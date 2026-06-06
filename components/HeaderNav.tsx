@@ -1,0 +1,281 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "./AuthProvider";
+import FeedbackModal from "./FeedbackModal";
+import LanguageSwitcher from "./LanguageSwitcher";
+import {
+  IconClipboard,
+  IconHeart,
+  IconMessage,
+  IconSubmit,
+  IconUser,
+  NavItem,
+} from "./NavIcons";
+import { changeLanguage } from "@/lib/i18n/client";
+import { LOCALE_LABELS, LOCALES, type Locale } from "@/lib/i18n/settings";
+
+function IconMenu({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden
+    >
+      <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export default function HeaderNav() {
+  const { t, i18n } = useTranslation();
+  const { user, loading, refresh } = useAuth();
+  const router = useRouter();
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const isAdmin = user?.role === "admin";
+  const locale = (i18n.language as Locale) || "zh-CN";
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
+  async function handleLogout() {
+    setMenuOpen(false);
+    await fetch("/api/auth/logout", { method: "POST" });
+    await refresh();
+    router.push("/");
+    router.refresh();
+  }
+
+  function closeMenu() {
+    setMenuOpen(false);
+  }
+
+  const drawerLinkClass =
+    "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50";
+
+  return (
+    <>
+      <header
+        id="site-header"
+        className="sticky top-0 z-10 border-b border-border bg-white/90 backdrop-blur-sm"
+      >
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:gap-3 sm:px-6">
+          <Link
+            href="/"
+            className="min-w-0 shrink cursor-pointer text-lg font-semibold tracking-tight text-neutral-900 sm:text-xl"
+          >
+            <span className="block truncate">{t("siteTitle")}</span>
+          </Link>
+
+          <nav className="hidden items-center gap-2 text-xs text-muted sm:gap-3 sm:text-sm lg:flex">
+            <NavItem
+              href="/submit"
+              icon={<IconSubmit />}
+              label={t("nav.submit")}
+            />
+            <NavItem
+              href="/my-submissions"
+              icon={<IconClipboard />}
+              label={isAdmin ? t("nav.review") : t("nav.mySubmissions")}
+            />
+            <NavItem
+              href="/favorites"
+              icon={<IconHeart />}
+              label={t("nav.favorites")}
+            />
+            <LanguageSwitcher />
+            {isAdmin ? (
+              <NavItem
+                href="/feedback"
+                icon={<IconMessage />}
+                label={t("nav.feedback")}
+              />
+            ) : (
+              <NavItem
+                icon={<IconMessage />}
+                label={t("nav.feedback")}
+                onClick={() => setFeedbackOpen(true)}
+              />
+            )}
+            {!loading &&
+              (user ? (
+                <div className="flex items-center gap-2 border-l border-border pl-2 sm:pl-3">
+                  <span className="flex items-center gap-1 text-neutral-500">
+                    <IconUser className="h-3.5 w-3.5" />
+                    <span className="max-w-[6rem] truncate">{user.account}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="flex cursor-pointer items-center gap-1 whitespace-nowrap hover:text-neutral-900"
+                    title={t("auth.logout")}
+                  >
+                    <span>{t("auth.logout")}</span>
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="flex cursor-pointer items-center gap-1 whitespace-nowrap border-l border-border pl-2 font-medium text-neutral-900 hover:text-neutral-600 sm:pl-3"
+                  title={t("auth.login")}
+                >
+                  <IconUser />
+                  <span>{t("auth.login")}</span>
+                </Link>
+              ))}
+          </nav>
+
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            className="flex cursor-pointer items-center justify-center rounded-lg p-2 text-neutral-700 hover:bg-neutral-100 lg:hidden"
+            aria-label={t("nav.openMenu")}
+          >
+            <IconMenu />
+          </button>
+        </div>
+      </header>
+
+      {menuOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={closeMenu}
+            aria-hidden
+          />
+          <aside className="absolute right-0 top-0 flex h-full w-[min(85vw,18rem)] flex-col bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+              <span className="text-sm font-semibold text-neutral-900">
+                {t("nav.menu")}
+              </span>
+              <button
+                type="button"
+                onClick={closeMenu}
+                className="cursor-pointer text-xl leading-none text-neutral-400 hover:text-neutral-700"
+                aria-label={t("nav.closeMenu")}
+              >
+                ×
+              </button>
+            </div>
+
+            <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
+              <Link href="/submit" onClick={closeMenu} className={drawerLinkClass}>
+                <IconSubmit />
+                <span>{t("nav.submit")}</span>
+              </Link>
+              <Link
+                href="/my-submissions"
+                onClick={closeMenu}
+                className={drawerLinkClass}
+              >
+                <IconClipboard />
+                <span>{isAdmin ? t("nav.review") : t("nav.mySubmissions")}</span>
+              </Link>
+              <Link
+                href="/favorites"
+                onClick={closeMenu}
+                className={drawerLinkClass}
+              >
+                <IconHeart />
+                <span>{t("nav.favorites")}</span>
+              </Link>
+              {isAdmin ? (
+                <Link
+                  href="/feedback"
+                  onClick={closeMenu}
+                  className={drawerLinkClass}
+                >
+                  <IconMessage />
+                  <span>{t("nav.feedback")}</span>
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeMenu();
+                    setFeedbackOpen(true);
+                  }}
+                  className={`${drawerLinkClass} w-full text-left`}
+                >
+                  <IconMessage />
+                  <span>{t("nav.feedback")}</span>
+                </button>
+              )}
+
+              <div className="mt-2 border-t border-border pt-3">
+                <p className="mb-2 px-3 text-xs text-muted">{t("nav.language")}</p>
+                <div className="flex flex-col gap-1">
+                  {LOCALES.map((loc) => (
+                    <button
+                      key={loc}
+                      type="button"
+                      onClick={() => {
+                        changeLanguage(loc);
+                        closeMenu();
+                      }}
+                      className={`cursor-pointer rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-50 ${
+                        locale === loc
+                          ? "font-medium text-neutral-900"
+                          : "text-neutral-600"
+                      }`}
+                    >
+                      {LOCALE_LABELS[loc]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </nav>
+
+            <div className="border-t border-border p-3">
+              {!loading &&
+                (user ? (
+                  <div className="space-y-2">
+                    <p className="flex items-center gap-2 px-3 text-sm text-neutral-500">
+                      <IconUser className="h-4 w-4" />
+                      <span className="truncate">{user.account}</span>
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className={`${drawerLinkClass} w-full text-left`}
+                    >
+                      <span>{t("auth.logout")}</span>
+                    </button>
+                  </div>
+                ) : (
+                  <Link
+                    href="/login"
+                    onClick={closeMenu}
+                    className={drawerLinkClass}
+                  >
+                    <IconUser />
+                    <span>{t("auth.login")}</span>
+                  </Link>
+                ))}
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {!isAdmin && (
+        <FeedbackModal
+          open={feedbackOpen}
+          onClose={() => setFeedbackOpen(false)}
+        />
+      )}
+    </>
+  );
+}

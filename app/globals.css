@@ -1,0 +1,157 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #fafafa;
+  --color-border: #e5e5e5;
+  --color-muted: #737373;
+}
+
+html {
+  overflow-x: hidden;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: #171717;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  min-height: 100dvh;
+}
+
+/* 可點擊元素 */
+a[href],
+button:not(:disabled),
+select,
+label,
+summary,
+[role="button"] {
+  cursor: pointer;
+}
+
+/* 內容區一般圖片 */
+.prose img,
+img:not([data-nimg]):not(.lightbox-img) {
+  max-width: 100%;
+  height: auto;
+}
+
+img.lightbox-img {
+  display: block;
+  max-height: 100%;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.filter-select {
+  -webkit-appearance: none;
+  appearance: none;
+  border: 1px solid var(--color-border);
+  padding-right: 2rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23737373' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.625rem center;
+  background-size: 1rem;
+}
+
+/* 穿搭封面固定 3:4，避免圖片撐破版面 */
+.cover-aspect {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  contain: layout paint;
+}
+
+/* 詳情頁封面隨捲動固定於左側 */
+.detail-cover-sticky {
+  align-self: start;
+}
+
+@media (min-width: 1024px) {
+  .detail-cover-sticky {
+    position: sticky;
+    top: calc(var(--header-h, 57px) + 1rem);
+  }
+}
+
+/* 詳情頁封面：固定 3:4 */
+.detail-cover-frame {
+  position: relative;
+  display: block;
+  width: clamp(260px, 24.74vw, 475px);
+  max-width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+}
+
+.detail-cover-frame > span {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+.detail-cover-frame > img[data-nimg="fill"],
+.detail-cover-frame > span > img[data-nimg="fill"] {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+/* 詳情頁單品列 660×230（1920 基準） */
+.detail-item-list {
+  width: 100%;
+  max-width: clamp(100%, 34.375vw, 660px);
+}
+
+.detail-item-row {
+  display: flex;
+  width: 100%;
+  min-height: clamp(112px, 9.5vw, 190px);
+  padding-top: .5rem;
+  padding-bottom: 1rem;
+}
+
+.detail-item-thumb-wrap {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: clamp(88px, 11.98vw, 200px);
+  padding: 10px 0;
+}
+
+.detail-item-thumb {
+  position: relative;
+  width: clamp(72px, 9vw, 168px);
+  height: clamp(72px, 9vw, 168px);
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+.cover-aspect > span {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+}
+
+.cover-aspect > img[data-nimg="fill"],
+.cover-aspect > span > img[data-nimg="fill"],
+.cover-aspect > img:not([data-nimg]) {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: 100% !important;
+  object-fit: cover;
+}

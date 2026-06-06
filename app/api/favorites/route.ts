@@ -1,0 +1,106 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+
+const VALID_TYPES = new Set(["outfit", "item"]);
+
+export async function GET() {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "未登入" }, { status: 401 });
+  }
+
+  const favorites = await prisma.favorite.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return NextResponse.json({
+    outfitIds: favorites
+      .filter((f) => f.type === "outfit")
+      .map((f) => f.targetId),
+    itemIds: favorites
+      .filter((f) => f.type === "item")
+      .map((f) => f.targetId),
+  });
+}
+
+export async function POST(request: NextRequest) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "未登入" }, { status: 401 });
+  }
+
+  const body = await request.json();
+  const type =
+    typeof body.type === "string"
+      ? body.type
+      : body.outfitId
+        ? "outfit"
+        : body.itemId
+          ? "item"
+          : null;
+  const targetId =
+    typeof body.targetId === "string"
+      ? body.targetId
+      : typeof body.outfitId === "string"
+        ? body.outfitId
+        : typeof body.itemId === "string"
+          ? body.itemId
+          : null;
+
+  if (!type || !targetId || !VALID_TYPES.has(type)) {
+    return NextResponse.json({ error: "無效參數" }, { status: 400 });
+  }
+
+  if (type === "outfit") {
+    const exists = await prisma.outfit.findUnique({
+      where: { id: targetId },
+      select: { id: true },
+    });
+    if (!exists) {
+      return NextResponse.json({ error: "找不到穿搭" }, { status: 404 });
+    }
+  } else {
+    const exists = await prisma.item.findUnique({
+      where: { id: targetId },
+      select: { id: true },
+    });
+    if (!exists) {
+      return NextResponse.json({ error: "找不到單品" }, { status: 404 });
+    }
+  }
+
+  await prisma.favorite.upsert({
+    where: {
+      userId_type_targetId: { userId: user.id, type, targetId },
+    },
+    create: { userId: user.id, type, targetId },
+    update: {},
+  });
+
+  return NextResponse.json({ ok: true, active: true });
+}
+
+export async function DELETE(request: NextRequest) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "未登入" }, { status: 401 });
+  }
+
+  const type = request.nextUrl.searchParams.get("type");
+  const targetId =
+    request.nextUrl.searchParams.get("targetId") ??
+    request.nextUrl.searchParams.get("outfitId") ??
+    request.nextUrl.searchParams.get("itemId");
+
+  if (!type || !targetId || !VALID_TYPES.has(type)) {
+    return NextResponse.json({ error: "無效參數" }, { status: 400 });
+  }
+
+  await prisma.favorite.deleteMany({
+    where: { userId: user.id, type, targetId },
+  });
+
+  return NextResponse.json({ ok: true, active: false });
+}

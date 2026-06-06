@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(cuid())
+  account      String         @unique
+  passwordHash String         @map("password_hash")
+  role         String         @default("user")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  submissions  Submission[]
+  favorites    Favorite[]
+  sessions     Session[]
+  outfits      Outfit[]
+  feedback     SiteFeedback[]
+
+  @@map("users")
+}
+
+model SiteFeedback {
+  id        String   @id @default(cuid())
+  userId    String?  @map("user_id")
+  category  String   @default("suggestion")
+  message   String
+  image     String?
+  status    String   @default("pending")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("site_feedback")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  type      String
+  targetId  String   @map("target_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, targetId])
+  @@map("favorites")
+}
+
+model Outfit {
+  id        String   @id @default(cuid())
+  eventName String   @map("event_name")
+  date      String
+  mainImage String   @map("main_image")
+  userId    String?  @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items     Item[]
+  reports   Report[]
+
+  @@map("outfits")
+}
+
+model Report {
+  id        String   @id @default(cuid())
+  outfitId  String   @map("outfit_id")
+  itemId    String?  @map("item_id")
+  message   String
+  status    String   @default("pending")
+  createdAt DateTime @default(now()) @map("created_at")
+  outfit    Outfit   @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  item      Item?    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@map("reports")
+}
+
+model Item {
+  id            String    @id @default(cuid())
+  outfitId      String    @map("outfit_id")
+  type          String
+  brand         String?
+  productName   String?   @map("product_name")
+  image         String?
+  officialLink  String?   @map("official_link")
+  notes         String?
+  linkStatus    String?   @map("link_status")
+  linkCheckedAt DateTime? @map("link_checked_at")
+  outfit        Outfit    @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  reports       Report[]
+
+  @@map("items")
+}
+
+model Submission {
+  id        String   @id @default(cuid())
+  userId    String?  @map("user_id")
+  status    String   @default("pending")
+  rawJson   String   @map("raw_json")
+  outfitId  String?  @map("outfit_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("submissions")
+}
