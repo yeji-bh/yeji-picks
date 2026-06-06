@@ -17,24 +17,41 @@ function uploadFilePath(url: string): string {
 
 export function collectPayloadImages(payload: {
   mainImage?: string;
-  items?: { image?: string | null }[];
+  items?: { image?: string | null; images?: string[] | null }[];
 }): Set<string> {
   const urls = new Set<string>();
   if (isLocalUpload(payload.mainImage)) urls.add(payload.mainImage);
   for (const item of payload.items ?? []) {
     if (isLocalUpload(item.image)) urls.add(item.image);
+    for (const url of item.images ?? []) {
+      if (isLocalUpload(url)) urls.add(url);
+    }
   }
   return urls;
 }
 
-export function collectOutfitImages(outfit: {
-  mainImage: string;
-  items: { image: string | null }[];
-}): string[] {
+export async function collectOutfitImages(outfitId: string): Promise<string[]> {
+  const outfit = await prisma.outfit.findUnique({
+    where: { id: outfitId },
+    select: {
+      mainImage: true,
+      outfitItems: {
+        select: {
+          catalogItem: {
+            select: { images: { select: { url: true } } },
+          },
+        },
+      },
+    },
+  });
+  if (!outfit) return [];
+
   const urls: string[] = [];
   if (isLocalUpload(outfit.mainImage)) urls.push(outfit.mainImage);
-  for (const item of outfit.items) {
-    if (isLocalUpload(item.image)) urls.push(item.image);
+  for (const row of outfit.outfitItems) {
+    for (const img of row.catalogItem.images) {
+      if (isLocalUpload(img.url)) urls.push(img.url);
+    }
   }
   return urls;
 }
@@ -48,14 +65,15 @@ function imagesInRawJson(rawJson: string): string[] {
 }
 
 export async function isUploadReferenced(url: string): Promise<boolean> {
-  const [outfitCount, itemCount, feedbackCount, submissions] = await Promise.all([
-    prisma.outfit.count({ where: { mainImage: url } }),
-    prisma.item.count({ where: { image: url } }),
-    prisma.siteFeedback.count({ where: { image: url } }),
-    prisma.submission.findMany({ select: { rawJson: true } }),
-  ]);
+  const [outfitCount, imageCount, feedbackCount, submissions] =
+    await Promise.all([
+      prisma.outfit.count({ where: { mainImage: url } }),
+      prisma.catalogItemImage.count({ where: { url } }),
+      prisma.siteFeedback.count({ where: { image: url } }),
+      prisma.submission.findMany({ select: { rawJson: true } }),
+    ]);
 
-  if (outfitCount + itemCount + feedbackCount > 0) return true;
+  if (outfitCount + imageCount + feedbackCount > 0) return true;
   return submissions.some((row) => imagesInRawJson(row.rawJson).includes(url));
 }
 

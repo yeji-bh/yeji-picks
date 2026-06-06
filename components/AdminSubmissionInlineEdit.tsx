@@ -92,6 +92,7 @@ export default function AdminSubmissionInlineEdit({
       mainImage: form.mainImage,
       items: form.items.filter(
         (item) =>
+          item.catalogItemId ||
           item.brand ||
           item.productName ||
           item.image ||

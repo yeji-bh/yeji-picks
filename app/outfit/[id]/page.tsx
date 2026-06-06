@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import OutfitDetailContent from "@/components/OutfitDetailContent";
 import OutfitDetailHeader from "@/components/OutfitDetailHeader";
+import { getOutfitDisplayItems } from "@/lib/catalog-item";
 import { prisma } from "@/lib/db";
 import { getOutfitNeighbors } from "@/lib/outfit-nav";
 import { formatOutfitTitle } from "@/lib/outfit";
@@ -14,12 +15,10 @@ export default async function OutfitDetailPage({
 }) {
   const { id } = await params;
 
-  const [outfit, neighbors] = await Promise.all([
-    prisma.outfit.findUnique({
-      where: { id },
-      include: { items: true },
-    }),
+  const [outfit, neighbors, items] = await Promise.all([
+    prisma.outfit.findUnique({ where: { id } }),
     getOutfitNeighbors(id),
+    getOutfitDisplayItems(id),
   ]);
 
   if (!outfit) {
@@ -37,7 +36,7 @@ export default async function OutfitDetailPage({
         outfitTitle={title}
         mainImage={outfit.mainImage}
         imageAlt={title}
-        items={outfit.items}
+        items={items}
         newerId={neighbors.newerId}
         olderId={neighbors.olderId}
       />

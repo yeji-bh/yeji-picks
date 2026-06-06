@@ -59,47 +59,70 @@ model Favorite {
 }
 
 model Outfit {
-  id        String   @id @default(cuid())
-  eventName String   @map("event_name")
-  date      String
-  mainImage String   @map("main_image")
-  userId    String?  @map("user_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  items     Item[]
-  reports   Report[]
+  id          String       @id @default(cuid())
+  eventName   String       @map("event_name")
+  date        String
+  mainImage   String       @map("main_image")
+  userId      String?      @map("user_id")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  outfitItems OutfitItem[]
+  reports     Report[]
 
   @@map("outfits")
 }
 
-model Report {
-  id        String   @id @default(cuid())
-  outfitId  String   @map("outfit_id")
-  itemId    String?  @map("item_id")
-  message   String
-  status    String   @default("pending")
-  createdAt DateTime @default(now()) @map("created_at")
-  outfit    Outfit   @relation(fields: [outfitId], references: [id], onDelete: Cascade)
-  item      Item?    @relation(fields: [itemId], references: [id], onDelete: Cascade)
-
-  @@map("reports")
-}
-
-model Item {
-  id            String    @id @default(cuid())
-  outfitId      String    @map("outfit_id")
+model CatalogItem {
+  id            String             @id @default(cuid())
   type          String
   brand         String?
-  productName   String?   @map("product_name")
-  image         String?
-  officialLink  String?   @map("official_link")
+  productName   String?            @map("product_name")
+  officialLink  String?            @map("official_link")
   notes         String?
-  linkStatus    String?   @map("link_status")
-  linkCheckedAt DateTime? @map("link_checked_at")
-  outfit        Outfit    @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  linkStatus    String?            @map("link_status")
+  linkCheckedAt DateTime?          @map("link_checked_at")
+  useCount      Int                @default(0) @map("use_count")
+  createdAt     DateTime           @default(now()) @map("created_at")
+  images        CatalogItemImage[]
+  placements    OutfitItem[]
   reports       Report[]
 
-  @@map("items")
+  @@map("catalog_items")
+}
+
+model CatalogItemImage {
+  id            String      @id @default(cuid())
+  catalogItemId String      @map("catalog_item_id")
+  url           String
+  sortOrder     Int         @default(0) @map("sort_order")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  catalogItem   CatalogItem @relation(fields: [catalogItemId], references: [id], onDelete: Cascade)
+
+  @@map("catalog_item_images")
+}
+
+model OutfitItem {
+  id            String      @id @default(cuid())
+  outfitId      String      @map("outfit_id")
+  catalogItemId String      @map("catalog_item_id")
+  outfit        Outfit      @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  catalogItem   CatalogItem @relation(fields: [catalogItemId], references: [id], onDelete: Restrict)
+
+  @@unique([outfitId, catalogItemId])
+  @@map("outfit_items")
+}
+
+model Report {
+  id            String       @id @default(cuid())
+  outfitId      String       @map("outfit_id")
+  catalogItemId String?      @map("catalog_item_id")
+  message       String
+  status        String       @default("pending")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  outfit        Outfit       @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  catalogItem   CatalogItem? @relation(fields: [catalogItemId], references: [id], onDelete: Cascade)
+
+  @@map("reports")
 }
 
 model Submission {

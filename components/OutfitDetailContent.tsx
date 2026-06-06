@@ -19,6 +19,7 @@ type Item = {
   officialLink: string | null;
   notes: string | null;
   linkStatus: string | null;
+  useCount: number;
 };
 
 function NavArrow({

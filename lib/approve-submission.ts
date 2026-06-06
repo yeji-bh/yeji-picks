@@ -1,3 +1,4 @@
+import { syncOutfitCatalogItems } from "@/lib/catalog-item";
 import { prisma } from "@/lib/db";
 import { revalidateOutfitCaches } from "@/lib/revalidate-outfits";
 import type { SubmissionPayload } from "@/lib/types";
@@ -30,19 +31,7 @@ export async function approveSubmission(
       },
     });
 
-    if (data.items.length > 0) {
-      await tx.item.createMany({
-        data: data.items.map((item) => ({
-          outfitId: created.id,
-          type: item.type,
-          brand: item.brand || null,
-          productName: item.productName || null,
-          image: item.image || null,
-          officialLink: item.officialLink || null,
-          notes: item.notes || null,
-        })),
-      });
-    }
+    await syncOutfitCatalogItems(tx, created.id, data.items);
 
     await tx.submission.update({
       where: { id: submissionId },

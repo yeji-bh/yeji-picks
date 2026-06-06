@@ -1,40 +1,49 @@
 import { formatOutfitTitle } from "@/lib/outfit";
 import { normalizeItemType } from "@/lib/types";
 
-type ItemWithOutfit = {
+type CatalogRow = {
   id: string;
   type: string;
   brand: string | null;
   productName: string | null;
-  image: string | null;
   notes: string | null;
-  outfit: {
-    id: string;
-    eventName: string;
-    date: string;
-    createdAt: Date;
-  };
+  useCount: number;
+  createdAt: Date;
+  images: { url: string }[];
+  placements: {
+    outfit: {
+      id: string;
+      eventName: string;
+      date: string;
+      createdAt: Date;
+    };
+  }[];
 };
 
-export function toItemSummary(item: ItemWithOutfit) {
-  const outfitTitle = formatOutfitTitle(item.outfit.date, item.outfit.eventName);
+export function toItemSummary(item: CatalogRow) {
+  const primaryOutfit = item.placements[0]?.outfit;
+  const outfitTitle = primaryOutfit
+    ? formatOutfitTitle(primaryOutfit.date, primaryOutfit.eventName)
+    : "";
 
   return {
     id: item.id,
-    image: item.image,
+    image: item.images[0]?.url ?? null,
     type: normalizeItemType(item.type),
     brand: item.brand,
     productName: item.productName,
-    outfitId: item.outfit.id,
+    useCount: item.useCount,
+    outfitId: primaryOutfit?.id ?? "",
     outfitTitle,
-    outfitDate: item.outfit.date,
-    outfitCreatedAt: item.outfit.createdAt,
+    outfitDate: primaryOutfit?.date ?? "",
+    outfitCreatedAt: primaryOutfit?.createdAt ?? item.createdAt,
     searchText: [
-      outfitTitle,
-      item.outfit.date,
       item.brand,
       item.productName,
       item.notes,
+      ...item.placements.map((p) =>
+        formatOutfitTitle(p.outfit.date, p.outfit.eventName)
+      ),
     ]
       .filter(Boolean)
       .join(" "),

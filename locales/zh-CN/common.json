@@ -42,6 +42,24 @@
       "category": "分类顺序"
     }
   },
+  "brand": {
+    "backHome": "返回首页",
+    "label": "品牌",
+    "itemCount": "共 {{count}} 件单品",
+    "noItems": "尚无单品资料"
+  },
+  "item": {
+    "backHome": "返回首页",
+    "useCount": "出现在 {{count}} 套穿搭",
+    "outfitsSection": "出现过的穿搭",
+    "outfitsSectionDesc": "此单品共出现在 {{count}} 套穿搭中",
+    "noOutfits": "尚无相关穿搭",
+    "searchPlaceholder": "搜索品牌、商品名称…",
+    "unlink": "取消链接",
+    "unnamed": "未命名单品",
+    "modeNew": "新增单品",
+    "modeLink": "链接既有单品"
+  },
   "outfit": {
     "backHome": "返回首页",
     "backDetail": "返回详情",

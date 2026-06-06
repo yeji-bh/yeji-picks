@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "找不到穿搭" }, { status: 404 });
     }
   } else {
-    const exists = await prisma.item.findUnique({
+    const exists = await prisma.catalogItem.findUnique({
       where: { id: targetId },
       select: { id: true },
     });

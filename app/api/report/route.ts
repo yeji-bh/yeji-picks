@@ -32,10 +32,10 @@ export async function POST(request: NextRequest) {
       if (typeof itemId !== "string") {
         return NextResponse.json({ error: "資料格式不正確" }, { status: 400 });
       }
-      const item = await prisma.item.findFirst({
-        where: { id: itemId, outfitId },
+      const placement = await prisma.outfitItem.findFirst({
+        where: { outfitId, catalogItemId: itemId },
       });
-      if (!item) {
+      if (!placement) {
         return NextResponse.json({ error: "找不到單品" }, { status: 404 });
       }
     }
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     const report = await prisma.report.create({
       data: {
         outfitId,
-        itemId: typeof itemId === "string" && itemId ? itemId : null,
+        catalogItemId: typeof itemId === "string" && itemId ? itemId : null,
         message: message.trim(),
         status: "pending",
       },

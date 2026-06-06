@@ -381,6 +381,7 @@ export default function HomeContent({
                     type={item.type}
                     brand={item.brand}
                     productName={item.productName}
+                    useCount={item.useCount}
                     outfitId={item.outfitId}
                     outfitTitle={item.outfitTitle}
                   />

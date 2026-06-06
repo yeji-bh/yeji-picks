@@ -9,6 +9,8 @@ import CoverImagePreview from "./CoverImagePreview";
 import ItemImagePreview from "./ItemImagePreview";
 import { useToast } from "./ToastProvider";
 import { addSubmissionId, getSubmissionIdsQuery } from "@/lib/submissions";
+import BrandAutocomplete from "./BrandAutocomplete";
+import CatalogItemPicker, { type CatalogPick } from "./CatalogItemPicker";
 import ItemTypeSelect from "./ItemTypeSelect";
 import { prepareImageFile } from "@/lib/prepare-image-file";
 import { uploadImageFile } from "@/lib/upload-client";
@@ -21,6 +23,7 @@ import {
 type PendingItem = SubmissionItem & {
   imageFile?: File | null;
   imagePreview?: string;
+  itemMode?: "new" | "link";
 };
 
 const emptyItem = (): PendingItem => ({
@@ -30,7 +33,16 @@ const emptyItem = (): PendingItem => ({
   image: "",
   officialLink: "",
   notes: "",
+  itemMode: "new",
 });
+
+function modeBtn(active: boolean): string {
+  return `cursor-pointer rounded-full px-3 py-1 text-xs font-medium ${
+    active
+      ? "bg-neutral-900 text-white"
+      : "border border-border bg-white text-neutral-600"
+  }`;
+}
 
 export default function SubmitForm() {
   const { t } = useTranslation();
@@ -83,12 +95,14 @@ export default function SubmitForm() {
         setItems(
           payload.items?.length > 0
             ? payload.items.map((item: SubmissionItem) => ({
+                catalogItemId: item.catalogItemId,
                 type: normalizeItemType(item.type ?? "top_other"),
                 brand: item.brand ?? "",
                 productName: item.productName ?? "",
                 image: item.image ?? "",
                 officialLink: item.officialLink ?? "",
                 notes: item.notes ?? "",
+                itemMode: item.catalogItemId ? "link" : "new",
               }))
             : [emptyItem()]
         );
@@ -208,6 +222,7 @@ export default function SubmitForm() {
         items
           .filter(
             (item) =>
+              item.catalogItemId ||
               item.brand ||
               item.productName ||
               item.image ||
@@ -216,6 +231,25 @@ export default function SubmitForm() {
               item.notes
           )
           .map(async (item) => {
+            if (item.catalogItemId) {
+              let image = item.image ?? "";
+              if (item.imageFile) {
+                image = await uploadImageFile(
+                  item.imageFile,
+                  t("submit.uploadFail")
+                );
+              }
+              return {
+                catalogItemId: item.catalogItemId,
+                type: item.type,
+                brand: item.brand,
+                productName: item.productName,
+                image,
+                officialLink: item.officialLink,
+                notes: item.notes,
+              };
+            }
+
             let image = item.image ?? "";
             if (item.imageFile) {
               image = await uploadImageFile(
@@ -386,57 +420,150 @@ export default function SubmitForm() {
               )}
             </div>
 
-            <label className="block">
-              <span className="text-xs text-muted">{t("submit.type")}</span>
-              <ItemTypeSelect
-                value={item.type}
-                onChange={(type) => updateItem(index, "type", type)}
-              />
-            </label>
-
-            <label className="block">
-              <span className="text-xs text-muted">{t("submit.brand")}</span>
-              <input
-                value={item.brand ?? ""}
-                onChange={(e) => updateItem(index, "brand", e.target.value)}
-                className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-neutral-400"
-              />
-            </label>
-
-            <label className="block">
-              <span className="text-xs text-muted">{t("submit.productName")}</span>
-              <input
-                value={item.productName ?? ""}
-                onChange={(e) =>
-                  updateItem(index, "productName", e.target.value)
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className={modeBtn(item.itemMode !== "link")}
+                onClick={() =>
+                  setItems((prev) =>
+                    prev.map((row, i) =>
+                      i === index
+                        ? {
+                            ...emptyItem(),
+                            type: row.type,
+                            itemMode: "new",
+                          }
+                        : row
+                    )
+                  )
                 }
-                className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-neutral-400"
-              />
-            </label>
-
-            <label className="block">
-              <span className="text-xs text-muted">{t("submit.itemImage")}</span>
-              <input
-                type="file"
-                accept="image/*"
-                disabled={submitting}
-                onChange={(e) =>
-                  handleItemImageSelect(index, e.target.files?.[0] ?? null)
+              >
+                {t("item.modeNew")}
+              </button>
+              <button
+                type="button"
+                className={modeBtn(item.itemMode === "link")}
+                onClick={() =>
+                  setItems((prev) =>
+                    prev.map((row, i) =>
+                      i === index
+                        ? {
+                            ...row,
+                            itemMode: "link",
+                            catalogItemId: undefined,
+                            brand: "",
+                            productName: "",
+                            image: "",
+                            imageFile: null,
+                            imagePreview: undefined,
+                          }
+                        : row
+                    )
+                  )
                 }
-                className="mt-1 w-full text-sm"
+              >
+                {t("item.modeLink")}
+              </button>
+            </div>
+
+            {item.itemMode === "link" ? (
+              <CatalogItemPicker
+                selected={
+                  item.catalogItemId
+                    ? {
+                        id: item.catalogItemId,
+                        type: item.type,
+                        brand: item.brand ?? null,
+                        productName: item.productName ?? null,
+                        image: item.image || item.imagePreview || null,
+                        officialLink: item.officialLink ?? null,
+                        notes: item.notes ?? null,
+                        useCount: 0,
+                      }
+                    : null
+                }
+                onSelect={(picked: CatalogPick) =>
+                  setItems((prev) =>
+                    prev.map((row, i) =>
+                      i === index
+                        ? {
+                            ...row,
+                            catalogItemId: picked.id,
+                            type: picked.type as PendingItem["type"],
+                            brand: picked.brand ?? "",
+                            productName: picked.productName ?? "",
+                            image: picked.image ?? "",
+                            officialLink: picked.officialLink ?? "",
+                            notes: picked.notes ?? "",
+                          }
+                        : row
+                    )
+                  )
+                }
+                onClear={() =>
+                  setItems((prev) =>
+                    prev.map((row, i) =>
+                      i === index
+                        ? { ...emptyItem(), itemMode: "link" }
+                        : row
+                    )
+                  )
+                }
               />
-              {(item.image || item.imagePreview) && (
-                <div className="mt-2 flex items-center gap-2">
-                  <ItemImagePreview
-                    src={item.imagePreview || item.image || ""}
-                    alt={item.productName || t("submit.itemImage")}
+            ) : (
+              <>
+                <label className="block">
+                  <span className="text-xs text-muted">{t("submit.type")}</span>
+                  <ItemTypeSelect
+                    value={item.type}
+                    onChange={(type) => updateItem(index, "type", type)}
                   />
-                  <p className="text-xs text-green-600">
-                    {t("submit.uploadDone")}
-                  </p>
-                </div>
-              )}
-            </label>
+                </label>
+
+                <label className="block">
+                  <span className="text-xs text-muted">{t("submit.brand")}</span>
+                  <BrandAutocomplete
+                    value={item.brand ?? ""}
+                    onChange={(brand) => updateItem(index, "brand", brand)}
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="text-xs text-muted">{t("submit.productName")}</span>
+                  <input
+                    value={item.productName ?? ""}
+                    onChange={(e) =>
+                      updateItem(index, "productName", e.target.value)
+                    }
+                    className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-neutral-400"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="text-xs text-muted">{t("submit.itemImage")}</span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
+                    disabled={submitting}
+                    onChange={(e) =>
+                      handleItemImageSelect(index, e.target.files?.[0] ?? null)
+                    }
+                    className="mt-1 w-full text-sm"
+                  />
+                  {(item.image || item.imagePreview) && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <ItemImagePreview
+                        src={item.imagePreview || item.image || ""}
+                        alt={item.productName || t("submit.itemImage")}
+                      />
+                      <p className="text-xs text-green-600">
+                        {t("submit.uploadDone")}
+                      </p>
+                    </div>
+                  )}
+                </label>
+              </>
+            )}
 
             <label className="block">
               <span className="text-xs text-muted">{t("outfit.officialLink")}</span>

@@ -6,17 +6,21 @@ import { formatOutfitTitle } from "@/lib/outfit";
 
 function mapDeadLink(item: {
   id: string;
-  outfitId: string;
   brand: string | null;
   productName: string | null;
   officialLink: string | null;
   linkCheckedAt: Date | null;
-  outfit: { date: string; eventName: string };
+  placements: {
+    outfit: { id: string; date: string; eventName: string };
+  }[];
 }) {
+  const outfit = item.placements[0]?.outfit;
   return {
     itemId: item.id,
-    outfitId: item.outfitId,
-    outfitTitle: formatOutfitTitle(item.outfit.date, item.outfit.eventName),
+    outfitId: outfit?.id ?? "",
+    outfitTitle: outfit
+      ? formatOutfitTitle(outfit.date, outfit.eventName)
+      : "",
     brand: item.brand,
     productName: item.productName,
     officialLink: item.officialLink,
@@ -24,12 +28,26 @@ function mapDeadLink(item: {
   };
 }
 
+const deadLinkSelect = {
+  id: true,
+  brand: true,
+  productName: true,
+  officialLink: true,
+  linkCheckedAt: true,
+  placements: {
+    take: 1,
+    select: {
+      outfit: { select: { id: true, date: true, eventName: true } },
+    },
+  },
+} as const;
+
 export async function POST() {
   if (!(await isAdminUser())) {
     return NextResponse.json({ error: "未授權" }, { status: 401 });
   }
 
-  const items = await prisma.item.findMany({
+  const items = await prisma.catalogItem.findMany({
     where: { officialLink: { not: null } },
     select: { id: true, officialLink: true },
   });
@@ -44,7 +62,7 @@ export async function POST() {
     checked += 1;
     if (status === "dead") dead += 1;
 
-    await prisma.item.update({
+    await prisma.catalogItem.update({
       where: { id: item.id },
       data: {
         linkStatus: status,
@@ -53,17 +71,9 @@ export async function POST() {
     });
   }
 
-  const deadLinks = await prisma.item.findMany({
+  const deadLinks = await prisma.catalogItem.findMany({
     where: { linkStatus: "dead" },
-    select: {
-      id: true,
-      outfitId: true,
-      brand: true,
-      productName: true,
-      officialLink: true,
-      linkCheckedAt: true,
-      outfit: { select: { date: true, eventName: true } },
-    },
+    select: deadLinkSelect,
     orderBy: { linkCheckedAt: "desc" },
   });
 
@@ -79,17 +89,9 @@ export async function GET() {
     return NextResponse.json({ error: "未授權" }, { status: 401 });
   }
 
-  const deadLinks = await prisma.item.findMany({
+  const deadLinks = await prisma.catalogItem.findMany({
     where: { linkStatus: "dead" },
-    select: {
-      id: true,
-      outfitId: true,
-      brand: true,
-      productName: true,
-      officialLink: true,
-      linkCheckedAt: true,
-      outfit: { select: { date: true, eventName: true } },
-    },
+    select: deadLinkSelect,
     orderBy: { linkCheckedAt: "desc" },
   });
 

@@ -7,6 +7,8 @@ import CoverImageCropper from "./CoverImageCropper";
 import CoverImagePreview from "./CoverImagePreview";
 import ItemImagePreview from "./ItemImagePreview";
 import { useToast } from "./ToastProvider";
+import BrandAutocomplete from "./BrandAutocomplete";
+import CatalogItemPicker, { type CatalogPick } from "./CatalogItemPicker";
 import ItemTypeSelect from "./ItemTypeSelect";
 import { prepareImageFile } from "@/lib/prepare-image-file";
 import { uploadImageFile } from "@/lib/upload-client";
@@ -19,6 +21,7 @@ import {
 type PendingItem = SubmissionItem & {
   imageFile?: File | null;
   imagePreview?: string;
+  itemMode?: "new" | "link";
 };
 
 const emptyItem = (): PendingItem => ({
@@ -28,7 +31,16 @@ const emptyItem = (): PendingItem => ({
   image: "",
   officialLink: "",
   notes: "",
+  itemMode: "new",
 });
+
+function modeBtn(active: boolean): string {
+  return `cursor-pointer rounded-full px-3 py-1 text-xs font-medium ${
+    active
+      ? "bg-neutral-900 text-white"
+      : "border border-border bg-white text-neutral-600"
+  }`;
+}
 
 export default function OutfitEditForm({ outfitId }: { outfitId: string }) {
   const { t } = useTranslation();
@@ -66,14 +78,18 @@ export default function OutfitEditForm({ outfitId }: { outfitId: string }) {
         setMainImage(data.mainImage ?? "");
         setItems(
           data.items?.length > 0
-            ? data.items.map((item: SubmissionItem) => ({
-                type: normalizeItemType(item.type ?? "top_other"),
-                brand: item.brand ?? "",
-                productName: item.productName ?? "",
-                image: item.image ?? "",
-                officialLink: item.officialLink ?? "",
-                notes: item.notes ?? "",
-              }))
+            ? data.items.map(
+                (item: SubmissionItem & { catalogItemId?: string }) => ({
+                  catalogItemId: item.catalogItemId,
+                  type: normalizeItemType(item.type ?? "top_other"),
+                  brand: item.brand ?? "",
+                  productName: item.productName ?? "",
+                  image: item.image ?? "",
+                  officialLink: item.officialLink ?? "",
+                  notes: item.notes ?? "",
+                  itemMode: item.catalogItemId ? "link" : "new",
+                })
+              )
             : [emptyItem()]
         );
       } catch (err) {
@@ -186,6 +202,7 @@ export default function OutfitEditForm({ outfitId }: { outfitId: string }) {
         items
           .filter(
             (item) =>
+              item.catalogItemId ||
               item.brand ||
               item.productName ||
               item.image ||
@@ -194,6 +211,25 @@ export default function OutfitEditForm({ outfitId }: { outfitId: string }) {
               item.notes
           )
           .map(async (item) => {
+            if (item.catalogItemId) {
+              let image = item.image ?? "";
+              if (item.imageFile) {
+                image = await uploadImageFile(
+                  item.imageFile,
+                  t("submit.uploadFail")
+                );
+              }
+              return {
+                catalogItemId: item.catalogItemId,
+                type: item.type,
+                brand: item.brand,
+                productName: item.productName,
+                image,
+                officialLink: item.officialLink,
+                notes: item.notes,
+              };
+            }
+
             let image = item.image ?? "";
             if (item.imageFile) {
               image = await uploadImageFile(
@@ -308,37 +344,129 @@ export default function OutfitEditForm({ outfitId }: { outfitId: string }) {
                 </button>
               )}
             </div>
-            <ItemTypeSelect
-              value={item.type}
-              onChange={(type) => updateItem(index, "type", type)}
-              className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-            />
-            <input
-              value={item.brand ?? ""}
-              onChange={(e) => updateItem(index, "brand", e.target.value)}
-              placeholder={t("submit.brand")}
-              className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-            />
-            <input
-              value={item.productName ?? ""}
-              onChange={(e) => updateItem(index, "productName", e.target.value)}
-              placeholder={t("submit.productName")}
-              className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-            />
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
-              disabled={submitting}
-              onChange={(e) => handleItemImageSelect(index, e.target.files?.[0] ?? null)}
-              className="w-full text-sm"
-            />
-            {(item.image || item.imagePreview) && (
-              <div className="mt-2">
-                <ItemImagePreview
-                  src={item.imagePreview || item.image || ""}
-                  alt={item.productName || t("submit.itemImage")}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className={modeBtn(item.itemMode !== "link")}
+                onClick={() =>
+                  setItems((prev) =>
+                    prev.map((row, i) =>
+                      i === index
+                        ? { ...emptyItem(), type: row.type, itemMode: "new" }
+                        : row
+                    )
+                  )
+                }
+              >
+                {t("item.modeNew")}
+              </button>
+              <button
+                type="button"
+                className={modeBtn(item.itemMode === "link")}
+                onClick={() =>
+                  setItems((prev) =>
+                    prev.map((row, i) =>
+                      i === index
+                        ? {
+                            ...row,
+                            itemMode: "link",
+                            catalogItemId: undefined,
+                            brand: "",
+                            productName: "",
+                            image: "",
+                            imageFile: null,
+                            imagePreview: undefined,
+                          }
+                        : row
+                    )
+                  )
+                }
+              >
+                {t("item.modeLink")}
+              </button>
+            </div>
+
+            {item.itemMode === "link" ? (
+              <CatalogItemPicker
+                selected={
+                  item.catalogItemId
+                    ? {
+                        id: item.catalogItemId,
+                        type: item.type,
+                        brand: item.brand ?? null,
+                        productName: item.productName ?? null,
+                        image: item.image || item.imagePreview || null,
+                        officialLink: item.officialLink ?? null,
+                        notes: item.notes ?? null,
+                        useCount: 0,
+                      }
+                    : null
+                }
+                onSelect={(picked: CatalogPick) =>
+                  setItems((prev) =>
+                    prev.map((row, i) =>
+                      i === index
+                        ? {
+                            ...row,
+                            catalogItemId: picked.id,
+                            type: picked.type as PendingItem["type"],
+                            brand: picked.brand ?? "",
+                            productName: picked.productName ?? "",
+                            image: picked.image ?? "",
+                            officialLink: picked.officialLink ?? "",
+                            notes: picked.notes ?? "",
+                          }
+                        : row
+                    )
+                  )
+                }
+                onClear={() =>
+                  setItems((prev) =>
+                    prev.map((row, i) =>
+                      i === index ? { ...emptyItem(), itemMode: "link" } : row
+                    )
+                  )
+                }
+              />
+            ) : (
+              <>
+                <ItemTypeSelect
+                  value={item.type}
+                  onChange={(type) => updateItem(index, "type", type)}
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm"
                 />
-              </div>
+                <BrandAutocomplete
+                  value={item.brand ?? ""}
+                  onChange={(brand) => updateItem(index, "brand", brand)}
+                  placeholder={t("submit.brand")}
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                />
+                <input
+                  value={item.productName ?? ""}
+                  onChange={(e) =>
+                    updateItem(index, "productName", e.target.value)
+                  }
+                  placeholder={t("submit.productName")}
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                />
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
+                  disabled={submitting}
+                  onChange={(e) =>
+                    handleItemImageSelect(index, e.target.files?.[0] ?? null)
+                  }
+                  className="w-full text-sm"
+                />
+                {(item.image || item.imagePreview) && (
+                  <div className="mt-2">
+                    <ItemImagePreview
+                      src={item.imagePreview || item.image || ""}
+                      alt={item.productName || t("submit.itemImage")}
+                    />
+                  </div>
+                )}
+              </>
             )}
             <input
               type="url"

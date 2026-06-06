@@ -16,29 +16,45 @@ export async function GET(request: NextRequest) {
 
   const outfits = await prisma.outfit.findMany({
     where: { id: { in: ids } },
-    include: { items: true },
+    include: {
+      outfitItems: {
+        select: {
+          catalogItem: {
+            select: {
+              type: true,
+              brand: true,
+              productName: true,
+              notes: true,
+            },
+          },
+        },
+      },
+    },
   });
 
-  const summaries = outfits.map((outfit) => ({
-    id: outfit.id,
-    mainImage: outfit.mainImage,
-    eventName: outfit.eventName,
-    date: outfit.date,
-    itemTypes: [
-      ...new Set(outfit.items.map((item) => normalizeItemType(item.type))),
-    ],
-    searchText: [
-      outfit.eventName,
-      outfit.date,
-      ...outfit.items.flatMap((item) => [
-        item.brand,
-        item.productName,
-        item.notes,
-      ]),
-    ]
-      .filter(Boolean)
-      .join(" "),
-  }));
+  const summaries = outfits.map((outfit) => {
+    const catalogItems = outfit.outfitItems.map((row) => row.catalogItem);
+    return {
+      id: outfit.id,
+      mainImage: outfit.mainImage,
+      eventName: outfit.eventName,
+      date: outfit.date,
+      itemTypes: [
+        ...new Set(catalogItems.map((item) => normalizeItemType(item.type))),
+      ],
+      searchText: [
+        outfit.eventName,
+        outfit.date,
+        ...catalogItems.flatMap((item) => [
+          item.brand,
+          item.productName,
+          item.notes,
+        ]),
+      ]
+        .filter(Boolean)
+        .join(" "),
+    };
+  });
 
   return NextResponse.json({ outfits: summaries });
 }

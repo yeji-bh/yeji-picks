@@ -10,6 +10,7 @@
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:setup-turso": "node --env-file=.env scripts/setup-turso.mjs",
+    "db:migrate-catalog": "node --env-file=.env scripts/migrate-catalog-items.mjs",
     "db:restore-items": "node --env-file=.env scripts/restore-items.mjs",
     "db:repair-items": "node --env-file=.env scripts/restore-items.mjs --repair",
     "db:process-item-bg": "node --env-file=.env scripts/process-item-backgrounds.mjs",

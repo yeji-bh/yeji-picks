@@ -23,12 +23,16 @@ const outfitSelect = {
   eventName: true,
   date: true,
   createdAt: true,
-  items: {
+  outfitItems: {
     select: {
-      type: true,
-      brand: true,
-      productName: true,
-      notes: true,
+      catalogItem: {
+        select: {
+          type: true,
+          brand: true,
+          productName: true,
+          notes: true,
+        },
+      },
     },
   },
 } satisfies Prisma.OutfitSelect;

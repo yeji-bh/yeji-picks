@@ -17,38 +17,41 @@ export type ItemListResult = {
   hasMore: boolean;
 };
 
-const itemSelect = {
+const catalogSelect = {
   id: true,
   type: true,
   brand: true,
   productName: true,
-  image: true,
   notes: true,
-  outfit: {
+  useCount: true,
+  createdAt: true,
+  images: { orderBy: { sortOrder: "asc" as const } },
+  placements: {
+    take: 1,
+    orderBy: { outfit: { createdAt: "desc" as const } },
     select: {
-      id: true,
-      eventName: true,
-      date: true,
-      createdAt: true,
+      outfit: {
+        select: { id: true, eventName: true, date: true, createdAt: true },
+      },
     },
   },
-} satisfies Prisma.ItemSelect;
+} satisfies Prisma.CatalogItemSelect;
 
-function prismaOrderBy(sort: ItemSort): Prisma.ItemOrderByWithRelationInput {
+function prismaOrderBy(sort: ItemSort): Prisma.CatalogItemOrderByWithRelationInput {
   switch (sort) {
     case "oldest":
-      return { outfit: { createdAt: "asc" } };
+      return { createdAt: "asc" };
     case "date_desc":
-      return { outfit: { date: "desc" } };
+      return { placements: { _count: "desc" } };
     case "date_asc":
-      return { outfit: { date: "asc" } };
+      return { placements: { _count: "asc" } };
     case "name_asc":
       return { productName: "asc" };
     case "name_desc":
       return { productName: "desc" };
     case "newest":
     default:
-      return { outfit: { createdAt: "desc" } };
+      return { createdAt: "desc" };
   }
 }
 
@@ -59,8 +62,8 @@ async function queryItemList(
 ): Promise<ItemListResult> {
   if (sort === "category") {
     const [rows, total] = await Promise.all([
-      prisma.item.findMany({ select: itemSelect }),
-      prisma.item.count(),
+      prisma.catalogItem.findMany({ select: catalogSelect }),
+      prisma.catalogItem.count(),
     ]);
     const sorted = rows.map(toItemSummary).sort(compareItemsByCategory);
     const items = sorted.slice(offset, offset + limit);
@@ -72,13 +75,16 @@ async function queryItemList(
   }
 
   const [rows, total] = await Promise.all([
-    prisma.item.findMany({
+    prisma.catalogItem.findMany({
       take: limit,
       skip: offset,
-      orderBy: prismaOrderBy(sort),
-      select: itemSelect,
+      orderBy:
+        sort === "newest" || sort === "oldest"
+          ? prismaOrderBy(sort)
+          : [{ useCount: "desc" }, prismaOrderBy(sort)],
+      select: catalogSelect,
     }),
-    prisma.item.count(),
+    prisma.catalogItem.count(),
   ]);
 
   const items = rows.map(toItemSummary);

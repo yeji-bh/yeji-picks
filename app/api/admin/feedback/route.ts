@@ -28,9 +28,9 @@ export async function GET() {
         status: true,
         createdAt: true,
         outfitId: true,
-        itemId: true,
+        catalogItemId: true,
         outfit: { select: { date: true, eventName: true } },
-        item: {
+        catalogItem: {
           select: { type: true, brand: true, productName: true },
         },
       },
@@ -54,11 +54,11 @@ export async function GET() {
       status: row.status,
       createdAt: row.createdAt.toISOString(),
       outfitId: row.outfitId,
-      itemId: row.itemId,
+      itemId: row.catalogItemId,
       outfitTitle: formatOutfitTitle(row.outfit.date, row.outfit.eventName),
-      itemType: row.item?.type ?? null,
-      itemBrand: row.item?.brand ?? null,
-      itemProductName: row.item?.productName ?? null,
+      itemType: row.catalogItem?.type ?? null,
+      itemBrand: row.catalogItem?.brand ?? null,
+      itemProductName: row.catalogItem?.productName ?? null,
     })),
   });
 }

@@ -98,10 +98,12 @@ export function matchesTypeFilter(itemType: string, filter: string): boolean {
 }
 
 export type SubmissionItem = {
+  catalogItemId?: string;
   type: ItemType;
   brand?: string;
   productName?: string;
   image?: string;
+  images?: string[];
   officialLink?: string;
   notes?: string;
 };

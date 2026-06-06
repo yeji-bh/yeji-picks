@@ -59,7 +59,35 @@ const statements = [
     "link_status" TEXT,
     "link_checked_at" DATETIME,
     CONSTRAINT "items_outfit_id_fkey" FOREIGN KEY ("outfit_id") REFERENCES "outfits" ("id") ON DELETE CASCADE ON UPDATE CASCADE
-  )`, "items"],
+  )`, "items (legacy)"],
+  [`CREATE TABLE IF NOT EXISTS "catalog_items" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "type" TEXT NOT NULL,
+    "brand" TEXT,
+    "product_name" TEXT,
+    "official_link" TEXT,
+    "notes" TEXT,
+    "link_status" TEXT,
+    "link_checked_at" DATETIME,
+    "use_count" INTEGER NOT NULL DEFAULT 0,
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`, "catalog_items"],
+  [`CREATE TABLE IF NOT EXISTS "catalog_item_images" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "catalog_item_id" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
+    "sort_order" INTEGER NOT NULL DEFAULT 0,
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "catalog_item_images_catalog_item_id_fkey" FOREIGN KEY ("catalog_item_id") REFERENCES "catalog_items" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+  )`, "catalog_item_images"],
+  [`CREATE TABLE IF NOT EXISTS "outfit_items" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "outfit_id" TEXT NOT NULL,
+    "catalog_item_id" TEXT NOT NULL,
+    CONSTRAINT "outfit_items_outfit_id_fkey" FOREIGN KEY ("outfit_id") REFERENCES "outfits" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "outfit_items_catalog_item_id_fkey" FOREIGN KEY ("catalog_item_id") REFERENCES "catalog_items" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+  )`, "outfit_items"],
+  [`CREATE UNIQUE INDEX IF NOT EXISTS "outfit_items_outfit_catalog_key" ON "outfit_items"("outfit_id", "catalog_item_id")`, "outfit_items_unique"],
   [`CREATE TABLE IF NOT EXISTS "submissions" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "user_id" TEXT,
@@ -177,10 +205,13 @@ if (favCols.includes("outfit_id") && !favCols.includes("type")) {
   console.log("Migrated favorites → type + target_id");
 }
 
-// reports: add item_id
+// reports: item_id (legacy) + catalog_item_id
 const reportCols = await tableColumns("reports");
 if (!reportCols.includes("item_id")) {
   await run(`ALTER TABLE reports ADD COLUMN item_id TEXT`, "reports add item_id");
+}
+if (!reportCols.includes("catalog_item_id")) {
+  await run(`ALTER TABLE reports ADD COLUMN catalog_item_id TEXT`, "reports add catalog_item_id");
 }
 
 // site_feedback: category + image (feedback modal)
@@ -270,3 +301,4 @@ const tables = await client.execute(
 );
 
 console.log("Turso tables ready:", tables.rows.map((r) => r.name).join(", "));
+console.log("If upgrading from legacy items, run: npm run db:migrate-catalog");

@@ -67,7 +67,7 @@ export async function syncBrowserDataToUser(
   }
 
   for (const itemId of favorites.items) {
-    const exists = await prisma.item.findUnique({
+    const exists = await prisma.catalogItem.findUnique({
       where: { id: itemId },
       select: { id: true },
     });

@@ -55,12 +55,11 @@ async function itemBackgroundToWhite(buffer) {
 }
 
 async function main() {
-  const items = await prisma.item.findMany({
-    where: { image: { not: null } },
-    select: { id: true, image: true },
+  const images = await prisma.catalogItemImage.findMany({
+    select: { url: true },
   });
 
-  const uniquePaths = [...new Set(items.map((i) => i.image).filter(Boolean))];
+  const uniquePaths = [...new Set(images.map((i) => i.url).filter(Boolean))];
   console.log(`Found ${uniquePaths.length} unique item images`);
 
   await mkdir(UPLOAD_DIR, { recursive: true });

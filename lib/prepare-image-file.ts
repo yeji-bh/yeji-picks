@@ -1,9 +1,10 @@
 "use client";
 
-import heic2any from "heic2any";
-
 async function tryConvertToJpeg(file: File): Promise<Blob | null> {
+  if (typeof window === "undefined") return null;
+
   try {
+    const { default: heic2any } = await import("heic2any");
     const result = await heic2any({
       blob: file,
       toType: "image/jpeg",

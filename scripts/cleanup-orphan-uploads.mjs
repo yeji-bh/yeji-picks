@@ -39,9 +39,9 @@ function collectFromPayload(data) {
 async function referencedUploads() {
   const refs = new Set();
 
-  const [outfits, items, feedback, submissions] = await Promise.all([
+  const [outfits, catalogImages, feedback, submissions] = await Promise.all([
     prisma.outfit.findMany({ select: { mainImage: true } }),
-    prisma.item.findMany({ select: { image: true } }),
+    prisma.catalogItemImage.findMany({ select: { url: true } }),
     prisma.siteFeedback.findMany({ select: { image: true } }),
     prisma.submission.findMany({ select: { rawJson: true } }),
   ]);
@@ -49,8 +49,8 @@ async function referencedUploads() {
   for (const row of outfits) {
     if (row.mainImage?.startsWith("/uploads/")) refs.add(row.mainImage);
   }
-  for (const row of items) {
-    if (row.image?.startsWith("/uploads/")) refs.add(row.image);
+  for (const row of catalogImages) {
+    if (row.url?.startsWith("/uploads/")) refs.add(row.url);
   }
   for (const row of feedback) {
     if (row.image?.startsWith("/uploads/")) refs.add(row.image);

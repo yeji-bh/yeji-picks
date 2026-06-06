@@ -42,6 +42,24 @@
       "category": "카테고리 순"
     }
   },
+  "brand": {
+    "backHome": "홈으로",
+    "label": "브랜드",
+    "itemCount": "아이템 {{count}}개",
+    "noItems": "아이템이 없습니다"
+  },
+  "item": {
+    "backHome": "홈으로",
+    "useCount": "{{count}}개 코디에 등장",
+    "outfitsSection": "이 아이템이 나온 코디",
+    "outfitsSectionDesc": "이 아이템은 {{count}}개 코디에 등장합니다",
+    "noOutfits": "관련 코디가 없습니다",
+    "searchPlaceholder": "브랜드, 상품명 검색…",
+    "unlink": "연결 해제",
+    "unnamed": "이름 없는 아이템",
+    "modeNew": "새 아이템",
+    "modeLink": "기존 아이템 연결"
+  },
   "outfit": {
     "backHome": "홈으로",
     "backDetail": "상세로 돌아가기",

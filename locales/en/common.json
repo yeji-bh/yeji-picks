@@ -42,6 +42,24 @@
       "category": "Category order"
     }
   },
+  "brand": {
+    "backHome": "Back to home",
+    "label": "Brand",
+    "itemCount": "{{count}} items",
+    "noItems": "No items yet"
+  },
+  "item": {
+    "backHome": "Back to home",
+    "useCount": "Used in {{count}} outfits",
+    "outfitsSection": "Outfits featuring this item",
+    "outfitsSectionDesc": "This item appears in {{count}} outfits",
+    "noOutfits": "No related outfits yet",
+    "searchPlaceholder": "Search brand, product name…",
+    "unlink": "Unlink",
+    "unnamed": "Unnamed item",
+    "modeNew": "New item",
+    "modeLink": "Link existing item"
+  },
   "outfit": {
     "backHome": "Back to home",
     "backDetail": "Back to detail",

@@ -41,12 +41,16 @@ export default async function FavoritesPage() {
           mainImage: true,
           eventName: true,
           date: true,
-          items: {
+          outfitItems: {
             select: {
-              type: true,
-              brand: true,
-              productName: true,
-              notes: true,
+              catalogItem: {
+                select: {
+                  type: true,
+                  brand: true,
+                  productName: true,
+                  notes: true,
+                },
+              },
             },
           },
         },
@@ -59,34 +63,43 @@ export default async function FavoritesPage() {
     }
 
     if (itemIds.length > 0) {
-      const rows = await prisma.item.findMany({
+      const rows = await prisma.catalogItem.findMany({
         where: { id: { in: itemIds } },
         select: {
           id: true,
           type: true,
           brand: true,
           productName: true,
-          image: true,
-          outfitId: true,
-          outfit: { select: { date: true, eventName: true } },
+          useCount: true,
+          images: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } },
+          placements: {
+            take: 1,
+            orderBy: { outfit: { createdAt: "desc" } },
+            select: {
+              outfit: { select: { id: true, date: true, eventName: true } },
+            },
+          },
         },
       });
       const map = new Map(
-        rows.map((item) => [
-          item.id,
-          {
-            id: item.id,
-            type: item.type,
-            brand: item.brand,
-            productName: item.productName,
-            image: item.image,
-            outfitId: item.outfitId,
-            outfitTitle: formatOutfitTitle(
-              item.outfit.date,
-              item.outfit.eventName
-            ),
-          },
-        ])
+        rows.map((item) => {
+          const outfit = item.placements[0]?.outfit;
+          return [
+            item.id,
+            {
+              id: item.id,
+              type: item.type,
+              brand: item.brand,
+              productName: item.productName,
+              image: item.images[0]?.url ?? null,
+              useCount: item.useCount,
+              outfitId: outfit?.id ?? "",
+              outfitTitle: outfit
+                ? formatOutfitTitle(outfit.date, outfit.eventName)
+                : "",
+            },
+          ];
+        })
       );
       initialItems = itemIds.flatMap((id) => {
         const item = map.get(id);

@@ -25,7 +25,20 @@ export async function GET(request: NextRequest) {
 
   const outfits = await prisma.outfit.findMany({
     where: { id: { in: ids } },
-    include: { items: true },
+    include: {
+      outfitItems: {
+        select: {
+          catalogItem: {
+            select: {
+              type: true,
+              brand: true,
+              productName: true,
+              notes: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   const map = new Map(outfits.map((o) => [o.id, toOutfitSummary(o)]));

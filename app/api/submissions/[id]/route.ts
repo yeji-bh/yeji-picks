@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { recalcUseCounts, syncOutfitCatalogItems } from "@/lib/catalog-item";
 import {
   cleanupReplacedUploads,
   collectOutfitImages,
@@ -102,11 +103,8 @@ export async function PATCH(
     let previousImages: Set<string>;
 
     if (submission.status === "approved" && submission.outfitId) {
-      const outfit = await prisma.outfit.findUnique({
-        where: { id: submission.outfitId },
-        include: { items: true },
-      });
-      previousImages = new Set(outfit ? collectOutfitImages(outfit) : []);
+      const previousUrls = await collectOutfitImages(submission.outfitId);
+      previousImages = new Set(previousUrls);
 
       await prisma.$transaction(async (tx) => {
         await tx.outfit.update({
@@ -118,21 +116,7 @@ export async function PATCH(
           },
         });
 
-        await tx.item.deleteMany({ where: { outfitId: submission.outfitId! } });
-
-        if (payload.items.length > 0) {
-          await tx.item.createMany({
-            data: payload.items.map((item) => ({
-              outfitId: submission.outfitId!,
-              type: item.type,
-              brand: item.brand || null,
-              productName: item.productName || null,
-              image: item.image || null,
-              officialLink: item.officialLink || null,
-              notes: item.notes || null,
-            })),
-          });
-        }
+        await syncOutfitCatalogItems(tx, submission.outfitId!, payload.items);
 
         await tx.submission.update({
           where: { id },
@@ -192,11 +176,7 @@ export async function DELETE(
     const imagesToMaybeDelete: string[] = [];
 
     if (outfitId) {
-      const outfit = await prisma.outfit.findUnique({
-        where: { id: outfitId },
-        include: { items: true },
-      });
-      if (outfit) imagesToMaybeDelete.push(...collectOutfitImages(outfit));
+      imagesToMaybeDelete.push(...(await collectOutfitImages(outfitId)));
     } else {
       imagesToMaybeDelete.push(
         ...collectPayloadImages(JSON.parse(submission.rawJson) as SubmissionPayload)
@@ -205,7 +185,14 @@ export async function DELETE(
 
     await prisma.$transaction(async (tx) => {
       if (outfitId) {
+        const catalogIds = (
+          await tx.outfitItem.findMany({
+            where: { outfitId },
+            select: { catalogItemId: true },
+          })
+        ).map((row) => row.catalogItemId);
         await tx.outfit.delete({ where: { id: outfitId } });
+        await recalcUseCounts(tx, catalogIds);
       }
       await tx.submission.delete({ where: { id } });
     });

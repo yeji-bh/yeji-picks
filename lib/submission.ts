@@ -21,12 +21,19 @@ export function validateSubmissionPayload(
         typeof i.type === "string" ? i.type : "other"
       );
 
+      const images = Array.isArray(i.images)
+        ? i.images.filter((url): url is string => typeof url === "string")
+        : undefined;
+
       return {
+        catalogItemId:
+          typeof i.catalogItemId === "string" ? i.catalogItemId : undefined,
         type,
         brand: typeof i.brand === "string" ? i.brand : undefined,
         productName:
           typeof i.productName === "string" ? i.productName : undefined,
         image: typeof i.image === "string" ? i.image : undefined,
+        images,
         officialLink:
           typeof i.officialLink === "string" ? i.officialLink : undefined,
         notes: typeof i.notes === "string" ? i.notes : undefined,

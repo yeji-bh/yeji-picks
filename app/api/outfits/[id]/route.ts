@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminUser } from "@/lib/auth";
+import { getOutfitDisplayItems, syncOutfitCatalogItems } from "@/lib/catalog-item";
 import {
   cleanupReplacedUploads,
   collectOutfitImages,
@@ -15,27 +16,28 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  const outfit = await prisma.outfit.findUnique({
-    where: { id },
-    include: { items: true },
-  });
-
+  const outfit = await prisma.outfit.findUnique({ where: { id } });
   if (!outfit) {
     return NextResponse.json({ error: "找不到穿搭" }, { status: 404 });
   }
+
+  const items = await getOutfitDisplayItems(id);
 
   return NextResponse.json({
     id: outfit.id,
     eventName: outfit.eventName,
     date: outfit.date,
     mainImage: outfit.mainImage,
-    items: outfit.items.map((item) => ({
+    items: items.map((item) => ({
+      catalogItemId: item.id,
       type: item.type,
       brand: item.brand ?? "",
       productName: item.productName ?? "",
       image: item.image ?? "",
+      images: item.images,
       officialLink: item.officialLink ?? "",
       notes: item.notes ?? "",
+      useCount: item.useCount,
     })),
   });
 }
@@ -58,15 +60,12 @@ export async function PATCH(
       return NextResponse.json({ error: "資料格式不正確" }, { status: 400 });
     }
 
-    const outfit = await prisma.outfit.findUnique({
-      where: { id },
-      include: { items: true },
-    });
+    const outfit = await prisma.outfit.findUnique({ where: { id } });
     if (!outfit) {
       return NextResponse.json({ error: "找不到穿搭" }, { status: 404 });
     }
 
-    const previousImages = collectOutfitImages(outfit);
+    const previousImages = await collectOutfitImages(id);
     const nextImages = collectPayloadImages(payload);
 
     await prisma.$transaction(async (tx) => {
@@ -79,21 +78,7 @@ export async function PATCH(
         },
       });
 
-      await tx.item.deleteMany({ where: { outfitId: id } });
-
-      if (payload.items.length > 0) {
-        await tx.item.createMany({
-          data: payload.items.map((item) => ({
-            outfitId: id,
-            type: item.type,
-            brand: item.brand || null,
-            productName: item.productName || null,
-            image: item.image || null,
-            officialLink: item.officialLink || null,
-            notes: item.notes || null,
-          })),
-        });
-      }
+      await syncOutfitCatalogItems(tx, id, payload.items);
 
       await tx.submission.updateMany({
         where: { outfitId: id },
