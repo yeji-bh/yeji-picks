@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { assetUrl } from "@/lib/asset-url";
 import { brandHref } from "@/lib/brand";
 import type { OutfitDisplayItem } from "@/lib/catalog-item";
+import { useAuth } from "./AuthProvider";
 import FavoriteButton from "./FavoriteButton";
 import OutfitCard from "./OutfitCard";
 
@@ -39,6 +40,8 @@ export default function ItemDetailContent({
   outfits: OutfitRef[];
 }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
 
   return (
     <div className="min-w-0">
@@ -108,6 +111,14 @@ export default function ItemDetailContent({
                 )}
               </div>
               <div className="flex shrink-0 items-center gap-1">
+                {isAdmin && (
+                  <Link
+                    href={`/item/${item.id}/edit`}
+                    className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+                  >
+                    {t("item.editCatalogBtn")}
+                  </Link>
+                )}
                 {item.officialLink && (
                   <a
                     href={item.officialLink}

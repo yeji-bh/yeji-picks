@@ -395,8 +395,8 @@ export default function HomeContent({
           {!hasMore && listLength > 0 && (
             <p className="py-4 text-center text-xs text-muted">
               {viewMode === "outfit"
-                ? t("home.allLoaded", { count: total })
-                : t("home.allItemsLoaded", { count: total })}
+                ? t("home.allLoaded")
+                : t("home.allItemsLoaded")}
             </p>
           )}
         </>

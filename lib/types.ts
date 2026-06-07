@@ -54,7 +54,10 @@ const LEGACY_TYPE_MAP: Record<string, ItemType> = {
   bag_other: "bag",
   top_tshirt: "top_shortsleeve",
   top_vest: "top_sleeveless",
-  top_blazer: "top_other",
+  top_blazer: "top_jacket",
+  jacket: "top_jacket",
+  coat: "top_jacket",
+  outerwear: "top_jacket",
   shoes_loafers: "shoes_other",
   jewelry: "jewelry_other",
   eyewear: "eyewear_glasses",
@@ -65,10 +68,15 @@ const LEGACY_TYPE_MAP: Record<string, ItemType> = {
 };
 
 export function normalizeItemType(type: string): ItemType {
-  if ((ITEM_TYPES as readonly string[]).includes(type)) {
-    return type as ItemType;
+  const trimmed = type.trim();
+  if ((ITEM_TYPES as readonly string[]).includes(trimmed)) {
+    return trimmed as ItemType;
   }
-  return LEGACY_TYPE_MAP[type] ?? "other";
+  const lower = trimmed.toLowerCase();
+  if ((ITEM_TYPES as readonly string[]).includes(lower)) {
+    return lower as ItemType;
+  }
+  return LEGACY_TYPE_MAP[trimmed] ?? LEGACY_TYPE_MAP[lower] ?? "other";
 }
 
 export function isItemTypeGroup(filter: string): filter is ItemTypeGroup {

@@ -41,17 +41,8 @@ export default function SubmissionsPanel({
         <h1 className="text-xl font-semibold text-neutral-900 sm:text-2xl">
           {t("mySubmissions.title")}
         </h1>
-        <p className="mt-1 text-sm text-muted">{t("mySubmissions.desc")}</p>
       </div>
       <MySubmissions initialRecords={initialRecords} />
-      <div className="mt-6 text-center">
-        <Link
-          href="/submit"
-          className="text-sm font-medium text-neutral-900 underline hover:text-neutral-600"
-        >
-          {t("mySubmissions.newSubmit")}
-        </Link>
-      </div>
     </div>
   );
 }

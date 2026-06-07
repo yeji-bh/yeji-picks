@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { assetUrl } from "@/lib/asset-url";
 import { COVER_ASPECT_CLASS } from "@/lib/image";
@@ -28,6 +29,26 @@ export default function OutfitCard({
   const { t } = useTranslation();
   const title = formatOutfitTitle(date, eventName);
   const displayTitle = title === "outfit" ? t("outfit.unnamed") : title;
+  const imageRef = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = imageRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "120px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <Link
@@ -36,16 +57,18 @@ export default function OutfitCard({
       className="group block min-w-0 overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md"
     >
       <div
+        ref={imageRef}
         className={`relative w-full overflow-hidden bg-neutral-100 ${COVER_ASPECT_CLASS}`}
       >
-        <Image
-          src={assetUrl(mainImage)}
-          alt={displayTitle}
-          fill
-          className="object-cover transition-transform duration-200 group-hover:scale-[1.02]"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          loading="lazy"
-        />
+        {inView ? (
+          <Image
+            src={assetUrl(mainImage)}
+            alt={displayTitle}
+            fill
+            className="object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          />
+        ) : null}
         <div className="absolute right-2 top-2">
           <FavoriteButton type="outfit" targetId={id} />
         </div>

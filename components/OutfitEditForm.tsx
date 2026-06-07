@@ -5,11 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import CoverImageCropper from "./CoverImageCropper";
 import CoverImagePreview from "./CoverImagePreview";
-import ItemImagePreview from "./ItemImagePreview";
 import { useToast } from "./ToastProvider";
 import BrandAutocomplete from "./BrandAutocomplete";
 import CatalogItemPicker, { type CatalogPick } from "./CatalogItemPicker";
+import ItemImagePreview from "./ItemImagePreview";
 import ItemTypeSelect from "./ItemTypeSelect";
+import LinkedCatalogItemEditor from "./LinkedCatalogItemEditor";
 import { prepareImageFile } from "@/lib/prepare-image-file";
 import { uploadImageFile } from "@/lib/upload-client";
 import {
@@ -22,6 +23,7 @@ type PendingItem = SubmissionItem & {
   imageFile?: File | null;
   imagePreview?: string;
   itemMode?: "new" | "link";
+  catalogEditOpen?: boolean;
 };
 
 const emptyItem = (): PendingItem => ({
@@ -88,6 +90,7 @@ export default function OutfitEditForm({ outfitId }: { outfitId: string }) {
                   officialLink: item.officialLink ?? "",
                   notes: item.notes ?? "",
                   itemMode: item.catalogItemId ? "link" : "new",
+                  catalogEditOpen: false,
                 })
               )
             : [emptyItem()]
@@ -181,6 +184,14 @@ export default function OutfitEditForm({ outfitId }: { outfitId: string }) {
   function updateItem(index: number, field: keyof SubmissionItem, value: string) {
     setItems((prev) =>
       prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
+    );
+  }
+
+  function toggleCatalogEdit(index: number) {
+    setItems((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, catalogEditOpen: !item.catalogEditOpen } : item
+      )
     );
   }
 
@@ -302,7 +313,7 @@ export default function OutfitEditForm({ outfitId }: { outfitId: string }) {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-neutral-400"
+            className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm outline-none focus:border-neutral-400"
           />
         </label>
         <div className="block">
@@ -313,7 +324,7 @@ export default function OutfitEditForm({ outfitId }: { outfitId: string }) {
             accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
             disabled={submitting || imagePreparing}
             onChange={(e) => handleMainImageSelect(e.target.files?.[0] ?? null)}
-            className="mt-1 w-full text-sm"
+            className="file-input-zone mt-1"
           />
           {imagePreparing && (
             <p className="mt-1 text-xs text-muted">{t("feedback.imageProcessing")}</p>
@@ -387,47 +398,72 @@ export default function OutfitEditForm({ outfitId }: { outfitId: string }) {
             </div>
 
             {item.itemMode === "link" ? (
-              <CatalogItemPicker
-                selected={
-                  item.catalogItemId
-                    ? {
-                        id: item.catalogItemId,
-                        type: item.type,
-                        brand: item.brand ?? null,
-                        productName: item.productName ?? null,
-                        image: item.image || item.imagePreview || null,
-                        officialLink: item.officialLink ?? null,
-                        notes: item.notes ?? null,
-                        useCount: 0,
-                      }
-                    : null
-                }
-                onSelect={(picked: CatalogPick) =>
-                  setItems((prev) =>
-                    prev.map((row, i) =>
-                      i === index
-                        ? {
-                            ...row,
-                            catalogItemId: picked.id,
-                            type: picked.type as PendingItem["type"],
-                            brand: picked.brand ?? "",
-                            productName: picked.productName ?? "",
-                            image: picked.image ?? "",
-                            officialLink: picked.officialLink ?? "",
-                            notes: picked.notes ?? "",
-                          }
-                        : row
+              <>
+                <CatalogItemPicker
+                  selected={
+                    item.catalogItemId
+                      ? {
+                          id: item.catalogItemId,
+                          type: item.type,
+                          brand: item.brand ?? null,
+                          productName: item.productName ?? null,
+                          image: item.image || item.imagePreview || null,
+                          officialLink: item.officialLink ?? null,
+                          notes: item.notes ?? null,
+                          useCount: 0,
+                        }
+                      : null
+                  }
+                  onSelect={(picked: CatalogPick) =>
+                    setItems((prev) =>
+                      prev.map((row, i) =>
+                        i === index
+                          ? {
+                              ...row,
+                              itemMode: "link",
+                              catalogEditOpen: false,
+                              catalogItemId: picked.id,
+                              type: picked.type as PendingItem["type"],
+                              brand: picked.brand ?? "",
+                              productName: picked.productName ?? "",
+                              image: picked.image ?? "",
+                              officialLink: picked.officialLink ?? "",
+                              notes: picked.notes ?? "",
+                            }
+                          : row
+                      )
                     )
-                  )
-                }
-                onClear={() =>
-                  setItems((prev) =>
-                    prev.map((row, i) =>
-                      i === index ? { ...emptyItem(), itemMode: "link" } : row
+                  }
+                  onClear={() =>
+                    setItems((prev) =>
+                      prev.map((row, i) =>
+                        i === index
+                          ? { ...emptyItem(), itemMode: "link", catalogEditOpen: false }
+                          : row
+                      )
                     )
-                  )
-                }
-              />
+                  }
+                />
+                {item.catalogItemId ? (
+                  <LinkedCatalogItemEditor
+                    open={!!item.catalogEditOpen}
+                    onToggle={() => toggleCatalogEdit(index)}
+                    catalogItemId={item.catalogItemId}
+                    type={item.type}
+                    brand={item.brand ?? ""}
+                    productName={item.productName ?? ""}
+                    image={item.image ?? ""}
+                    imagePreview={item.imagePreview}
+                    submitting={submitting}
+                    onTypeChange={(type) => updateItem(index, "type", type)}
+                    onBrandChange={(brand) => updateItem(index, "brand", brand)}
+                    onProductNameChange={(productName) =>
+                      updateItem(index, "productName", productName)
+                    }
+                    onImageSelect={(file) => handleItemImageSelect(index, file)}
+                  />
+                ) : null}
+              </>
             ) : (
               <>
                 <ItemTypeSelect
@@ -456,13 +492,13 @@ export default function OutfitEditForm({ outfitId }: { outfitId: string }) {
                   onChange={(e) =>
                     handleItemImageSelect(index, e.target.files?.[0] ?? null)
                   }
-                  className="w-full text-sm"
+                  className="file-input-zone w-full"
                 />
                 {(item.image || item.imagePreview) && (
                   <div className="mt-2">
                     <ItemImagePreview
                       src={item.imagePreview || item.image || ""}
-                      alt={item.productName || t("submit.itemImage")}
+                      alt={item.productName || t(`itemTypes.${item.type}`)}
                     />
                   </div>
                 )}

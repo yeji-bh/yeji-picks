@@ -64,7 +64,7 @@ export default function RegisterPage() {
             autoComplete="username"
             value={account}
             onChange={(e) => setAccount(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-neutral-400"
+            className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm outline-none focus:border-neutral-400"
           />
         </label>
         <label className="block">
@@ -76,7 +76,7 @@ export default function RegisterPage() {
             autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-border px-3 py-2.5 text-sm outline-none focus:border-neutral-400"
+            className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm outline-none focus:border-neutral-400"
           />
         </label>
         <button

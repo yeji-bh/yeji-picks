@@ -107,10 +107,6 @@ export default function MySubmissions({
     return (
       <div className="rounded-xl border border-dashed border-border bg-neutral-50 px-4 py-10 text-center">
         <p className="text-sm text-neutral-700">{t("mySubmissions.empty")}</p>
-        <p className="mt-1 text-xs text-muted">{t("mySubmissions.emptyHint")}</p>
-        {!user && (
-          <p className="mt-2 text-xs text-muted">{t("mySubmissions.loginHint")}</p>
-        )}
         <Link
           href="/submit"
           className="mt-4 inline-block text-sm text-neutral-900 underline"

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdminUser } from "@/lib/auth";
 import { getOutfitDisplayItems, syncOutfitCatalogItems } from "@/lib/catalog-item";
 import {
+  cleanupRemovedCatalogImages,
   cleanupReplacedUploads,
   collectOutfitImages,
   collectPayloadImages,
@@ -68,6 +69,7 @@ export async function PATCH(
     const previousImages = await collectOutfitImages(id);
     const nextImages = collectPayloadImages(payload);
 
+    let removedCatalogImages: string[] = [];
     await prisma.$transaction(async (tx) => {
       await tx.outfit.update({
         where: { id },
@@ -78,7 +80,7 @@ export async function PATCH(
         },
       });
 
-      await syncOutfitCatalogItems(tx, id, payload.items);
+      removedCatalogImages = await syncOutfitCatalogItems(tx, id, payload.items);
 
       await tx.submission.updateMany({
         where: { outfitId: id },
@@ -87,6 +89,7 @@ export async function PATCH(
     });
 
     await cleanupReplacedUploads(previousImages, nextImages);
+    await cleanupRemovedCatalogImages(removedCatalogImages);
 
     revalidateOutfitCaches(id);
 

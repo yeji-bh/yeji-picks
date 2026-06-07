@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ImageLightbox from "./ImageLightbox";
 import OutfitItemsSection from "./OutfitItemsSection";
@@ -21,6 +21,16 @@ type Item = {
   linkStatus: string | null;
   useCount: number;
 };
+
+type CoverMode = "static" | "fixed" | "bottom";
+
+type CoverFixedStyle = {
+  left: number;
+  top: number;
+  width: number;
+};
+
+const DESKTOP_MQ = "(min-width: 1024px)";
 
 function NavArrow({
   href,
@@ -76,12 +86,90 @@ export default function OutfitDetailContent({
 }) {
   const { t } = useTranslation();
   const [zoomOpen, setZoomOpen] = useState(false);
+  const columnRef = useRef<HTMLDivElement>(null);
+  const coverRef = useRef<HTMLDivElement>(null);
+  const [coverMode, setCoverMode] = useState<CoverMode>("static");
+  const [coverFixedStyle, setCoverFixedStyle] = useState<CoverFixedStyle | null>(null);
+  const [coverHeight, setCoverHeight] = useState(0);
 
   useEffect(() => {
     syncMainBounds();
     window.addEventListener("resize", syncMainBounds);
     return () => window.removeEventListener("resize", syncMainBounds);
   }, []);
+
+  useEffect(() => {
+    const column = columnRef.current;
+    const cover = coverRef.current;
+    if (!column || !cover) return;
+
+    const mq = window.matchMedia(DESKTOP_MQ);
+
+    function updateCoverPosition() {
+      if (!mq.matches) {
+        setCoverMode("static");
+        setCoverFixedStyle(null);
+        setCoverHeight(0);
+        return;
+      }
+
+      const height = cover!.offsetHeight;
+      setCoverHeight(height);
+
+      const columnRect = column!.getBoundingClientRect();
+      const top = Math.max(16, (window.innerHeight - height) / 2);
+      const bottomLimit = top + height;
+
+      if (columnRect.top >= top) {
+        setCoverMode("static");
+        setCoverFixedStyle(null);
+      } else if (columnRect.bottom <= bottomLimit) {
+        setCoverMode("bottom");
+        setCoverFixedStyle(null);
+      } else {
+        setCoverMode("fixed");
+        setCoverFixedStyle({
+          left: columnRect.left,
+          top,
+          width: columnRect.width,
+        });
+      }
+    }
+
+    updateCoverPosition();
+    window.addEventListener("scroll", updateCoverPosition, { passive: true });
+    window.addEventListener("resize", updateCoverPosition);
+
+    const ro = new ResizeObserver(updateCoverPosition);
+    ro.observe(cover);
+    ro.observe(column);
+
+    mq.addEventListener("change", updateCoverPosition);
+
+    return () => {
+      window.removeEventListener("scroll", updateCoverPosition);
+      window.removeEventListener("resize", updateCoverPosition);
+      mq.removeEventListener("change", updateCoverPosition);
+      ro.disconnect();
+    };
+  }, [mainImage]);
+
+  const coverPositionStyle: React.CSSProperties | undefined =
+    coverMode === "fixed" && coverFixedStyle
+      ? {
+          position: "fixed",
+          left: coverFixedStyle.left,
+          top: coverFixedStyle.top,
+          width: coverFixedStyle.width,
+        }
+      : coverMode === "bottom"
+        ? {
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            width: "100%",
+          }
+        : undefined;
 
   return (
     <>
@@ -102,23 +190,32 @@ export default function OutfitDetailContent({
         />
       )}
 
-      <div className="mt-4 grid gap-8 lg:mt-6 lg:grid-cols-[clamp(260px,24.74vw,475px)_minmax(0,1fr)] lg:items-start lg:justify-between lg:gap-x-12 xl:gap-x-16">
-        <div className="detail-cover-sticky w-full lg:w-auto">
-          <button
-            type="button"
-            onClick={() => setZoomOpen(true)}
-            className={`group relative block w-full cursor-zoom-in overflow-hidden bg-neutral-100 ${COVER_DETAIL_CLASS}`}
-            aria-label={t("outfit.zoomImage")}
+      <div className="mt-4 grid gap-8 lg:mt-6 lg:grid-cols-[clamp(260px,24.74vw,475px)_minmax(0,1fr)] lg:justify-between lg:gap-x-12 xl:gap-x-16">
+        <div ref={columnRef} className="detail-cover-column min-h-0 w-full lg:w-auto">
+          {coverMode === "fixed" && coverHeight > 0 ? (
+            <div aria-hidden className="w-full" style={{ height: coverHeight }} />
+          ) : null}
+          <div
+            ref={coverRef}
+            className={`detail-cover-sticky${coverMode === "fixed" ? " is-fixed" : ""}`}
+            style={coverPositionStyle}
           >
-            <Image
-              src={assetUrl(mainImage)}
-              alt={imageAlt}
-              fill
-              className="object-cover transition-transform duration-200 group-hover:scale-[1.02]"
-              sizes="475px"
-              priority
-            />
-          </button>
+            <button
+              type="button"
+              onClick={() => setZoomOpen(true)}
+              className={`group relative block w-full cursor-zoom-in overflow-hidden bg-neutral-100 ${COVER_DETAIL_CLASS}`}
+              aria-label={t("outfit.zoomImage")}
+            >
+              <Image
+                src={assetUrl(mainImage)}
+                alt={imageAlt}
+                fill
+                className="object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+                sizes="475px"
+                priority
+              />
+            </button>
+          </div>
         </div>
 
         <OutfitItemsSection

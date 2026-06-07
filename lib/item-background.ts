@@ -3,7 +3,8 @@ import "server-only";
 import { removeBackground } from "@imgly/background-removal-node";
 import sharp from "sharp";
 
-const ENABLED = process.env.ITEM_BG_REMOVAL !== "false";
+/** Off by default — set ITEM_BG_REMOVAL=true to enable AI background removal. */
+const ENABLED = process.env.ITEM_BG_REMOVAL === "true";
 
 /** Remove item image background and composite onto pure white. */
 export async function itemBackgroundToWhite(buffer: Buffer): Promise<Buffer> {

@@ -178,9 +178,8 @@ export default function FeedbackModal({
               accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
               disabled={loading || imageProcessing}
               onChange={(e) => handleImageSelect(e.target.files?.[0] ?? null)}
-              className="mt-1 w-full text-sm"
+              className="file-input-zone mt-1"
             />
-            <p className="mt-1 text-[11px] text-muted">{t("feedback.imageHint")}</p>
             {imageProcessing && (
               <p className="mt-1 text-xs text-muted">{t("feedback.imageProcessing")}</p>
             )}

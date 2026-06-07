@@ -69,9 +69,6 @@ export default function CatalogItemPicker({
             {selected.brand && selected.productName && (
               <p className="text-xs text-muted">{selected.brand}</p>
             )}
-            <p className="mt-1 text-[11px] text-muted">
-              {t("item.useCount", { count: selected.useCount })}
-            </p>
           </div>
           <button
             type="button"
@@ -119,11 +116,11 @@ export default function CatalogItemPicker({
                   <span className="block truncate text-sm text-neutral-900">
                     {item.productName || item.brand || "—"}
                   </span>
-                  <span className="block truncate text-[11px] text-muted">
-                    {item.brand}
-                    {item.useCount > 0 &&
-                      ` · ${t("item.useCount", { count: item.useCount })}`}
-                  </span>
+                  {item.brand && (
+                    <span className="block truncate text-[11px] text-muted">
+                      {item.brand}
+                    </span>
+                  )}
                 </span>
               </button>
             </li>

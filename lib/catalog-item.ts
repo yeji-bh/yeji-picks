@@ -4,7 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { resolveCanonicalBrand } from "@/lib/brand-db";
 import { catalogFingerprint } from "@/lib/catalog-fingerprint";
 import { prisma } from "@/lib/db";
-import type { SubmissionItem } from "@/lib/types";
+import { normalizeItemType, type SubmissionItem } from "@/lib/types";
 
 export type CatalogItemWithImages = Prisma.CatalogItemGetPayload<{
   include: { images: true };
@@ -32,7 +32,7 @@ export function primaryImage(item: CatalogItemWithImages): string | null {
 export function toDisplayItem(item: CatalogItemWithImages): OutfitDisplayItem {
   return {
     id: item.id,
-    type: item.type,
+    type: normalizeItemType(item.type),
     brand: item.brand,
     productName: item.productName,
     image: primaryImage(item),
@@ -44,62 +44,107 @@ export function toDisplayItem(item: CatalogItemWithImages): OutfitDisplayItem {
   };
 }
 
-function collectImageUrls(item: SubmissionItem): string[] {
-  const urls = new Set<string>();
-  if (item.image) urls.add(item.image);
-  for (const url of item.images ?? []) {
-    if (url) urls.add(url);
-  }
-  return [...urls];
+function catalogImageUrl(item: SubmissionItem): string | null {
+  const primary = item.image?.trim();
+  if (primary) return primary;
+  const fallback = item.images?.find((url) => url?.trim());
+  return fallback?.trim() ?? null;
 }
 
-async function addImagesIfNew(
+/** Keep a single catalog image; replace when the URL changes. Returns removed URLs. */
+export async function syncCatalogImages(
   tx: Prisma.TransactionClient,
   catalogItemId: string,
-  urls: string[]
-) {
-  if (urls.length === 0) return;
+  url: string
+): Promise<string[]> {
+  const nextUrl = url.trim();
+  if (!nextUrl) return [];
 
   const existing = await tx.catalogItemImage.findMany({
     where: { catalogItemId },
-    select: { url: true, sortOrder: true },
+    select: { url: true },
+    orderBy: { sortOrder: "asc" },
   });
-  const known = new Set(existing.map((row) => row.url));
-  let nextOrder =
-    existing.reduce((max, row) => Math.max(max, row.sortOrder), -1) + 1;
+  const existingUrls = existing.map((row) => row.url);
 
-  for (const url of urls) {
-    if (known.has(url)) continue;
-    await tx.catalogItemImage.create({
-      data: { catalogItemId, url, sortOrder: nextOrder++ },
-    });
-    known.add(url);
+  if (existingUrls.length === 1 && existingUrls[0] === nextUrl) {
+    return [];
   }
+
+  await tx.catalogItemImage.deleteMany({ where: { catalogItemId } });
+  await tx.catalogItemImage.create({
+    data: { catalogItemId, url: nextUrl, sortOrder: 0 },
+  });
+
+  return existingUrls.filter((oldUrl) => oldUrl !== nextUrl);
 }
 
 async function resolveCatalogItem(
   tx: Prisma.TransactionClient,
   item: SubmissionItem
-): Promise<string> {
+): Promise<{ catalogItemId: string; removedImageUrls: string[] }> {
+  const normalizedType = normalizeItemType(item.type);
+  const imageUrl = catalogImageUrl(item);
+  let removedImageUrls: string[] = [];
+
   if (item.catalogItemId) {
     const existing = await tx.catalogItem.findUnique({
       where: { id: item.catalogItemId },
     });
     if (!existing) throw new Error("找不到單品主檔");
-    await addImagesIfNew(tx, existing.id, collectImageUrls(item));
-    return existing.id;
+    if (imageUrl) {
+      removedImageUrls = await syncCatalogImages(tx, existing.id, imageUrl);
+    }
+
+    const updates: {
+      type?: string;
+      brand?: string | null;
+      productName?: string | null;
+      officialLink?: string | null;
+      notes?: string | null;
+    } = {};
+
+    if (normalizedType !== normalizeItemType(existing.type)) {
+      updates.type = normalizedType;
+    }
+    const brand = (await resolveCanonicalBrand(item.brand, tx)) ?? existing.brand;
+    if (item.brand !== undefined && brand !== existing.brand) {
+      updates.brand = brand;
+    }
+    const productName = item.productName?.trim() || null;
+    if (item.productName !== undefined && productName !== existing.productName) {
+      updates.productName = productName;
+    }
+    const officialLink = item.officialLink?.trim() || null;
+    if (item.officialLink !== undefined && officialLink !== existing.officialLink) {
+      updates.officialLink = officialLink;
+    }
+    const notes = item.notes?.trim() || null;
+    if (item.notes !== undefined && notes !== existing.notes) {
+      updates.notes = notes;
+    }
+
+    if (Object.keys(updates).length > 0) {
+      await tx.catalogItem.update({
+        where: { id: existing.id },
+        data: updates,
+      });
+    }
+
+    return { catalogItemId: existing.id, removedImageUrls };
   }
 
   const canonicalBrand = await resolveCanonicalBrand(item.brand, tx);
   const fingerprint = catalogFingerprint({
     ...item,
+    type: normalizedType,
     brand: canonicalBrand,
   });
 
   const productName = item.productName?.trim() || null;
   const candidates = await tx.catalogItem.findMany({
     where: {
-      type: item.type,
+      type: normalizedType,
       ...(productName ? { productName } : {}),
     },
     select: { id: true, type: true, brand: true, productName: true },
@@ -115,13 +160,15 @@ async function resolveCatalogItem(
   );
 
   if (matched) {
-    await addImagesIfNew(tx, matched.id, collectImageUrls(item));
-    return matched.id;
+    if (imageUrl) {
+      removedImageUrls = await syncCatalogImages(tx, matched.id, imageUrl);
+    }
+    return { catalogItemId: matched.id, removedImageUrls };
   }
 
   const created = await tx.catalogItem.create({
     data: {
-      type: item.type,
+      type: normalizedType,
       brand: canonicalBrand,
       productName: item.productName?.trim() || null,
       officialLink: item.officialLink?.trim() || null,
@@ -129,8 +176,10 @@ async function resolveCatalogItem(
     },
   });
 
-  await addImagesIfNew(tx, created.id, collectImageUrls(item));
-  return created.id;
+  if (imageUrl) {
+    removedImageUrls = await syncCatalogImages(tx, created.id, imageUrl);
+  }
+  return { catalogItemId: created.id, removedImageUrls };
 }
 
 export async function recalcUseCounts(
@@ -152,7 +201,7 @@ export async function syncOutfitCatalogItems(
   tx: Prisma.TransactionClient,
   outfitId: string,
   items: SubmissionItem[]
-) {
+): Promise<string[]> {
   const previous = await tx.outfitItem.findMany({
     where: { outfitId },
     select: { catalogItemId: true },
@@ -162,15 +211,18 @@ export async function syncOutfitCatalogItems(
   await tx.outfitItem.deleteMany({ where: { outfitId } });
 
   const nextIds: string[] = [];
+  const removedImageUrls: string[] = [];
   for (const item of items) {
-    const catalogItemId = await resolveCatalogItem(tx, item);
+    const resolved = await resolveCatalogItem(tx, item);
     await tx.outfitItem.create({
-      data: { outfitId, catalogItemId },
+      data: { outfitId, catalogItemId: resolved.catalogItemId },
     });
-    nextIds.push(catalogItemId);
+    nextIds.push(resolved.catalogItemId);
+    removedImageUrls.push(...resolved.removedImageUrls);
   }
 
   await recalcUseCounts(tx, [...previousIds, ...nextIds]);
+  return removedImageUrls;
 }
 
 export async function getOutfitDisplayItems(

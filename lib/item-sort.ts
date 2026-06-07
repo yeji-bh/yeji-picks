@@ -4,7 +4,7 @@ import type { ItemSummary } from "@/lib/item-summary";
 
 export const ITEM_SORT_OPTIONS = OUTFIT_SORT_OPTIONS;
 export type ItemSort = OutfitSort;
-export const DEFAULT_ITEM_SORT: ItemSort = "newest";
+export const DEFAULT_ITEM_SORT: ItemSort = "date_desc";
 
 export function parseItemSort(value: string | null | undefined): ItemSort {
   if (value && (ITEM_SORT_OPTIONS as readonly string[]).includes(value)) {

@@ -103,3 +103,15 @@ export async function cleanupReplacedUploads(
     await deleteUploadIfOrphaned(url);
   }
 }
+
+/** Delete catalog images replaced during item updates. */
+export async function cleanupRemovedCatalogImages(
+  urls: Iterable<string>
+): Promise<void> {
+  const seen = new Set<string>();
+  for (const url of urls) {
+    if (!isLocalUpload(url) || seen.has(url)) continue;
+    seen.add(url);
+    await deleteUploadIfOrphaned(url);
+  }
+}

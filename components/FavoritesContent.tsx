@@ -119,7 +119,6 @@ export default function FavoritesContent({
       ) : isEmpty ? (
         <div className="rounded-xl border border-dashed border-border bg-white p-8 text-center sm:p-12">
           <p className="text-sm text-muted">{t("favorites.empty")}</p>
-          <p className="mt-1 text-xs text-neutral-400">{t("favorites.emptyHint")}</p>
         </div>
       ) : (
         <div className="space-y-10">

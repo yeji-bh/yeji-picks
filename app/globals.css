@@ -7,15 +7,46 @@
 }
 
 html {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
   background-color: var(--color-surface);
   color: #171717;
+  color-scheme: light;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  overflow-x: clip;
   min-height: 100dvh;
+}
+
+/* 日期選擇器固定亮色主題 */
+input[type="date"] {
+  color-scheme: light;
+  background-color: #ffffff;
+}
+
+/* 檔案上傳區：虛線框提示可點擊 */
+.file-input-zone {
+  display: block;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px dashed var(--color-border);
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.file-input-zone:hover:not(:disabled) {
+  border-color: #a3a3a3;
+  background-color: #fafafa;
+}
+
+.file-input-zone:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* 可點擊元素 */
@@ -65,15 +96,24 @@ img.lightbox-img {
   contain: layout paint;
 }
 
-/* 詳情頁封面隨捲動固定於左側 */
+/* 詳情頁左欄撐滿右側單品列表高度 */
+.detail-cover-column {
+  position: relative;
+  align-self: stretch;
+}
+
 .detail-cover-sticky {
-  align-self: start;
+  width: 100%;
 }
 
 @media (min-width: 1024px) {
   .detail-cover-sticky {
-    position: sticky;
-    top: calc(var(--header-h, 57px) + 1rem);
+    width: clamp(260px, 24.74vw, 475px);
+    max-width: 100%;
+  }
+
+  .detail-cover-sticky.is-fixed {
+    z-index: 5;
   }
 }
 

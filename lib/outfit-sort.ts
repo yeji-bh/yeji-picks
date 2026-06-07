@@ -12,7 +12,7 @@ export const OUTFIT_SORT_OPTIONS = [
 
 export type OutfitSort = (typeof OUTFIT_SORT_OPTIONS)[number];
 
-export const DEFAULT_OUTFIT_SORT: OutfitSort = "newest";
+export const DEFAULT_OUTFIT_SORT: OutfitSort = "date_desc";
 
 export function parseOutfitSort(value: string | null | undefined): OutfitSort {
   if (value && (OUTFIT_SORT_OPTIONS as readonly string[]).includes(value)) {

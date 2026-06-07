@@ -15,21 +15,12 @@ import {
 } from "@/lib/i18n/settings";
 import "./globals.css";
 
-const SITE_TITLES = {
-  "zh-CN": "黄礼志的衣柜",
-  "zh-TW": "黃禮志的衣櫃",
-  en: "YEJI's Closet",
-  ko: "황예지 옷장",
-} as const;
+const SITE_TITLE = "YEJI Picks";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const cookieStore = await cookies();
-  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
-  const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
-
   return {
-    title: SITE_TITLES[locale],
-    description: "黄礼志穿搭与单品",
+    title: SITE_TITLE,
+    description: "YEJI Picks — outfits & favorites",
   };
 }
 

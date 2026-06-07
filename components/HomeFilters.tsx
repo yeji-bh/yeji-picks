@@ -46,6 +46,11 @@ function pillClass(active: boolean): string {
 }
 
 function groupForSub(sub: ItemType): ItemTypeGroup {
+  for (const group of FILTER_TYPES) {
+    if ((ITEM_TYPE_GROUPS[group] as readonly string[]).includes(sub)) {
+      return group;
+    }
+  }
   const idx = sub.indexOf("_");
   return (idx === -1 ? sub : sub.slice(0, idx)) as ItemTypeGroup;
 }
