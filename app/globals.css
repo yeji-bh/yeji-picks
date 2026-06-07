@@ -33,20 +33,36 @@ input[type="date"] {
   border: 1px dashed var(--color-border);
   border-radius: 0.5rem;
   background-color: #ffffff;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  cursor: pointer;
   transition: border-color 0.15s, background-color 0.15s;
 }
 
-.file-input-zone:hover:not(:disabled) {
+.file-input-zone:not([data-disabled="true"]):hover {
   border-color: #a3a3a3;
   background-color: #fafafa;
 }
 
-.file-input-zone:disabled {
+.file-input-zone[data-disabled="true"] {
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+.file-input-zone-btn {
+  border: 0;
+  border-radius: 0.375rem;
+  background-color: #f5f5f5;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #171717;
+  cursor: pointer;
+}
+
+.file-input-zone-btn:hover:not(:disabled) {
+  background-color: #e5e5e5;
+}
+
+.file-input-zone-btn:disabled {
+  cursor: not-allowed;
 }
 
 /* 可點擊元素 */

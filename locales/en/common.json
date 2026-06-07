@@ -1,5 +1,9 @@
 {
   "siteTitle": "YEJI Picks",
+  "common": {
+    "backToTop": "Back to top",
+    "chooseFile": "Choose file"
+  },
   "footer": {
     "disclaimer": "We cannot guarantee that every item listed on this website is an exact match. If you notice any incorrect information or have any concerns, please use the report feature or send us your feedback."
   },

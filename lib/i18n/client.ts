@@ -3,6 +3,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
+import { LOCALE_MANUAL_COOKIE } from "./resolve-locale";
 import {
   DEFAULT_LOCALE,
   I18N_NAMESPACE,
@@ -53,6 +54,7 @@ export function initI18n(initialLocale: Locale) {
 
 export function changeLanguage(locale: Locale) {
   document.cookie = `${LOCALE_COOKIE}=${locale};path=/;max-age=31536000;SameSite=Lax`;
+  document.cookie = `${LOCALE_MANUAL_COOKIE}=1;path=/;max-age=31536000;SameSite=Lax`;
   document.documentElement.lang = locale;
   return i18n.changeLanguage(locale);
 }

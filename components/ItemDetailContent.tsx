@@ -52,130 +52,125 @@ export default function ItemDetailContent({
         ← {t("item.backHome")}
       </Link>
 
-      <div className="mt-4">
-        <div className="flex items-start gap-4 sm:gap-6">
-          <div className="w-[140px] shrink-0 sm:w-[180px]">
-            <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-border bg-white">
-              {item.image ? (
-                <Image
-                  src={assetUrl(item.image)}
-                  alt={item.productName ?? t(`itemTypes.${item.type}`)}
-                  fill
-                  className="object-contain p-2"
-                  sizes="(max-width: 640px) 140px, 180px"
-                  priority
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center text-sm text-muted">
-                  {t(`itemTypes.${item.type}`)}
+      <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
+        <div className="mx-auto w-full max-w-[200px] shrink-0 sm:mx-0 sm:max-w-none sm:w-[180px]">
+          <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-border bg-white">
+            {item.image ? (
+              <Image
+                src={assetUrl(item.image)}
+                alt={item.productName ?? t(`itemTypes.${item.type}`)}
+                fill
+                className="object-contain p-2"
+                sizes="(max-width: 640px) 200px, 180px"
+                priority
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center text-sm text-muted">
+                {t(`itemTypes.${item.type}`)}
+              </div>
+            )}
+          </div>
+
+          {item.images.length > 1 && (
+            <div className="mt-2 flex flex-wrap justify-center gap-1.5 sm:justify-start">
+              {item.images.map((url) => (
+                <div
+                  key={url}
+                  className="relative h-11 w-11 overflow-hidden rounded-lg border border-border bg-white"
+                >
+                  <Image
+                    src={assetUrl(url)}
+                    alt=""
+                    fill
+                    className="object-contain p-0.5"
+                    sizes="44px"
+                  />
                 </div>
-              )}
-            </div>
-
-            {item.images.length > 1 && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {item.images.map((url) => (
-                  <div
-                    key={url}
-                    className="relative h-11 w-11 overflow-hidden rounded-lg border border-border bg-white"
-                  >
-                    <Image
-                      src={assetUrl(url)}
-                      alt=""
-                      fill
-                      className="object-contain p-0.5"
-                      sizes="44px"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-sm text-muted">{t(`itemTypes.${item.type}`)}</p>
-                {item.productName && (
-                  <h1 className="mt-1 text-lg font-semibold leading-snug text-neutral-900 sm:text-xl">
-                    {item.productName}
-                  </h1>
-                )}
-                {item.brand && (
-                  <Link
-                    href={brandHref(item.brand)}
-                    className="mt-2 inline-block text-sm text-neutral-600 hover:text-neutral-900 hover:underline"
-                  >
-                    {item.brand}
-                  </Link>
-                )}
-              </div>
-              <div className="flex shrink-0 items-center gap-1">
-                {isAdmin && (
-                  <Link
-                    href={`/item/${item.id}/edit`}
-                    className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
-                  >
-                    {t("item.editCatalogBtn")}
-                  </Link>
-                )}
-                {item.officialLink && (
-                  <a
-                    href={item.officialLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={t("outfit.openLink")}
-                    className={`rounded-full p-2 transition-colors ${
-                      item.linkStatus === "dead"
-                        ? "text-red-500 hover:bg-red-50"
-                        : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
-                    }`}
-                  >
-                    <ExternalLinkIcon />
-                  </a>
-                )}
-                <FavoriteButton
-                  type="item"
-                  targetId={item.id}
-                  variant="inline"
-                  size="lg"
-                />
-              </div>
-            </div>
-
-            {item.linkStatus === "dead" && item.officialLink && (
-              <p className="mt-2 text-xs text-red-500">{t("outfit.linkDead")}</p>
-            )}
-
-            {item.notes && (
-              <p className="mt-3 whitespace-pre-wrap text-sm text-muted">
-                {item.notes}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <section className="mt-6 border-t border-border pt-5">
-          <h2 className="text-base font-semibold text-neutral-900 sm:text-lg">
-            {t("item.outfitsSection")}
-          </h2>
-          {outfits.length === 0 ? (
-            <p className="mt-3 text-sm text-muted">{t("item.noOutfits")}</p>
-          ) : (
-            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {outfits.map((outfit) => (
-                <OutfitCard
-                  key={outfit.id}
-                  id={outfit.id}
-                  mainImage={outfit.mainImage}
-                  eventName={outfit.eventName}
-                  date={outfit.date}
-                />
               ))}
             </div>
           )}
-        </section>
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="text-sm text-muted">{t(`itemTypes.${item.type}`)}</p>
+          {item.productName && (
+            <h1 className="mt-1 break-words text-lg font-semibold leading-snug text-neutral-900 sm:text-xl">
+              {item.productName}
+            </h1>
+          )}
+          {item.brand && (
+            <Link
+              href={brandHref(item.brand)}
+              className="mt-2 inline-block text-sm text-neutral-600 hover:text-neutral-900 hover:underline"
+            >
+              {item.brand}
+            </Link>
+          )}
+
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            {isAdmin && (
+              <Link
+                href={`/item/${item.id}/edit`}
+                className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+              >
+                {t("item.editCatalogBtn")}
+              </Link>
+            )}
+            {item.officialLink && (
+              <a
+                href={item.officialLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t("outfit.openLink")}
+                className={`rounded-full p-2 transition-colors ${
+                  item.linkStatus === "dead"
+                    ? "text-red-500 hover:bg-red-50"
+                    : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+                }`}
+              >
+                <ExternalLinkIcon />
+              </a>
+            )}
+            <FavoriteButton
+              type="item"
+              targetId={item.id}
+              variant="inline"
+              size="lg"
+            />
+          </div>
+
+          {item.linkStatus === "dead" && item.officialLink && (
+            <p className="mt-2 text-xs text-red-500">{t("outfit.linkDead")}</p>
+          )}
+
+          {item.notes && (
+            <p className="mt-3 whitespace-pre-wrap text-sm text-muted">
+              {item.notes}
+            </p>
+          )}
+        </div>
       </div>
+
+      <section className="mt-6 border-t border-border pt-5">
+        <h2 className="text-base font-semibold text-neutral-900 sm:text-lg">
+          {t("item.outfitsSection")}
+        </h2>
+        {outfits.length === 0 ? (
+          <p className="mt-3 text-sm text-muted">{t("item.noOutfits")}</p>
+        ) : (
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {outfits.map((outfit) => (
+              <OutfitCard
+                key={outfit.id}
+                id={outfit.id}
+                mainImage={outfit.mainImage}
+                eventName={outfit.eventName}
+                date={outfit.date}
+              />
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

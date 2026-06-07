@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "./AuthProvider";
 import OutfitCard from "./OutfitCard";
-import AutoTranslate from "./AutoTranslate";
 import {
   getFavoriteItemIds,
   getFavoriteOutfitIds,
@@ -182,18 +181,15 @@ export default function FavoritesContent({
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs text-muted">{item.outfitTitle}</p>
                       {item.brand && (
-                        <AutoTranslate
-                          text={item.brand}
-                          className="mt-1 block text-xs font-medium text-neutral-500"
-                        />
+                        <p className="mt-1 text-xs font-medium text-neutral-500">
+                          {item.brand}
+                        </p>
                       )}
                       {item.productName && (
-                        <AutoTranslate
-                          text={item.productName}
-                          className="mt-0.5 block break-words text-sm font-medium text-neutral-900"
-                        />
+                        <p className="mt-0.5 break-words text-sm font-medium text-neutral-900">
+                          {item.productName}
+                        </p>
                       )}
                     </div>
                   </Link>

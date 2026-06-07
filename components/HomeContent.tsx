@@ -16,6 +16,7 @@ import {
   HOME_PAGE_SIZE,
   setSavedLoadedCount,
 } from "@/lib/home-pagination";
+import { getSavedFilters, setSavedFilters } from "@/lib/home-filters";
 import { clearHomeScroll, getHomeScroll } from "@/lib/home-scroll";
 import { getSavedSort, setSavedSort } from "@/lib/home-sort";
 import {
@@ -99,7 +100,16 @@ export default function HomeContent({
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadingMoreRef = useRef(false);
   const initDoneRef = useRef(false);
+  const filtersRestoredRef = useRef(false);
   const [pageReady, setPageReady] = useState(hasOutfitInitial || hasItemInitial);
+
+  useEffect(() => {
+    if (filtersRestoredRef.current) return;
+    filtersRestoredRef.current = true;
+    const saved = getSavedFilters();
+    setTypeFilter(saved.typeFilter);
+    setQuery(saved.query);
+  }, []);
 
   const fetchOutfits = useCallback(
     async (offset: number, limit: number, nextSort: OutfitSort) => {
@@ -228,7 +238,7 @@ export default function HomeContent({
     );
 
     return () => timers.forEach(clearTimeout);
-  }, [pageReady, outfits.length, items.length]);
+  }, [pageReady, outfits.length, items.length, typeFilter, query]);
 
   const hasMore = viewMode === "outfit" ? outfitHasMore : itemHasMore;
   const listLength = viewMode === "outfit" ? outfits.length : items.length;
@@ -303,6 +313,16 @@ export default function HomeContent({
     void reloadFromStart(nextMode, sort);
   }
 
+  function handleTypeFilterChange(next: string) {
+    setTypeFilter(next);
+    setSavedFilters({ typeFilter: next, query });
+  }
+
+  function handleQueryChange(next: string) {
+    setQuery(next);
+    setSavedFilters({ typeFilter, query: next });
+  }
+
   const filteredOutfits = useMemo(() => {
     const q = query.trim().toLowerCase();
     return outfits.filter((outfit) => {
@@ -339,8 +359,8 @@ export default function HomeContent({
         query={query}
         sort={sort}
         onViewModeChange={handleViewModeChange}
-        onTypeChange={setTypeFilter}
-        onQueryChange={setQuery}
+        onTypeChange={handleTypeFilterChange}
+        onQueryChange={handleQueryChange}
         onSortChange={handleSortChange}
       />
 
@@ -382,8 +402,6 @@ export default function HomeContent({
                     brand={item.brand}
                     productName={item.productName}
                     useCount={item.useCount}
-                    outfitId={item.outfitId}
-                    outfitTitle={item.outfitTitle}
                   />
                 ))}
           </div>

@@ -10,6 +10,7 @@ import BrandAutocomplete from "./BrandAutocomplete";
 import CatalogItemPicker, { type CatalogPick } from "./CatalogItemPicker";
 import ItemImagePreview from "./ItemImagePreview";
 import ItemTypeSelect from "./ItemTypeSelect";
+import FileInputZone from "./FileInputZone";
 import LinkedCatalogItemEditor from "./LinkedCatalogItemEditor";
 import { prepareImageFile } from "@/lib/prepare-image-file";
 import { uploadImageFile } from "@/lib/upload-client";
@@ -318,13 +319,11 @@ export default function OutfitEditForm({ outfitId }: { outfitId: string }) {
         </label>
         <div className="block">
           <span className="text-xs text-muted">{t("submit.mainImage")} *</span>
-          <input
+          <FileInputZone
             ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
             disabled={submitting || imagePreparing}
-            onChange={(e) => handleMainImageSelect(e.target.files?.[0] ?? null)}
-            className="file-input-zone mt-1"
+            onChange={handleMainImageSelect}
+            className="mt-1"
           />
           {imagePreparing && (
             <p className="mt-1 text-xs text-muted">{t("feedback.imageProcessing")}</p>
@@ -485,14 +484,10 @@ export default function OutfitEditForm({ outfitId }: { outfitId: string }) {
                   placeholder={t("submit.productName")}
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm"
                 />
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
+                <FileInputZone
                   disabled={submitting}
-                  onChange={(e) =>
-                    handleItemImageSelect(index, e.target.files?.[0] ?? null)
-                  }
-                  className="file-input-zone w-full"
+                  onChange={(file) => handleItemImageSelect(index, file)}
+                  className="w-full"
                 />
                 {(item.image || item.imagePreview) && (
                   <div className="mt-2">

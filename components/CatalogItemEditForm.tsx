@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import BrandAutocomplete from "./BrandAutocomplete";
+import FileInputZone from "./FileInputZone";
 import ItemImagePreview from "./ItemImagePreview";
 import ItemTypeSelect from "./ItemTypeSelect";
 import { useToast } from "./ToastProvider";
@@ -155,12 +156,10 @@ export default function CatalogItemEditForm({ itemId }: { itemId: string }) {
           placeholder={t("submit.productName")}
           className="w-full rounded-lg border border-border px-3 py-2 text-sm"
         />
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
+        <FileInputZone
           disabled={submitting}
-          onChange={(e) => handleImageSelect(e.target.files?.[0] ?? null)}
-          className="file-input-zone w-full"
+          onChange={handleImageSelect}
+          className="w-full"
         />
         {(image || imagePreview) && (
           <ItemImagePreview

@@ -1,5 +1,9 @@
 {
   "siteTitle": "YEJI Picks",
+  "common": {
+    "backToTop": "맨 위로",
+    "chooseFile": "파일 선택"
+  },
   "footer": {
     "disclaimer": "본 사이트에 등록된 모든 제품이 실제와 완전히 동일한 제품임을 보장할 수 없습니다. 정보가 잘못되었거나 문의사항이 있으신 경우, 신고 기능을 이용하거나 의견을 남겨주세요."
   },

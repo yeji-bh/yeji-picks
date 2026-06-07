@@ -2,6 +2,7 @@
 
 import { useTranslation } from "react-i18next";
 import BrandAutocomplete from "./BrandAutocomplete";
+import FileInputZone from "./FileInputZone";
 import ItemImagePreview from "./ItemImagePreview";
 import ItemTypeSelect from "./ItemTypeSelect";
 import type { ItemType } from "@/lib/types";
@@ -81,12 +82,10 @@ export default function LinkedCatalogItemEditor({
             placeholder={t("submit.productName")}
             className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm"
           />
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
+          <FileInputZone
             disabled={submitting}
-            onChange={(e) => onImageSelect(e.target.files?.[0] ?? null)}
-            className="file-input-zone w-full"
+            onChange={onImageSelect}
+            className="w-full"
           />
           {(image || imagePreview) && (
             <ItemImagePreview

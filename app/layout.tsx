@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import AuthProvider from "@/components/AuthProvider";
 import FavoritesProvider from "@/components/FavoritesProvider";
 import DocumentTitle from "@/components/DocumentTitle";
@@ -9,10 +9,11 @@ import I18nProvider from "@/components/I18nProvider";
 import SiteFooter from "@/components/SiteFooter";
 import { getCurrentUser } from "@/lib/auth";
 import {
-  DEFAULT_LOCALE,
-  isLocale,
-  LOCALE_COOKIE,
-} from "@/lib/i18n/settings";
+  LOCALE_MANUAL_COOKIE,
+  resolveInitialLocale,
+} from "@/lib/i18n/resolve-locale";
+import { LOCALE_COOKIE } from "@/lib/i18n/settings";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 import "./globals.css";
 
 const SITE_TITLE = "YEJI Picks";
@@ -35,8 +36,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookieStore = await cookies();
-  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
-  const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+  const headerStore = await headers();
+  const locale = resolveInitialLocale(
+    cookieStore.get(LOCALE_COOKIE)?.value,
+    cookieStore.get(LOCALE_MANUAL_COOKIE)?.value,
+    headerStore.get("accept-language")
+  );
   const initialUser = await getCurrentUser();
 
   return (
@@ -52,6 +57,7 @@ export default async function RootLayout({
             {children}
           </main>
           <SiteFooter />
+          <ScrollToTopButton />
           </ToastProvider>
           </FavoritesProvider>
           </AuthProvider>

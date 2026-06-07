@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { prepareImageFile } from "@/lib/prepare-image-file";
+import FileInputZone from "./FileInputZone";
 import { useToast } from "./ToastProvider";
 
 export type FeedbackCategory = "suggestion" | "same_style";
@@ -172,13 +173,11 @@ export default function FeedbackModal({
 
           <div className="block">
             <span className="text-xs text-muted">{t("feedback.imageLabel")}</span>
-            <input
+            <FileInputZone
               ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
               disabled={loading || imageProcessing}
-              onChange={(e) => handleImageSelect(e.target.files?.[0] ?? null)}
-              className="file-input-zone mt-1"
+              onChange={handleImageSelect}
+              className="mt-1"
             />
             {imageProcessing && (
               <p className="mt-1 text-xs text-muted">{t("feedback.imageProcessing")}</p>

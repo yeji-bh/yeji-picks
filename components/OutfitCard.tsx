@@ -9,7 +9,7 @@ import { COVER_ASPECT_CLASS } from "@/lib/image";
 import { formatOutfitTitle } from "@/lib/outfit";
 import FavoriteButton from "./FavoriteButton";
 import ItemTypeBadges from "./ItemTypeBadges";
-import { saveHomeScroll } from "@/lib/home-scroll";
+import { saveHomeScrollIfHome } from "@/lib/home-scroll";
 
 type OutfitCardProps = {
   id: string;
@@ -53,7 +53,7 @@ export default function OutfitCard({
   return (
     <Link
       href={`/outfit/${id}`}
-      onClick={() => saveHomeScroll(window.scrollY)}
+      onClick={() => saveHomeScrollIfHome()}
       className="group block min-w-0 overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md"
     >
       <div

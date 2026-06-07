@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 import { assetUrl } from "@/lib/asset-url";
 import { brandHref } from "@/lib/brand";
 import { ITEM_TYPES, normalizeItemType } from "@/lib/types";
-import AutoTranslate from "./AutoTranslate";
 import FavoriteButton from "./FavoriteButton";
 import ItemReport from "./ItemReport";
 
@@ -148,10 +147,7 @@ export default function ItemList({
                 <p className="mt-1 text-xs text-red-500">{t("outfit.linkDead")}</p>
               )}
               {item.notes && (
-                <AutoTranslate
-                  text={item.notes}
-                  className="mt-2 block break-words text-xs text-muted"
-                />
+                <p className="mt-2 break-words text-xs text-muted">{item.notes}</p>
               )}
               <div className="mt-2">
                 <ItemReport

@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { assetUrl } from "@/lib/asset-url";
 import { brandHref } from "@/lib/brand";
 import FavoriteButton from "./FavoriteButton";
-import { saveHomeScroll } from "@/lib/home-scroll";
+import { saveHomeScrollIfHome } from "@/lib/home-scroll";
 
 type ItemCardProps = {
   id: string;
@@ -15,8 +15,6 @@ type ItemCardProps = {
   brand: string | null;
   productName: string | null;
   useCount: number;
-  outfitId: string;
-  outfitTitle: string;
 };
 
 export default function ItemCard({
@@ -26,17 +24,14 @@ export default function ItemCard({
   brand,
   productName,
   useCount,
-  outfitTitle,
 }: ItemCardProps) {
   const { t } = useTranslation();
-  const displayTitle =
-    outfitTitle === "outfit" ? t("outfit.unnamed") : outfitTitle;
 
   return (
     <article className="group min-w-0 overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md">
       <Link
         href={`/item/${id}`}
-        onClick={() => saveHomeScroll(window.scrollY)}
+        onClick={() => saveHomeScrollIfHome()}
         className="relative block aspect-square w-full overflow-hidden bg-white"
       >
         {image ? (
@@ -62,7 +57,7 @@ export default function ItemCard({
         {productName && (
           <Link
             href={`/item/${id}`}
-            onClick={() => saveHomeScroll(window.scrollY)}
+            onClick={() => saveHomeScrollIfHome()}
             className="block break-words text-sm font-medium leading-snug text-neutral-900 line-clamp-2 hover:underline"
           >
             {productName}
@@ -79,7 +74,6 @@ export default function ItemCard({
         <p className="text-[11px] text-muted">
           {t("item.useCount", { count: useCount })}
         </p>
-        <p className="truncate text-[11px] text-neutral-400">{displayTitle}</p>
       </div>
     </article>
   );

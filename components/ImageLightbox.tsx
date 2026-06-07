@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { syncMainBounds } from "@/lib/main-bounds";
 
 export default function ImageLightbox({
   src,
@@ -20,9 +19,8 @@ export default function ImageLightbox({
   useEffect(() => {
     if (!open) return;
 
-    syncMainBounds();
-    const onResize = () => syncMainBounds();
-    window.addEventListener("resize", onResize);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -30,22 +28,16 @@ export default function ImageLightbox({
     window.addEventListener("keydown", onKey);
 
     return () => {
-      window.removeEventListener("resize", onResize);
+      document.body.style.overflow = prevOverflow;
       window.removeEventListener("keydown", onKey);
     };
   }, [open, onClose]);
 
   if (!open) return null;
 
-  const mainBoundsStyle = {
-    top: "var(--header-h, 57px)",
-    bottom: "var(--footer-h, 53px)",
-  };
-
   return (
     <div
-      className="fixed inset-x-0 z-50 cursor-pointer bg-black/75"
-      style={mainBoundsStyle}
+      className="fixed inset-0 z-50 cursor-pointer bg-black/80"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -54,16 +46,27 @@ export default function ImageLightbox({
       <button
         type="button"
         onClick={onClose}
-        className="absolute right-4 top-4 z-10 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-border bg-white text-lg leading-none text-neutral-600 shadow-md hover:bg-neutral-50 hover:text-neutral-900"
+        className="absolute right-4 top-4 z-10 cursor-pointer p-2 text-white drop-shadow-md transition-opacity hover:opacity-80"
         aria-label={t("outfit.closeZoom")}
       >
-        ×
+        <svg
+          className="h-7 w-7"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          aria-hidden
+        >
+          <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+        </svg>
       </button>
-      <div
-        className="flex h-full w-full cursor-default items-center justify-center p-4 sm:p-6"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <img src={src} alt={alt} className="lightbox-img" />
+      <div className="pointer-events-none flex h-full w-full items-center justify-center p-4 sm:p-6">
+        <img
+          src={src}
+          alt={alt}
+          className="lightbox-img pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
+        />
       </div>
     </div>
   );

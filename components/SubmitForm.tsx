@@ -12,6 +12,7 @@ import { addSubmissionId, getSubmissionIdsQuery } from "@/lib/submissions";
 import BrandAutocomplete from "./BrandAutocomplete";
 import CatalogItemPicker, { type CatalogPick } from "./CatalogItemPicker";
 import ItemTypeSelect from "./ItemTypeSelect";
+import FileInputZone from "./FileInputZone";
 import LinkedCatalogItemEditor from "./LinkedCatalogItemEditor";
 import { prepareImageFile } from "@/lib/prepare-image-file";
 import { uploadImageFile } from "@/lib/upload-client";
@@ -379,15 +380,11 @@ export default function SubmitForm() {
 
           <div className="block">
             <span className="text-xs text-muted">{t("submit.mainImage")} *</span>
-            <input
+            <FileInputZone
               ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
               disabled={submitting || imagePreparing}
-              onChange={(e) =>
-                handleMainImageSelect(e.target.files?.[0] ?? null)
-              }
-              className="file-input-zone mt-1"
+              onChange={handleMainImageSelect}
+              className="mt-1"
             />
             {imagePreparing && (
               <p className="mt-1 text-xs text-muted">{t("feedback.imageProcessing")}</p>
@@ -571,14 +568,10 @@ export default function SubmitForm() {
 
                 <label className="block">
                   <span className="text-xs text-muted">{t("submit.itemImage")}</span>
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
+                  <FileInputZone
                     disabled={submitting}
-                    onChange={(e) =>
-                      handleItemImageSelect(index, e.target.files?.[0] ?? null)
-                    }
-                    className="file-input-zone mt-1"
+                    onChange={(file) => handleItemImageSelect(index, file)}
+                    className="mt-1"
                   />
                   {(item.image || item.imagePreview) && (
                     <div className="mt-2 flex items-center gap-2">

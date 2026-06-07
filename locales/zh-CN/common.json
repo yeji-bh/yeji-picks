@@ -1,5 +1,9 @@
 {
   "siteTitle": "YEJI Picks",
+  "common": {
+    "backToTop": "返回顶部",
+    "chooseFile": "选择文件"
+  },
   "footer": {
     "disclaimer": "本站无法保证所有内容皆为完全同款，如有任何问题，请使用回报功能。"
   },
