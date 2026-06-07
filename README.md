@@ -1,1 +1,1 @@
-# yeji-outfits
+# yeji-picks
