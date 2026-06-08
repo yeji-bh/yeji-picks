@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "./AuthProvider";
 import FavoriteButton from "./FavoriteButton";
 import OutfitReport from "./OutfitReport";
+import { outfitHref } from "@/lib/entity-href";
 
 export default function OutfitDetailHeader({
   outfitId,
@@ -37,7 +38,7 @@ export default function OutfitDetailHeader({
         <div className="flex shrink-0 items-center gap-2">
           {isAdmin && (
             <Link
-              href={`/outfit/${outfitId}/edit`}
+              href={`${outfitHref({ id: outfitId, eventName: outfitTitle })}/edit`}
               className="cursor-pointer rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50 sm:text-sm"
             >
               {t("mySubmissions.edit")}

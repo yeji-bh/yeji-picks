@@ -10,6 +10,7 @@ import OutfitReviewsSection from "./OutfitReviewsSection";
 import { assetUrl } from "@/lib/asset-url";
 import { syncMainBounds } from "@/lib/main-bounds";
 import { COVER_DETAIL_CLASS } from "@/lib/image";
+import { outfitHref } from "@/lib/entity-href";
 
 type Item = {
   id: string;
@@ -64,16 +65,16 @@ export default function OutfitDetailContent({
   mainImage,
   imageAlt,
   items,
-  newerId,
-  olderId,
+  newer,
+  older,
 }: {
   outfitId: string;
   outfitTitle: string;
   mainImage: string;
   imageAlt: string;
   items: Item[];
-  newerId: string | null;
-  olderId: string | null;
+  newer: { id: string; date: string; eventName: string } | null;
+  older: { id: string; date: string; eventName: string } | null;
 }) {
   const { t } = useTranslation();
   const [zoomOpen, setZoomOpen] = useState(false);
@@ -86,17 +87,17 @@ export default function OutfitDetailContent({
 
   return (
     <>
-      {newerId && (
+      {newer && (
         <NavArrow
-          href={`/outfit/${newerId}`}
+          href={outfitHref(newer)}
           label={t("outfit.newer")}
           direction="prev"
           className="left-3 xl:left-6"
         />
       )}
-      {olderId && (
+      {older && (
         <NavArrow
-          href={`/outfit/${olderId}`}
+          href={outfitHref(older)}
           label={t("outfit.older")}
           direction="next"
           className="right-3 xl:right-6"

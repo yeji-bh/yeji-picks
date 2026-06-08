@@ -12,7 +12,8 @@ export async function GET(request: NextRequest) {
   );
 
   const sort = request.nextUrl.searchParams.get("sort");
-  const data = await getOutfitList(limit, offset, sort);
+  const withTotal = request.nextUrl.searchParams.get("withTotal") !== "0";
+  const data = await getOutfitList(limit, offset, sort, withTotal);
 
   return NextResponse.json(data, {
     headers: {

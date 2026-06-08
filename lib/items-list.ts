@@ -58,36 +58,41 @@ function prismaOrderBy(sort: ItemSort): Prisma.CatalogItemOrderByWithRelationInp
 async function queryItemList(
   limit: number,
   offset: number,
-  sort: ItemSort = DEFAULT_ITEM_SORT
+  sort: ItemSort = DEFAULT_ITEM_SORT,
+  includeTotal = true
 ): Promise<ItemListResult> {
   if (sort === "category") {
-    const [rows, total] = await Promise.all([
-      prisma.catalogItem.findMany({ select: catalogSelect }),
-      prisma.catalogItem.count(),
-    ]);
+    const rows = await prisma.catalogItem.findMany({ select: catalogSelect });
     const sorted = rows.map(toItemSummary).sort(compareItemsByCategory);
     const items = sorted.slice(offset, offset + limit);
+    const total = includeTotal ? sorted.length : offset + items.length + (items.length === limit ? 1 : 0);
     return {
       items,
       total,
-      hasMore: offset + items.length < total,
+      hasMore: offset + items.length < (includeTotal ? total : offset + items.length + (items.length === limit ? 1 : 0)),
     };
   }
 
-  const [rows, total] = await Promise.all([
-    prisma.catalogItem.findMany({
-      take: limit,
-      skip: offset,
-      orderBy:
-        sort === "newest" || sort === "oldest"
-          ? prismaOrderBy(sort)
-          : [{ useCount: "desc" }, prismaOrderBy(sort)],
-      select: catalogSelect,
-    }),
-    prisma.catalogItem.count(),
-  ]);
+  const rows = await prisma.catalogItem.findMany({
+    take: limit,
+    skip: offset,
+    orderBy:
+      sort === "newest" || sort === "oldest"
+        ? prismaOrderBy(sort)
+        : [{ useCount: "desc" }, prismaOrderBy(sort)],
+    select: catalogSelect,
+  });
 
   const items = rows.map(toItemSummary);
+  if (!includeTotal) {
+    return {
+      items,
+      total: offset + items.length + (items.length === limit ? 1 : 0),
+      hasMore: items.length === limit,
+    };
+  }
+
+  const total = await prisma.catalogItem.count();
   return {
     items,
     total,
@@ -96,7 +101,7 @@ async function queryItemList(
 }
 
 const getCachedFirstPage = unstable_cache(
-  async () => queryItemList(8, 0, DEFAULT_ITEM_SORT),
+  async () => queryItemList(8, 0, DEFAULT_ITEM_SORT, true),
   ["items-list-first-page"],
   { revalidate: 60, tags: ["outfits"] }
 );
@@ -104,11 +109,12 @@ const getCachedFirstPage = unstable_cache(
 export async function getItemList(
   limit: number,
   offset: number,
-  sort?: string | null
+  sort?: string | null,
+  includeTotal = true
 ): Promise<ItemListResult> {
   const parsedSort = parseItemSort(sort);
-  if (limit === 8 && offset === 0 && parsedSort === DEFAULT_ITEM_SORT) {
+  if (includeTotal && limit === 8 && offset === 0 && parsedSort === DEFAULT_ITEM_SORT) {
     return getCachedFirstPage();
   }
-  return queryItemList(limit, offset, parsedSort);
+  return queryItemList(limit, offset, parsedSort, includeTotal);
 }

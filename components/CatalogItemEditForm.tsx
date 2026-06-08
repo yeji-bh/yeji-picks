@@ -12,6 +12,7 @@ import { useToast } from "./ToastProvider";
 import { prepareImageFile } from "@/lib/prepare-image-file";
 import { normalizeItemType, type ItemType } from "@/lib/types";
 import { uploadImageFile } from "@/lib/upload-client";
+import { itemHref } from "@/lib/entity-href";
 
 export default function CatalogItemEditForm({ itemId }: { itemId: string }) {
   const { t } = useTranslation();
@@ -107,7 +108,7 @@ export default function CatalogItemEditForm({ itemId }: { itemId: string }) {
       if (!res.ok) throw new Error(data.error ?? t("submit.submitFail"));
 
       showToast(t("item.catalogUpdateSuccess"));
-      router.push(`/item/${itemId}`);
+      router.push(itemHref({ id: itemId, productName, brand, type }));
       router.refresh();
     } catch (err) {
       showToast(
@@ -127,7 +128,7 @@ export default function CatalogItemEditForm({ itemId }: { itemId: string }) {
     <form onSubmit={handleSubmit} className="mx-auto max-w-lg space-y-6">
       <div>
         <Link
-          href={`/item/${itemId}`}
+          href={itemHref({ id: itemId, productName, brand, type })}
           className="text-xs text-muted hover:text-neutral-900 sm:text-sm"
         >
           ← {t("item.backDetail")}

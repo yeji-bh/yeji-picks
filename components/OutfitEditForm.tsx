@@ -14,6 +14,7 @@ import FileInputZone from "./FileInputZone";
 import LinkedCatalogItemEditor from "./LinkedCatalogItemEditor";
 import { prepareImageFile } from "@/lib/prepare-image-file";
 import { uploadImageFile } from "@/lib/upload-client";
+import { outfitHref } from "@/lib/entity-href";
 import {
   normalizeItemType,
   type ItemType,
@@ -275,7 +276,7 @@ export default function OutfitEditForm({ outfitId }: { outfitId: string }) {
       if (!res.ok) throw new Error(data.error ?? t("submit.submitFail"));
 
       showToast(t("submit.updateSuccess"));
-      router.push(`/outfit/${outfitId}`);
+      router.push(outfitHref({ id: outfitId, date, eventName }));
       router.refresh();
     } catch (err) {
       showToast(

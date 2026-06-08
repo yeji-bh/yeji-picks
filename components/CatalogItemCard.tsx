@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { assetUrl } from "@/lib/asset-url";
 import { cdnImageProps } from "@/lib/remote-image";
+import { itemHref } from "@/lib/entity-href";
 import FavoriteButton from "./FavoriteButton";
 
 type CatalogItemCardProps = {
@@ -28,7 +29,7 @@ export default function CatalogItemCard({
 
   return (
     <Link
-      href={`/item/${id}`}
+      href={itemHref({ id, productName, brand, type })}
       className="group block min-w-0 overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md"
     >
       <div className="relative aspect-square w-full overflow-hidden bg-white">

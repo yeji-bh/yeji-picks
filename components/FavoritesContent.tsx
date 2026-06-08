@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { assetUrl } from "@/lib/asset-url";
 import { cdnImageProps } from "@/lib/remote-image";
+import { outfitHref } from "@/lib/entity-href";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "./AuthProvider";
@@ -163,7 +164,7 @@ export default function FavoritesContent({
                 {visibleItems.map((item) => (
                   <Link
                     key={item.id}
-                    href={`/outfit/${item.outfitId}`}
+                    href={outfitHref({ id: item.outfitId })}
                     className="flex min-w-0 cursor-pointer gap-3 rounded-xl border border-border bg-white p-3 transition-shadow hover:shadow-sm"
                   >
                     {item.image ? (

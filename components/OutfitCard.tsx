@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { assetUrl } from "@/lib/asset-url";
 import { cdnImageProps } from "@/lib/remote-image";
 import { COVER_ASPECT_CLASS } from "@/lib/image";
+import { outfitHref } from "@/lib/entity-href";
 import { formatOutfitTitle } from "@/lib/outfit";
 import FavoriteButton from "./FavoriteButton";
 import ItemTypeBadges from "./ItemTypeBadges";
@@ -53,7 +54,7 @@ export default function OutfitCard({
 
   return (
     <Link
-      href={`/outfit/${id}`}
+      href={outfitHref({ id, date, eventName })}
       onClick={() => saveHomeScrollIfHome()}
       className="group block min-w-0 overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md"
     >

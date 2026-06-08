@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { assetUrl } from "@/lib/asset-url";
 import { cdnImageProps } from "@/lib/remote-image";
 import { brandHref } from "@/lib/brand";
+import { itemHref } from "@/lib/entity-href";
 import FavoriteButton from "./FavoriteButton";
 import { saveHomeScrollIfHome } from "@/lib/home-scroll";
 
@@ -31,7 +32,7 @@ export default function ItemCard({
   return (
     <article className="group min-w-0 overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md">
       <Link
-        href={`/item/${id}`}
+        href={itemHref({ id, productName, brand, type })}
         onClick={() => saveHomeScrollIfHome()}
         className="relative block aspect-square w-full overflow-hidden bg-white"
       >
@@ -58,7 +59,7 @@ export default function ItemCard({
         <p className="text-[11px] text-muted">{t(`itemTypes.${type}`)}</p>
         {productName && (
           <Link
-            href={`/item/${id}`}
+            href={itemHref({ id, productName, brand, type })}
             onClick={() => saveHomeScrollIfHome()}
             className="block break-words text-sm font-medium leading-snug text-neutral-900 line-clamp-2 hover:underline"
           >

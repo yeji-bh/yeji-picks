@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import { outfitHref } from "@/lib/entity-href";
 
 export default function OutfitEditPageHeader({ outfitId }: { outfitId: string }) {
   const { t } = useTranslation();
@@ -9,7 +10,7 @@ export default function OutfitEditPageHeader({ outfitId }: { outfitId: string })
   return (
     <div className="mb-4 border-b border-border pb-3 sm:mb-6">
       <Link
-        href={`/outfit/${outfitId}`}
+        href={outfitHref({ id: outfitId })}
         className="cursor-pointer text-xs text-muted hover:text-neutral-900 sm:text-sm"
       >
         ← {t("outfit.backDetail")}

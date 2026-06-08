@@ -58,35 +58,38 @@ function prismaOrderBy(sort: OutfitSort): Prisma.OutfitOrderByWithRelationInput 
 async function queryOutfitList(
   limit: number,
   offset: number,
-  sort: OutfitSort = DEFAULT_OUTFIT_SORT
+  sort: OutfitSort = DEFAULT_OUTFIT_SORT,
+  includeTotal = true
 ): Promise<OutfitListResult> {
   if (sort === "category") {
-    const [rows, total] = await Promise.all([
-      prisma.outfit.findMany({ select: outfitSelect }),
-      prisma.outfit.count(),
-    ]);
-    const sorted = rows
-      .map(toOutfitSummary)
-      .sort(compareOutfitsByCategory);
+    const rows = await prisma.outfit.findMany({ select: outfitSelect });
+    const sorted = rows.map(toOutfitSummary).sort(compareOutfitsByCategory);
     const outfits = sorted.slice(offset, offset + limit);
+    const total = includeTotal ? sorted.length : offset + outfits.length + (outfits.length === limit ? 1 : 0);
     return {
       outfits,
       total,
-      hasMore: offset + outfits.length < total,
+      hasMore: offset + outfits.length < (includeTotal ? total : offset + outfits.length + (outfits.length === limit ? 1 : 0)),
     };
   }
 
-  const [rows, total] = await Promise.all([
-    prisma.outfit.findMany({
-      take: limit,
-      skip: offset,
-      orderBy: prismaOrderBy(sort),
-      select: outfitSelect,
-    }),
-    prisma.outfit.count(),
-  ]);
+  const rows = await prisma.outfit.findMany({
+    take: limit,
+    skip: offset,
+    orderBy: prismaOrderBy(sort),
+    select: outfitSelect,
+  });
 
   const outfits = rows.map(toOutfitSummary);
+  if (!includeTotal) {
+    return {
+      outfits,
+      total: offset + outfits.length + (outfits.length === limit ? 1 : 0),
+      hasMore: outfits.length === limit,
+    };
+  }
+
+  const total = await prisma.outfit.count();
   return {
     outfits,
     total,
@@ -95,7 +98,7 @@ async function queryOutfitList(
 }
 
 const getCachedFirstPage = unstable_cache(
-  async () => queryOutfitList(8, 0, DEFAULT_OUTFIT_SORT),
+  async () => queryOutfitList(8, 0, DEFAULT_OUTFIT_SORT, true),
   ["outfits-list-first-page"],
   { revalidate: 60, tags: ["outfits"] }
 );
@@ -103,11 +106,12 @@ const getCachedFirstPage = unstable_cache(
 export async function getOutfitList(
   limit: number,
   offset: number,
-  sort?: string | null
+  sort?: string | null,
+  includeTotal = true
 ): Promise<OutfitListResult> {
   const parsedSort = parseOutfitSort(sort);
-  if (limit === 8 && offset === 0 && parsedSort === DEFAULT_OUTFIT_SORT) {
+  if (includeTotal && limit === 8 && offset === 0 && parsedSort === DEFAULT_OUTFIT_SORT) {
     return getCachedFirstPage();
   }
-  return queryOutfitList(limit, offset, parsedSort);
+  return queryOutfitList(limit, offset, parsedSort, includeTotal);
 }

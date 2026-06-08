@@ -5,8 +5,7 @@ import ItemDetailOutfits from "@/components/ItemDetailOutfits";
 import ItemDupesSection from "@/components/ItemDupesSection";
 import { toDisplayItem } from "@/lib/catalog-item";
 import { prisma } from "@/lib/db";
-
-export const dynamic = "force-dynamic";
+import { extractIdFromSlugParam } from "@/lib/slug";
 
 function ItemInfoSkeleton() {
   return (
@@ -79,16 +78,17 @@ export default async function ItemDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const resolvedId = extractIdFromSlugParam(id);
 
   return (
     <div className="min-w-0">
       <Suspense fallback={<ItemInfoSkeleton />}>
-        <ItemInfoSection id={id} />
+        <ItemInfoSection id={resolvedId} />
       </Suspense>
       <Suspense fallback={<ItemOutfitsSkeleton />}>
-        <ItemOutfitsSection id={id} />
+        <ItemOutfitsSection id={resolvedId} />
       </Suspense>
-      <ItemDupesSection catalogItemId={id} />
+      <ItemDupesSection catalogItemId={resolvedId} />
     </div>
   );
 }

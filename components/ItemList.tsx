@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { assetUrl } from "@/lib/asset-url";
 import { cdnImageProps } from "@/lib/remote-image";
 import { brandHref } from "@/lib/brand";
+import { itemHref } from "@/lib/entity-href";
 import { ITEM_TYPES, normalizeItemType } from "@/lib/types";
 import FavoriteButton from "./FavoriteButton";
 import ItemReport from "./ItemReport";
@@ -70,7 +71,7 @@ export default function ItemList({
           <article key={item.id} className="detail-item-row">
             <div className="detail-item-thumb-wrap">
               <Link
-                href={`/item/${item.id}`}
+                href={itemHref({ id: item.id, productName: item.productName, brand: item.brand, type: item.type })}
                 className="detail-item-thumb block cursor-pointer transition-opacity hover:opacity-90"
               >
                 {item.image ? (
@@ -107,7 +108,7 @@ export default function ItemList({
                   )}
                   {item.productName && (
                     <Link
-                      href={`/item/${item.id}`}
+                      href={itemHref({ id: item.id, productName: item.productName, brand: item.brand, type: item.type })}
                       className="mt-1 block break-words text-sm font-medium leading-snug text-neutral-900 hover:underline sm:text-base"
                     >
                       {item.productName}
@@ -115,7 +116,7 @@ export default function ItemList({
                   )}
                   {item.useCount > 0 && (
                     <Link
-                      href={`/item/${item.id}`}
+                      href={itemHref({ id: item.id, productName: item.productName, brand: item.brand, type: item.type })}
                       className="mt-1 block text-[11px] text-muted hover:text-neutral-900 hover:underline"
                     >
                       {t("item.useCount", { count: item.useCount })}

@@ -4,10 +4,9 @@ import OutfitDetailContent from "@/components/OutfitDetailContent";
 import OutfitDetailHeader from "@/components/OutfitDetailHeader";
 import { getOutfitDisplayItems } from "@/lib/catalog-item";
 import { prisma } from "@/lib/db";
+import { extractIdFromSlugParam } from "@/lib/slug";
 import { getOutfitNeighbors } from "@/lib/outfit-nav";
 import { formatOutfitTitle } from "@/lib/outfit";
-
-export const dynamic = "force-dynamic";
 
 function OutfitHeaderSkeleton() {
   return (
@@ -63,8 +62,8 @@ async function OutfitBodySection({ id }: { id: string }) {
       mainImage={outfit.mainImage}
       imageAlt={title}
       items={items}
-      newerId={neighbors.newerId}
-      olderId={neighbors.olderId}
+      newer={neighbors.newer}
+      older={neighbors.older}
     />
   );
 }
@@ -75,14 +74,15 @@ export default async function OutfitDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const resolvedId = extractIdFromSlugParam(id);
 
   return (
     <div className="min-w-0">
       <Suspense fallback={<OutfitHeaderSkeleton />}>
-        <OutfitHeaderSection id={id} />
+        <OutfitHeaderSection id={resolvedId} />
       </Suspense>
       <Suspense fallback={<OutfitBodySkeleton />}>
-        <OutfitBodySection id={id} />
+        <OutfitBodySection id={resolvedId} />
       </Suspense>
     </div>
   );

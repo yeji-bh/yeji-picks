@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { assetUrl } from "@/lib/asset-url";
 import { brandHref } from "@/lib/brand";
+import { itemHref } from "@/lib/entity-href";
 import type { OutfitDisplayItem } from "@/lib/catalog-item";
 import { useAuth } from "./AuthProvider";
 import FavoriteButton from "./FavoriteButton";
@@ -89,7 +90,7 @@ export default function ItemDetailInfo({ item }: { item: OutfitDisplayItem }) {
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             {isAdmin && (
               <Link
-                href={`/item/${item.id}/edit`}
+                href={`${itemHref({ id: item.id, productName: item.productName, brand: item.brand, type: item.type })}/edit`}
                 className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
               >
                 {t("item.editCatalogBtn")}

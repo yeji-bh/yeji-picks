@@ -2,6 +2,12 @@ import "server-only";
 
 import { prisma } from "@/lib/db";
 
+export type OutfitNeighbor = {
+  id: string;
+  date: string;
+  eventName: string;
+};
+
 export async function getOutfitNeighbors(id: string) {
   const current = await prisma.outfit.findUnique({
     where: { id },
@@ -9,24 +15,27 @@ export async function getOutfitNeighbors(id: string) {
   });
 
   if (!current) {
-    return { newerId: null, olderId: null };
+    return { newer: null, older: null } as {
+      newer: OutfitNeighbor | null;
+      older: OutfitNeighbor | null;
+    };
   }
 
   const [newer, older] = await Promise.all([
     prisma.outfit.findFirst({
       where: { createdAt: { gt: current.createdAt } },
       orderBy: { createdAt: "asc" },
-      select: { id: true },
+      select: { id: true, date: true, eventName: true },
     }),
     prisma.outfit.findFirst({
       where: { createdAt: { lt: current.createdAt } },
       orderBy: { createdAt: "desc" },
-      select: { id: true },
+      select: { id: true, date: true, eventName: true },
     }),
   ]);
 
   return {
-    newerId: newer?.id ?? null,
-    olderId: older?.id ?? null,
+    newer: newer ?? null,
+    older: older ?? null,
   };
 }

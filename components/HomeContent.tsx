@@ -113,8 +113,9 @@ export default function HomeContent({
 
   const fetchOutfits = useCallback(
     async (offset: number, limit: number, nextSort: OutfitSort) => {
+      const withTotal = offset === 0 ? "1" : "0";
       const res = await fetch(
-        `/api/outfits/list?limit=${limit}&offset=${offset}&sort=${nextSort}`
+        `/api/outfits/list?limit=${limit}&offset=${offset}&sort=${nextSort}&withTotal=${withTotal}`
       );
       const data = await res.json();
       if (!res.ok) throw new Error();
@@ -125,8 +126,9 @@ export default function HomeContent({
 
   const fetchItems = useCallback(
     async (offset: number, limit: number, nextSort: OutfitSort) => {
+      const withTotal = offset === 0 ? "1" : "0";
       const res = await fetch(
-        `/api/items/list?limit=${limit}&offset=${offset}&sort=${nextSort}`
+        `/api/items/list?limit=${limit}&offset=${offset}&sort=${nextSort}&withTotal=${withTotal}`
       );
       const data = await res.json();
       if (!res.ok) throw new Error();
@@ -256,7 +258,7 @@ export default function HomeContent({
           setSavedLoadedCount(next.length);
           return next;
         });
-        setOutfitTotal(data.total);
+        if (data.total > 0) setOutfitTotal(data.total);
         setOutfitHasMore(data.hasMore);
       } else {
         const data = await fetchItems(items.length, HOME_PAGE_SIZE, sort);
@@ -265,7 +267,7 @@ export default function HomeContent({
           setSavedLoadedCount(next.length);
           return next;
         });
-        setItemTotal(data.total);
+        if (data.total > 0) setItemTotal(data.total);
         setItemHasMore(data.hasMore);
       }
     } catch {
@@ -365,7 +367,12 @@ export default function HomeContent({
       />
 
       {loading ? (
-        <p className="text-sm text-muted">{t("loading")}</p>
+        <div className="py-6 text-center">
+          <span className="inline-flex items-center gap-2 text-sm text-muted">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-700" aria-hidden />
+            {t("loading")}
+          </span>
+        </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-white p-8 text-center sm:p-12">
           <p className="text-sm text-muted">
@@ -407,7 +414,12 @@ export default function HomeContent({
           </div>
           {hasMore && (
             <div ref={sentinelRef} className="py-6 text-center text-xs text-muted">
-              {loadingMore ? t("loading") : t("home.loadMore")}
+              {loadingMore ? (
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-700" aria-hidden />
+                  {t("loading")}
+                </span>
+              ) : t("home.loadMore")}
             </div>
           )}
           {!hasMore && listLength > 0 && (
