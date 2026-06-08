@@ -86,51 +86,54 @@ export default function ItemDetailContent({
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="text-sm text-muted">{t(`itemTypes.${item.type}`)}</p>
-          {item.productName && (
-            <h1 className="mt-1 break-words text-lg font-semibold leading-snug text-neutral-900 sm:text-xl">
-              {item.productName}
-            </h1>
-          )}
-          {item.brand && (
-            <Link
-              href={brandHref(item.brand)}
-              className="mt-2 inline-block text-sm text-neutral-600 hover:text-neutral-900 hover:underline"
-            >
-              {item.brand}
-            </Link>
-          )}
-
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            {isAdmin && (
-              <Link
-                href={`/item/${item.id}/edit`}
-                className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
-              >
-                {t("item.editCatalogBtn")}
-              </Link>
-            )}
-            {item.officialLink && (
-              <a
-                href={item.officialLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={t("outfit.openLink")}
-                className={`rounded-full p-2 transition-colors ${
-                  item.linkStatus === "dead"
-                    ? "text-red-500 hover:bg-red-50"
-                    : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
-                }`}
-              >
-                <ExternalLinkIcon />
-              </a>
-            )}
-            <FavoriteButton
-              type="item"
-              targetId={item.id}
-              variant="inline"
-              size="lg"
-            />
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm text-muted">{t(`itemTypes.${item.type}`)}</p>
+              {item.productName && (
+                <h1 className="mt-0.5 break-words text-lg font-semibold leading-snug text-neutral-900 sm:text-xl">
+                  {item.productName}
+                </h1>
+              )}
+              {item.brand && (
+                <Link
+                  href={brandHref(item.brand)}
+                  className="mt-2 inline-block text-sm text-neutral-600 hover:text-neutral-900 hover:underline"
+                >
+                  {item.brand}
+                </Link>
+              )}
+            </div>
+            <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+              {isAdmin && (
+                <Link
+                  href={`/item/${item.id}/edit`}
+                  className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+                >
+                  {t("item.editCatalogBtn")}
+                </Link>
+              )}
+              {item.officialLink && (
+                <a
+                  href={item.officialLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={t("outfit.openLink")}
+                  className={`rounded-full p-2 transition-colors ${
+                    item.linkStatus === "dead"
+                      ? "text-red-500 hover:bg-red-50"
+                      : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+                  }`}
+                >
+                  <ExternalLinkIcon />
+                </a>
+              )}
+              <FavoriteButton
+                type="item"
+                targetId={item.id}
+                variant="inline"
+                size="lg"
+              />
+            </div>
           </div>
 
           {item.linkStatus === "dead" && item.officialLink && (

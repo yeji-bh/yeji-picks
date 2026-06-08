@@ -5,13 +5,13 @@
     "chooseFile": "选择文件"
   },
   "footer": {
-    "disclaimer": "本站无法保证所有内容皆为完全同款，如有任何问题，请使用回报功能。"
+    "disclaimer": "如发现错误或有任何建议，欢迎透过问题反馈功能与我们联系。"
   },
   "nav": {
     "submit": "投稿",
     "mySubmissions": "我的投稿",
     "review": "投稿审核",
-    "feedback": "反馈",
+    "feedback": "问题反馈",
     "favorites": "我的收藏",
     "admin": "审核",
     "language": "语言",
@@ -169,7 +169,7 @@
     }
   },
   "feedback": {
-    "title": "反馈",
+    "title": "问题反馈",
     "desc": "有任何建议或问题，欢迎告诉我们",
     "categoryLabel": "类型",
     "category": {
@@ -274,8 +274,8 @@
     "accessory": "配件"
   },
   "report": {
-    "button": "回报资讯",
-    "modalTitle": "回报资讯",
+    "button": "问题反馈",
+    "modalTitle": "问题反馈",
     "desc": "发现品牌、商品或连结有误？告诉管理员",
     "placeholder": "请描述哪里不正确...",
     "submit": "送出回报",
@@ -288,6 +288,34 @@
     "itemDesc": "发现品牌、商品或连结有误？告诉管理员",
     "targetOutfit": "回报对象：穿搭",
     "targetItem": "回报对象：单品"
+  },
+  "review": {
+    "sectionTitle": "评价",
+    "count": "共 {{count}} 条",
+    "empty": "尚无评价",
+    "loadFail": "加载失败",
+    "loadMore": "加载更多",
+    "formTitle": "撰写评价",
+    "editTitle": "编辑评价",
+    "nicknamePlaceholder": "昵称（选填，未填显示匿名）",
+    "loggedInAs": "以 {{name}} 身份评价",
+    "ratingLabel": "评分",
+    "contentPlaceholder": "分享你对这套穿搭的看法…",
+    "contentRequired": "请输入评价内容",
+    "submitBtn": "送出评价",
+    "updateBtn": "更新评价",
+    "submitting": "送出中…",
+    "submitSuccess": "评价已送出",
+    "updateSuccess": "评价已更新",
+    "submitFail": "送出失败",
+    "delete": "删除",
+    "edit": "编辑",
+    "deleteConfirm": "确定要删除此评价吗？",
+    "deleteSuccess": "评价已删除",
+    "deleteFail": "删除失败",
+    "cancelEdit": "取消",
+    "mine": "我的",
+    "anonymous": "匿名"
   },
   "admin": {
     "login": "管理员登录",

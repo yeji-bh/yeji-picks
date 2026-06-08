@@ -4,6 +4,22 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ReportTarget from "./ReportTarget";
 
+function ReportIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden
+    >
+      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+      <line x1="4" y1="22" x2="4" y2="15" />
+    </svg>
+  );
+}
+
 export default function OutfitReport({
   outfitId,
   outfitTitle,
@@ -73,9 +89,10 @@ export default function OutfitReport({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="shrink-0 cursor-pointer text-xs text-muted underline hover:text-neutral-900 sm:text-sm"
+        aria-label={t("report.button")}
+        className="shrink-0 cursor-pointer rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
       >
-        {t("report.button")}
+        <ReportIcon />
       </button>
 
       {open && (

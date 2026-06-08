@@ -21,7 +21,19 @@ export default function OutfitDetailHeader({
 
   return (
     <header className="border-b border-border pb-3">
-      <div className="mb-2 flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <h1 className="min-w-0 break-words text-base font-semibold tracking-tight text-neutral-900 sm:text-lg lg:text-xl">
+            {displayTitle}
+          </h1>
+          <FavoriteButton
+            type="outfit"
+            targetId={outfitId}
+            variant="inline"
+            size="lg"
+            className="shrink-0 bg-neutral-50"
+          />
+        </div>
         <div className="flex shrink-0 items-center gap-2">
           {isAdmin && (
             <Link
@@ -31,20 +43,6 @@ export default function OutfitDetailHeader({
               {t("mySubmissions.edit")}
             </Link>
           )}
-          <FavoriteButton
-            type="outfit"
-            targetId={outfitId}
-            variant="inline"
-            size="lg"
-            className="bg-neutral-50"
-          />
-        </div>
-      </div>
-      <div className="flex flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <h1 className="w-full min-w-0 text-base font-semibold tracking-tight text-neutral-900 sm:flex-1 sm:text-lg lg:text-xl">
-          {displayTitle}
-        </h1>
-        <div className="shrink-0 sm:ml-auto">
           <OutfitReport outfitId={outfitId} outfitTitle={outfitTitle} />
         </div>
       </div>

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ImageLightbox from "./ImageLightbox";
 import OutfitItemsSection from "./OutfitItemsSection";
+import OutfitReviewsSection from "./OutfitReviewsSection";
 import { assetUrl } from "@/lib/asset-url";
 import { syncMainBounds } from "@/lib/main-bounds";
 import { COVER_DETAIL_CLASS } from "@/lib/image";
@@ -86,8 +87,18 @@ export default function OutfitDetailContent({
 }) {
   const { t } = useTranslation();
   const [zoomOpen, setZoomOpen] = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
   const columnRef = useRef<HTMLDivElement>(null);
+  const itemsColumnRef = useRef<HTMLDivElement>(null);
+  const reviewsRef = useRef<HTMLDivElement>(null);
   const coverRef = useRef<HTMLDivElement>(null);
+  const coverStateRef = useRef({
+    mode: "static" as CoverMode,
+    height: 0,
+    left: 0,
+    top: 0,
+    width: 0,
+  });
   const [coverMode, setCoverMode] = useState<CoverMode>("static");
   const [coverFixedStyle, setCoverFixedStyle] = useState<CoverFixedStyle | null>(null);
   const [coverHeight, setCoverHeight] = useState(0);
@@ -99,57 +110,109 @@ export default function OutfitDetailContent({
   }, []);
 
   useEffect(() => {
-    const column = columnRef.current;
-    const cover = coverRef.current;
-    if (!column || !cover) return;
+    const coverEl = coverRef.current;
+    if (!coverEl) return;
 
     const mq = window.matchMedia(DESKTOP_MQ);
+    let frame = 0;
+
+    function applyCoverState(
+      mode: CoverMode,
+      fixed: CoverFixedStyle | null,
+      height: number
+    ) {
+      const prev = coverStateRef.current;
+      const nextLeft = fixed?.left ?? 0;
+      const nextTop = fixed?.top ?? 0;
+      const nextWidth = fixed?.width ?? 0;
+      if (
+        prev.mode === mode &&
+        prev.height === height &&
+        prev.left === nextLeft &&
+        prev.top === nextTop &&
+        prev.width === nextWidth
+      ) {
+        return;
+      }
+      coverStateRef.current = {
+        mode,
+        height,
+        left: nextLeft,
+        top: nextTop,
+        width: nextWidth,
+      };
+      setCoverMode(mode);
+      setCoverFixedStyle(fixed);
+      setCoverHeight(height);
+    }
 
     function updateCoverPosition() {
+      const cover = coverRef.current;
+      const column = columnRef.current;
+      const itemsColumn = itemsColumnRef.current;
+      const reviews = reviewsRef.current;
+      if (!cover || !column) return;
+
       if (!mq.matches) {
-        setCoverMode("static");
-        setCoverFixedStyle(null);
-        setCoverHeight(0);
+        applyCoverState("static", null, 0);
         return;
       }
 
-      const height = cover!.offsetHeight;
-      setCoverHeight(height);
-
-      const columnRect = column!.getBoundingClientRect();
+      const height = cover.offsetHeight;
+      const columnRect = column.getBoundingClientRect();
+      const itemsRect = itemsColumn?.getBoundingClientRect();
+      const reviewsRect = reviews?.getBoundingClientRect();
       const top = Math.max(16, (window.innerHeight - height) / 2);
       const bottomLimit = top + height;
 
+      // 單品列表或評論區進入視窗底部 — 完全停用 fixed，避免捲動回彈
+      if (
+        (itemsRect && itemsRect.bottom <= window.innerHeight + 8) ||
+        (reviewsRect && reviewsRect.top <= window.innerHeight)
+      ) {
+        applyCoverState("static", null, 0);
+        return;
+      }
+
       if (columnRect.top >= top) {
-        setCoverMode("static");
-        setCoverFixedStyle(null);
+        applyCoverState("static", null, 0);
       } else if (columnRect.bottom <= bottomLimit) {
-        setCoverMode("bottom");
-        setCoverFixedStyle(null);
+        applyCoverState("bottom", null, 0);
       } else {
-        setCoverMode("fixed");
-        setCoverFixedStyle({
+        applyCoverState("fixed", {
           left: columnRect.left,
           top,
           width: columnRect.width,
-        });
+        }, height);
       }
     }
 
-    updateCoverPosition();
-    window.addEventListener("scroll", updateCoverPosition, { passive: true });
-    window.addEventListener("resize", updateCoverPosition);
+    function scheduleUpdate() {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        updateCoverPosition();
+      });
+    }
 
-    const ro = new ResizeObserver(updateCoverPosition);
-    ro.observe(cover);
-    ro.observe(column);
+    scheduleUpdate();
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
 
-    mq.addEventListener("change", updateCoverPosition);
+    const ro = new ResizeObserver(scheduleUpdate);
+    ro.observe(coverEl);
+    const itemsColumnEl = itemsColumnRef.current;
+    const reviewsEl = reviewsRef.current;
+    if (itemsColumnEl) ro.observe(itemsColumnEl);
+    if (reviewsEl) ro.observe(reviewsEl);
+
+    mq.addEventListener("change", scheduleUpdate);
 
     return () => {
-      window.removeEventListener("scroll", updateCoverPosition);
-      window.removeEventListener("resize", updateCoverPosition);
-      mq.removeEventListener("change", updateCoverPosition);
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      mq.removeEventListener("change", scheduleUpdate);
       ro.disconnect();
     };
   }, [mainImage]);
@@ -190,9 +253,12 @@ export default function OutfitDetailContent({
         />
       )}
 
-      <div className="mt-4 grid gap-8 lg:mt-6 lg:grid-cols-[clamp(260px,24.74vw,475px)_minmax(0,1fr)] lg:justify-between lg:gap-x-12 xl:gap-x-16">
-        <div ref={columnRef} className="detail-cover-column min-h-0 w-full lg:w-auto">
-          {coverMode === "fixed" && coverHeight > 0 ? (
+      <div
+        ref={gridRef}
+        className="mt-4 grid gap-8 lg:mt-6 lg:grid-cols-[clamp(260px,24.74vw,475px)_minmax(0,1fr)] lg:items-start lg:justify-between lg:gap-x-12 xl:gap-x-16"
+      >
+        <div ref={columnRef} className="detail-cover-column min-h-0 w-full lg:w-auto lg:self-start">
+          {(coverMode === "fixed" || coverMode === "bottom") && coverHeight > 0 ? (
             <div aria-hidden className="w-full" style={{ height: coverHeight }} />
           ) : null}
           <div
@@ -218,11 +284,17 @@ export default function OutfitDetailContent({
           </div>
         </div>
 
-        <OutfitItemsSection
-          items={items}
-          outfitId={outfitId}
-          outfitTitle={outfitTitle}
-        />
+        <div ref={itemsColumnRef} className="min-w-0">
+          <OutfitItemsSection
+            items={items}
+            outfitId={outfitId}
+            outfitTitle={outfitTitle}
+          />
+        </div>
+      </div>
+
+      <div ref={reviewsRef} className="w-full">
+        <OutfitReviewsSection outfitId={outfitId} />
       </div>
 
       <ImageLightbox

@@ -112,10 +112,9 @@ img.lightbox-img {
   contain: layout paint;
 }
 
-/* 詳情頁左欄撐滿右側單品列表高度 */
+/* 詳情頁左欄封面 */
 .detail-cover-column {
   position: relative;
-  align-self: stretch;
 }
 
 .detail-cover-sticky {

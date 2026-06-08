@@ -16,9 +16,10 @@ model User {
   submissions  Submission[]
   favorites    Favorite[]
   sessions     Session[]
-  outfits      Outfit[]
-  feedback     SiteFeedback[]
-  catalogDupes CatalogDupe[]
+  outfits       Outfit[]
+  feedback      SiteFeedback[]
+  catalogDupes  CatalogDupe[]
+  outfitReviews OutfitReview[]
 
   @@map("users")
 }
@@ -69,8 +70,25 @@ model Outfit {
   user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
   outfitItems OutfitItem[]
   reports     Report[]
+  reviews     OutfitReview[]
 
   @@map("outfits")
+}
+
+model OutfitReview {
+  id        String   @id @default(cuid())
+  outfitId  String   @map("outfit_id")
+  userId    String?  @map("user_id")
+  actorKey  String   @map("actor_key")
+  nickname  String?
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  outfit    Outfit   @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([outfitId, actorKey])
+  @@map("outfit_reviews")
 }
 
 model CatalogItem {

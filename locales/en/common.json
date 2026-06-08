@@ -5,13 +5,13 @@
     "chooseFile": "Choose file"
   },
   "footer": {
-    "disclaimer": "We cannot guarantee that every item listed on this website is an exact match. If you notice any incorrect information or have any concerns, please use the report feature or send us your feedback."
+    "disclaimer": "If you find incorrect information or have any suggestions, please contact us through the Problem Report feature."
   },
   "nav": {
     "submit": "Submit",
     "mySubmissions": "My submissions",
     "review": "Review",
-    "feedback": "Feedback",
+    "feedback": "Problem Report",
     "favorites": "My favorites",
     "admin": "Review",
     "language": "Language",
@@ -169,7 +169,7 @@
     }
   },
   "feedback": {
-    "title": "Feedback",
+    "title": "Problem Report",
     "desc": "Share any suggestions or issues with us",
     "categoryLabel": "Type",
     "category": {
@@ -273,8 +273,8 @@
     "accessory": "Accessory"
   },
   "report": {
-    "button": "Report incorrect info",
-    "modalTitle": "Report incorrect info",
+    "button": "Problem Report",
+    "modalTitle": "Problem Report",
     "desc": "Found wrong brand, product or link? Let admin know",
     "placeholder": "Describe what's incorrect...",
     "submit": "Submit report",
@@ -287,6 +287,34 @@
     "itemDesc": "Found wrong brand, product or link? Let admin know",
     "targetOutfit": "Report target: outfit",
     "targetItem": "Report target: item"
+  },
+  "review": {
+    "sectionTitle": "Reviews",
+    "count": "{{count}} reviews",
+    "empty": "No reviews yet",
+    "loadFail": "Failed to load",
+    "loadMore": "Load more",
+    "formTitle": "Write a review",
+    "editTitle": "Edit your review",
+    "nicknamePlaceholder": "Nickname (optional, shown as Anonymous if empty)",
+    "loggedInAs": "Reviewing as {{name}}",
+    "ratingLabel": "Rating",
+    "contentPlaceholder": "Share your thoughts on this outfit…",
+    "contentRequired": "Please enter your review",
+    "submitBtn": "Submit review",
+    "updateBtn": "Update review",
+    "submitting": "Submitting…",
+    "submitSuccess": "Review submitted",
+    "updateSuccess": "Review updated",
+    "submitFail": "Failed to submit",
+    "delete": "Delete",
+    "edit": "Edit",
+    "deleteConfirm": "Delete this review?",
+    "deleteSuccess": "Review deleted",
+    "deleteFail": "Failed to delete",
+    "cancelEdit": "Cancel",
+    "mine": "Mine",
+    "anonymous": "Anonymous"
   },
   "admin": {
     "login": "Admin login",

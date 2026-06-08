@@ -161,6 +161,19 @@ const statements = [
     CONSTRAINT "dupe_votes_dupe_id_fkey" FOREIGN KEY ("dupe_id") REFERENCES "catalog_dupes" ("id") ON DELETE CASCADE ON UPDATE CASCADE
   )`, "dupe_votes"],
   [`CREATE UNIQUE INDEX IF NOT EXISTS "dupe_votes_dupe_voter_key" ON "dupe_votes"("dupe_id", "voter_key")`, "dupe_votes_unique"],
+  [`CREATE TABLE IF NOT EXISTS "outfit_reviews" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "outfit_id" TEXT NOT NULL,
+    "user_id" TEXT,
+    "actor_key" TEXT NOT NULL,
+    "nickname" TEXT,
+    "content" TEXT NOT NULL,
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "outfit_reviews_outfit_id_fkey" FOREIGN KEY ("outfit_id") REFERENCES "outfits" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "outfit_reviews_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+  )`, "outfit_reviews"],
+  [`CREATE UNIQUE INDEX IF NOT EXISTS "outfit_reviews_outfit_actor_key" ON "outfit_reviews"("outfit_id", "actor_key")`, "outfit_reviews_unique"],
 ];
 
 for (const [sql, label] of statements) {
@@ -379,6 +392,40 @@ if (catalogDupeCols.includes("user_id")) {
   await run(`ALTER TABLE catalog_dupes_new RENAME TO catalog_dupes`, "rename catalog_dupes");
   await run(`PRAGMA foreign_keys=ON`, "fk on catalog_dupes");
   console.log("Migrated catalog_dupes: optional user_id");
+}
+
+// outfit_reviews: drop rating column
+const reviewCols = await tableColumns("outfit_reviews");
+if (reviewCols.includes("rating")) {
+  await run(`PRAGMA foreign_keys=OFF`, "fk off outfit_reviews");
+  await run(
+    `CREATE TABLE "outfit_reviews_new" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "outfit_id" TEXT NOT NULL,
+      "user_id" TEXT,
+      "actor_key" TEXT NOT NULL,
+      "nickname" TEXT,
+      "content" TEXT NOT NULL,
+      "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updated_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "outfit_reviews_outfit_id_fkey" FOREIGN KEY ("outfit_id") REFERENCES "outfits" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+      CONSTRAINT "outfit_reviews_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    )`,
+    "outfit_reviews_new"
+  );
+  await run(
+    `INSERT INTO outfit_reviews_new (id, outfit_id, user_id, actor_key, nickname, content, created_at, updated_at)
+     SELECT id, outfit_id, user_id, actor_key, nickname, content, created_at, updated_at FROM outfit_reviews`,
+    "outfit_reviews drop rating"
+  );
+  await run(`DROP TABLE outfit_reviews`, "drop legacy outfit_reviews");
+  await run(`ALTER TABLE outfit_reviews_new RENAME TO outfit_reviews`, "rename outfit_reviews");
+  await run(
+    `CREATE UNIQUE INDEX IF NOT EXISTS "outfit_reviews_outfit_actor_key" ON "outfit_reviews"("outfit_id", "actor_key")`,
+    "outfit_reviews_unique"
+  );
+  await run(`PRAGMA foreign_keys=ON`, "fk on outfit_reviews");
+  console.log("Migrated outfit_reviews: removed rating");
 }
 
 const tables = await client.execute(
