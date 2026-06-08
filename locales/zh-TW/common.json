@@ -12,7 +12,7 @@
     "mySubmissions": "我的投稿",
     "review": "投稿審核",
     "feedback": "反饋",
-    "favorites": "收藏",
+    "favorites": "我的收藏",
     "admin": "審核",
     "language": "語言",
     "menu": "選單",
@@ -47,13 +47,11 @@
     }
   },
   "brand": {
-    "backHome": "返回首頁",
     "label": "品牌",
     "itemCount": "共 {{count}} 件單品",
     "noItems": "尚無單品資料"
   },
   "item": {
-    "backHome": "返回首頁",
     "useCount": "出現在 {{count}} 套穿搭",
     "outfitsSection": "出現過的穿搭",
     "outfitsSectionDesc": "此單品共出現在 {{count}} 套穿搭中",
@@ -72,8 +70,29 @@
     "catalogUpdateBtn": "儲存主檔",
     "catalogUpdateSuccess": "單品主檔已更新"
   },
+  "dupe": {
+    "sectionTitle": "平替推薦",
+    "sectionDesc": "粉絲分享的相似款式，僅供參考",
+    "addDupe": "推薦平替",
+    "cancelAdd": "取消",
+    "brand": "品牌",
+    "productName": "商品名稱（選填）",
+    "priceRange": "價格區間（選填）",
+    "buyLink": "購買連結",
+    "notes": "備註（選填）",
+    "submitBtn": "送出平替",
+    "submitSuccess": "平替已送出",
+    "submitFail": "送出失敗",
+    "voteFail": "投票失敗",
+    "imageRequired": "請選擇圖片",
+    "empty": "尚無平替推薦",
+    "score": "評分 {{score}}",
+    "delete": "刪除",
+    "deleteConfirm": "確定要刪除此平替推薦嗎？",
+    "deleteSuccess": "平替已刪除",
+    "deleteFail": "刪除失敗"
+  },
   "outfit": {
-    "backHome": "返回首頁",
     "backDetail": "返回詳情",
     "items": "單品",
     "noItems": "尚無單品資料",

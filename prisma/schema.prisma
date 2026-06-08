@@ -18,6 +18,7 @@ model User {
   sessions     Session[]
   outfits      Outfit[]
   feedback     SiteFeedback[]
+  catalogDupes CatalogDupe[]
 
   @@map("users")
 }
@@ -86,8 +87,39 @@ model CatalogItem {
   images        CatalogItemImage[]
   placements    OutfitItem[]
   reports       Report[]
+  dupes         CatalogDupe[]
 
   @@map("catalog_items")
+}
+
+model CatalogDupe {
+  id            String      @id @default(cuid())
+  catalogItemId String      @map("catalog_item_id")
+  userId        String?     @map("user_id")
+  image         String
+  brand         String
+  productName   String?     @map("product_name")
+  priceRange    String?     @map("price_range")
+  buyLink       String      @map("buy_link")
+  notes         String?
+  createdAt     DateTime    @default(now()) @map("created_at")
+  catalogItem   CatalogItem @relation(fields: [catalogItemId], references: [id], onDelete: Cascade)
+  user          User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  votes         DupeVote[]
+
+  @@map("catalog_dupes")
+}
+
+model DupeVote {
+  id        String      @id @default(cuid())
+  dupeId    String      @map("dupe_id")
+  voterKey  String      @map("voter_key")
+  vote      String
+  createdAt DateTime    @default(now()) @map("created_at")
+  dupe      CatalogDupe @relation(fields: [dupeId], references: [id], onDelete: Cascade)
+
+  @@unique([dupeId, voterKey])
+  @@map("dupe_votes")
 }
 
 model CatalogItemImage {

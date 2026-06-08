@@ -65,15 +65,16 @@ function imagesInRawJson(rawJson: string): string[] {
 }
 
 export async function isUploadReferenced(url: string): Promise<boolean> {
-  const [outfitCount, imageCount, feedbackCount, submissions] =
+  const [outfitCount, imageCount, feedbackCount, dupeCount, submissions] =
     await Promise.all([
       prisma.outfit.count({ where: { mainImage: url } }),
       prisma.catalogItemImage.count({ where: { url } }),
       prisma.siteFeedback.count({ where: { image: url } }),
+      prisma.catalogDupe.count({ where: { image: url } }),
       prisma.submission.findMany({ select: { rawJson: true } }),
     ]);
 
-  if (outfitCount + imageCount + feedbackCount > 0) return true;
+  if (outfitCount + imageCount + feedbackCount + dupeCount > 0) return true;
   return submissions.some((row) => imagesInRawJson(row.rawJson).includes(url));
 }
 

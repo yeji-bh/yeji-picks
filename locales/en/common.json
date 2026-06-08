@@ -12,7 +12,7 @@
     "mySubmissions": "My submissions",
     "review": "Review",
     "feedback": "Feedback",
-    "favorites": "Favorites",
+    "favorites": "My favorites",
     "admin": "Review",
     "language": "Language",
     "menu": "Menu",
@@ -47,13 +47,11 @@
     }
   },
   "brand": {
-    "backHome": "Back to home",
     "label": "Brand",
     "itemCount": "{{count}} items",
     "noItems": "No items yet"
   },
   "item": {
-    "backHome": "Back to home",
     "useCount": "Used in {{count}} outfits",
     "outfitsSection": "Outfits featuring this item",
     "outfitsSectionDesc": "This item appears in {{count}} outfits",
@@ -72,8 +70,29 @@
     "catalogUpdateBtn": "Save catalog",
     "catalogUpdateSuccess": "Catalog item updated"
   },
+  "dupe": {
+    "sectionTitle": "Dupe options",
+    "sectionDesc": "Fan-suggested alternatives for reference",
+    "addDupe": "Suggest a dupe",
+    "cancelAdd": "Cancel",
+    "brand": "Brand",
+    "productName": "Product name (optional)",
+    "priceRange": "Price range (optional)",
+    "buyLink": "Buy link",
+    "notes": "Notes (optional)",
+    "submitBtn": "Submit dupe",
+    "submitSuccess": "Dupe submitted",
+    "submitFail": "Submit failed",
+    "voteFail": "Vote failed",
+    "imageRequired": "Please choose an image",
+    "empty": "No dupes yet",
+    "score": "Score {{score}}",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this dupe suggestion?",
+    "deleteSuccess": "Dupe deleted",
+    "deleteFail": "Delete failed"
+  },
   "outfit": {
-    "backHome": "Back to home",
     "backDetail": "Back to detail",
     "items": "Items",
     "noItems": "No items yet",

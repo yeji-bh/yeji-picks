@@ -138,6 +138,29 @@ const statements = [
     "status" TEXT NOT NULL DEFAULT 'pending',
     "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`, "site_feedback"],
+  [`CREATE TABLE IF NOT EXISTS "catalog_dupes" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "catalog_item_id" TEXT NOT NULL,
+    "user_id" TEXT,
+    "image" TEXT NOT NULL,
+    "brand" TEXT NOT NULL,
+    "product_name" TEXT,
+    "price_range" TEXT,
+    "buy_link" TEXT NOT NULL,
+    "notes" TEXT,
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "catalog_dupes_catalog_item_id_fkey" FOREIGN KEY ("catalog_item_id") REFERENCES "catalog_items" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "catalog_dupes_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+  )`, "catalog_dupes"],
+  [`CREATE TABLE IF NOT EXISTS "dupe_votes" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "dupe_id" TEXT NOT NULL,
+    "voter_key" TEXT NOT NULL,
+    "vote" TEXT NOT NULL,
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "dupe_votes_dupe_id_fkey" FOREIGN KEY ("dupe_id") REFERENCES "catalog_dupes" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+  )`, "dupe_votes"],
+  [`CREATE UNIQUE INDEX IF NOT EXISTS "dupe_votes_dupe_voter_key" ON "dupe_votes"("dupe_id", "voter_key")`, "dupe_votes_unique"],
 ];
 
 for (const [sql, label] of statements) {
@@ -294,6 +317,68 @@ if (favCols2.includes("outfit_id")) {
   );
   await run(`PRAGMA foreign_keys=ON`, "fk on favorites");
   console.log("Cleaned favorites table");
+}
+
+// dupe_votes: user_id → voter_key (anonymous voting)
+const dupeVoteCols = await tableColumns("dupe_votes");
+if (dupeVoteCols.includes("user_id") && !dupeVoteCols.includes("voter_key")) {
+  await run(`PRAGMA foreign_keys=OFF`, "fk off dupe_votes");
+  await run(
+    `CREATE TABLE "dupe_votes_new" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "dupe_id" TEXT NOT NULL,
+      "voter_key" TEXT NOT NULL,
+      "vote" TEXT NOT NULL,
+      "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "dupe_votes_dupe_id_fkey" FOREIGN KEY ("dupe_id") REFERENCES "catalog_dupes" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    )`,
+    "dupe_votes_new"
+  );
+  await run(
+    `INSERT INTO dupe_votes_new (id, dupe_id, voter_key, vote, created_at)
+     SELECT id, dupe_id, 'u:' || user_id, vote, created_at FROM dupe_votes`,
+    "dupe_votes migrate voter_key"
+  );
+  await run(`DROP TABLE dupe_votes`, "drop legacy dupe_votes");
+  await run(`ALTER TABLE dupe_votes_new RENAME TO dupe_votes`, "rename dupe_votes");
+  await run(
+    `CREATE UNIQUE INDEX IF NOT EXISTS "dupe_votes_dupe_voter_key" ON "dupe_votes"("dupe_id", "voter_key")`,
+    "dupe_votes_unique"
+  );
+  await run(`PRAGMA foreign_keys=ON`, "fk on dupe_votes");
+  console.log("Migrated dupe_votes → voter_key");
+}
+
+// catalog_dupes: optional user_id for anonymous submissions
+const catalogDupeCols = await tableColumns("catalog_dupes");
+if (catalogDupeCols.includes("user_id")) {
+  await run(`PRAGMA foreign_keys=OFF`, "fk off catalog_dupes");
+  await run(
+    `CREATE TABLE "catalog_dupes_new" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "catalog_item_id" TEXT NOT NULL,
+      "user_id" TEXT,
+      "image" TEXT NOT NULL,
+      "brand" TEXT NOT NULL,
+      "product_name" TEXT,
+      "price_range" TEXT,
+      "buy_link" TEXT NOT NULL,
+      "notes" TEXT,
+      "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "catalog_dupes_catalog_item_id_fkey" FOREIGN KEY ("catalog_item_id") REFERENCES "catalog_items" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+      CONSTRAINT "catalog_dupes_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    )`,
+    "catalog_dupes_new"
+  );
+  await run(
+    `INSERT INTO catalog_dupes_new (id, catalog_item_id, user_id, image, brand, product_name, price_range, buy_link, notes, created_at)
+     SELECT id, catalog_item_id, user_id, image, brand, product_name, price_range, buy_link, notes, created_at FROM catalog_dupes`,
+    "copy catalog_dupes"
+  );
+  await run(`DROP TABLE catalog_dupes`, "drop legacy catalog_dupes");
+  await run(`ALTER TABLE catalog_dupes_new RENAME TO catalog_dupes`, "rename catalog_dupes");
+  await run(`PRAGMA foreign_keys=ON`, "fk on catalog_dupes");
+  console.log("Migrated catalog_dupes: optional user_id");
 }
 
 const tables = await client.execute(

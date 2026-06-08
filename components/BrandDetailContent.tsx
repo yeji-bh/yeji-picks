@@ -24,13 +24,6 @@ export default function BrandDetailContent({
 
   return (
     <div className="min-w-0">
-      <Link
-        href="/"
-        className="text-xs text-muted hover:text-neutral-900 sm:text-sm"
-      >
-        ← {t("brand.backHome")}
-      </Link>
-
       <header className="mt-4">
         <p className="text-sm text-muted">{t("brand.label")}</p>
         <h1 className="mt-1 text-xl font-semibold text-neutral-900 sm:text-2xl">

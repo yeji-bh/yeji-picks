@@ -22,12 +22,6 @@ export default function OutfitDetailHeader({
   return (
     <header className="border-b border-border pb-3">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <Link
-          href="/"
-          className="cursor-pointer text-xs text-muted hover:text-neutral-900 sm:text-sm"
-        >
-          ← {t("outfit.backHome")}
-        </Link>
         <div className="flex shrink-0 items-center gap-2">
           {isAdmin && (
             <Link

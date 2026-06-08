@@ -8,7 +8,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "db:push": "prisma db push",
+    "db:push": "node -e \"const u=process.env.DATABASE_URL||'';if(!u.startsWith('file:')){console.error('\\n  此專案使用 Turso（libsql://），請改用：\\n  npm run db:setup-turso\\n');process.exit(1)}\" && prisma db push",
     "db:setup-turso": "node --env-file=.env scripts/setup-turso.mjs",
     "db:migrate-catalog": "node --env-file=.env scripts/migrate-catalog-items.mjs",
     "db:restore-items": "node --env-file=.env scripts/restore-items.mjs",

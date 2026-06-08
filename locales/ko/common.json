@@ -12,7 +12,7 @@
     "mySubmissions": "내 제출",
     "review": "제출 심사",
     "feedback": "피드백",
-    "favorites": "즐겨찾기",
+    "favorites": "내 즐겨찾기",
     "admin": "심사",
     "language": "언어",
     "menu": "메뉴",
@@ -47,13 +47,11 @@
     }
   },
   "brand": {
-    "backHome": "홈으로",
     "label": "브랜드",
     "itemCount": "아이템 {{count}}개",
     "noItems": "아이템이 없습니다"
   },
   "item": {
-    "backHome": "홈으로",
     "useCount": "{{count}}개 코디에 등장",
     "outfitsSection": "이 아이템이 나온 코디",
     "outfitsSectionDesc": "이 아이템은 {{count}}개 코디에 등장합니다",
@@ -72,8 +70,29 @@
     "catalogUpdateBtn": "카탈로그 저장",
     "catalogUpdateSuccess": "카탈로그가 업데이트되었습니다"
   },
+  "dupe": {
+    "sectionTitle": "대체 추천",
+    "sectionDesc": "팬이 공유한 유사 아이템, 참고용",
+    "addDupe": "대체품 추천",
+    "cancelAdd": "취소",
+    "brand": "브랜드",
+    "productName": "상품명 (선택)",
+    "priceRange": "가격대 (선택)",
+    "buyLink": "구매 링크",
+    "notes": "메모 (선택)",
+    "submitBtn": "대체품 등록",
+    "submitSuccess": "등록되었습니다",
+    "submitFail": "등록 실패",
+    "voteFail": "투표 실패",
+    "imageRequired": "이미지를 선택해 주세요",
+    "empty": "아직 추천이 없습니다",
+    "score": "점수 {{score}}",
+    "delete": "삭제",
+    "deleteConfirm": "이 대체품 추천을 삭제할까요?",
+    "deleteSuccess": "대체품이 삭제되었습니다",
+    "deleteFail": "삭제 실패"
+  },
   "outfit": {
-    "backHome": "홈으로",
     "backDetail": "상세로 돌아가기",
     "items": "아이템",
     "noItems": "아이템이 없습니다",

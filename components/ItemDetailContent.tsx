@@ -8,6 +8,7 @@ import { brandHref } from "@/lib/brand";
 import type { OutfitDisplayItem } from "@/lib/catalog-item";
 import { useAuth } from "./AuthProvider";
 import FavoriteButton from "./FavoriteButton";
+import ItemDupesSection from "./ItemDupesSection";
 import OutfitCard from "./OutfitCard";
 
 type OutfitRef = {
@@ -45,13 +46,6 @@ export default function ItemDetailContent({
 
   return (
     <div className="min-w-0">
-      <Link
-        href="/"
-        className="text-xs text-muted hover:text-neutral-900 sm:text-sm"
-      >
-        ← {t("item.backHome")}
-      </Link>
-
       <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
         <div className="mx-auto w-full max-w-[200px] shrink-0 sm:mx-0 sm:max-w-none sm:w-[180px]">
           <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-border bg-white">
@@ -171,6 +165,8 @@ export default function ItemDetailContent({
           </div>
         )}
       </section>
+
+      <ItemDupesSection catalogItemId={item.id} />
     </div>
   );
 }

@@ -60,12 +60,6 @@ export default function AdminPanel({
           </p>
           <p className="mt-1 text-xs text-neutral-400">{t("admin.hint")}</p>
         </div>
-        {/* <Link
-          href="/"
-          className="shrink-0 text-sm text-muted hover:text-neutral-900"
-        >
-          {t("outfit.backHome")}
-        </Link> */}
       </div>
 
       <div className="-mx-1 mb-4 flex gap-2 overflow-x-auto px-1 pb-1 sm:mb-6 sm:flex-wrap sm:overflow-visible">
