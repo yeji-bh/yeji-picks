@@ -112,9 +112,10 @@ img.lightbox-img {
   contain: layout paint;
 }
 
-/* 詳情頁左欄封面 */
+/* 詳情頁左欄封面：撐滿單品列表高度，sticky 捲動時固定 */
 .detail-cover-column {
   position: relative;
+  align-self: stretch;
 }
 
 .detail-cover-sticky {
@@ -123,12 +124,10 @@ img.lightbox-img {
 
 @media (min-width: 1024px) {
   .detail-cover-sticky {
+    position: sticky;
+    top: max(1rem, calc(50dvh - clamp(173px, 16.49vw, 317px)));
     width: clamp(260px, 24.74vw, 475px);
     max-width: 100%;
-  }
-
-  .detail-cover-sticky.is-fixed {
-    z-index: 5;
   }
 }
 

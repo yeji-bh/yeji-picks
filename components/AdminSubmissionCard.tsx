@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import AdminSubmissionInlineEdit from "./AdminSubmissionInlineEdit";
+import { assetUrl } from "@/lib/asset-url";
+import { cdnImageProps } from "@/lib/remote-image";
 import { COVER_ASPECT_CLASS } from "@/lib/image";
 import { formatOutfitTitle } from "@/lib/outfit";
 import type { SubmissionPayload } from "@/lib/types";
@@ -99,11 +101,13 @@ export default function AdminSubmissionCard({
             className={`relative overflow-hidden rounded-lg bg-neutral-100 ${COVER_ASPECT_CLASS}`}
           >
             <Image
-              src={data.mainImage}
+              src={assetUrl(data.mainImage)}
               alt={displayTitle}
               fill
               className="object-cover"
               sizes="140px"
+              loading="lazy"
+              {...cdnImageProps()}
             />
           </div>
         )}

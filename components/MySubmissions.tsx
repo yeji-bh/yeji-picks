@@ -6,6 +6,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "./AuthProvider";
 import type { SubmissionRecord } from "./SubmissionsPanel";
+import { assetUrl } from "@/lib/asset-url";
+import { cdnImageProps } from "@/lib/remote-image";
 import { formatOutfitTitle } from "@/lib/outfit";
 import { clearBrowserDataAfterSync } from "@/lib/clear-browser-data";
 import {
@@ -137,11 +139,13 @@ export default function MySubmissions({
           >
             <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-neutral-100 sm:h-24 sm:w-[72px]">
               <Image
-                src={record.payload.mainImage}
+                src={assetUrl(record.payload.mainImage)}
                 alt={displayTitle}
                 fill
                 className="object-cover"
                 sizes="72px"
+                loading="lazy"
+                {...cdnImageProps()}
               />
             </div>
 

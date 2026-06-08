@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { assetUrl } from "@/lib/asset-url";
+import { cdnImageProps } from "@/lib/remote-image";
 import FavoriteButton from "./FavoriteButton";
 
 type CatalogItemCardProps = {
@@ -39,6 +40,7 @@ export default function CatalogItemCard({
             className="object-contain p-2 transition-transform duration-200 group-hover:scale-[1.02]"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             loading="lazy"
+            {...cdnImageProps()}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center px-3 text-center text-xs text-neutral-400">

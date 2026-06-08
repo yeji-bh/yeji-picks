@@ -1,3 +1,5 @@
+import { uploadPathToObjectKey } from "@/lib/upload-path";
+
 /** Optional CDN / object-storage base URL for uploaded images. */
 export function assetUrl(path: string): string {
   if (!path || path.startsWith("http") || path.startsWith("blob:")) {
@@ -5,5 +7,12 @@ export function assetUrl(path: string): string {
   }
   const base = process.env.NEXT_PUBLIC_ASSET_BASE_URL?.replace(/\/$/, "");
   if (!base) return path;
-  return `${base}${path.startsWith("/") ? path : `/${path}`}`;
+
+  const objectPath = path.startsWith("/uploads/")
+    ? uploadPathToObjectKey(path)
+    : path.startsWith("/")
+      ? path.slice(1)
+      : path;
+
+  return `${base}/${objectPath}`;
 }

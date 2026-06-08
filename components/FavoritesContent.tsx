@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { assetUrl } from "@/lib/asset-url";
+import { cdnImageProps } from "@/lib/remote-image";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "./AuthProvider";
@@ -167,12 +169,13 @@ export default function FavoritesContent({
                     {item.image ? (
                       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-white">
                         <Image
-                          src={item.image}
+                          src={assetUrl(item.image)}
                           alt={item.productName ?? item.type}
                           fill
                           className="object-contain"
                           sizes="64px"
                           loading="lazy"
+                          {...cdnImageProps()}
                         />
                       </div>
                     ) : (

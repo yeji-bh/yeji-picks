@@ -4,6 +4,11 @@ import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
 import { compressImageBuffer, type ImageKind } from "@/lib/image-compress";
+import {
+  isObjectStorageConfigured,
+  putUploadObject,
+} from "@/lib/object-storage";
+import { objectKeyToUploadPath } from "@/lib/upload-path";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 const ALLOWED_TYPES = new Set([
@@ -25,13 +30,16 @@ export async function saveUploadedFile(
     throw new Error("圖片大小不可超過 10MB");
   }
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
-
   const raw = Buffer.from(await file.arrayBuffer());
   const compressed = await compressImageBuffer(raw, kind);
   const filename = `${randomUUID()}.webp`;
 
-  await writeFile(path.join(UPLOAD_DIR, filename), compressed);
+  if (isObjectStorageConfigured()) {
+    await putUploadObject(compressed, filename);
+  } else {
+    await mkdir(UPLOAD_DIR, { recursive: true });
+    await writeFile(path.join(UPLOAD_DIR, filename), compressed);
+  }
 
-  return `/uploads/${filename}`;
+  return objectKeyToUploadPath(filename);
 }

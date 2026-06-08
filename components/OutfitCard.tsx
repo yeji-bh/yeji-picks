@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { assetUrl } from "@/lib/asset-url";
+import { cdnImageProps } from "@/lib/remote-image";
 import { COVER_ASPECT_CLASS } from "@/lib/image";
 import { formatOutfitTitle } from "@/lib/outfit";
 import FavoriteButton from "./FavoriteButton";
@@ -60,15 +61,19 @@ export default function OutfitCard({
         ref={imageRef}
         className={`relative w-full overflow-hidden bg-neutral-100 ${COVER_ASPECT_CLASS}`}
       >
-        {inView ? (
+        {!inView ? (
+          <div className="absolute inset-0 animate-pulse bg-neutral-200" aria-hidden />
+        ) : (
           <Image
             src={assetUrl(mainImage)}
             alt={displayTitle}
             fill
             className="object-cover transition-transform duration-200 group-hover:scale-[1.02]"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            loading="lazy"
+            {...cdnImageProps()}
           />
-        ) : null}
+        )}
         <div className="absolute right-2 top-2">
           <FavoriteButton type="outfit" targetId={id} />
         </div>

@@ -3,15 +3,16 @@ import "server-only";
 import { unlink } from "fs/promises";
 import path from "path";
 import { prisma } from "@/lib/db";
+import {
+  deleteUploadObject,
+  isObjectStorageConfigured,
+} from "@/lib/object-storage";
 import type { SubmissionPayload } from "@/lib/types";
+import { isManagedUpload, UPLOAD_PREFIX } from "@/lib/upload-path";
 
-const UPLOAD_PREFIX = "/uploads/";
+export { isManagedUpload as isLocalUpload };
 
-export function isLocalUpload(url: string | null | undefined): url is string {
-  return typeof url === "string" && url.startsWith(UPLOAD_PREFIX);
-}
-
-function uploadFilePath(url: string): string {
+function localUploadFilePath(url: string): string {
   return path.join(process.cwd(), "public", url.replace(/^\//, ""));
 }
 
@@ -20,11 +21,11 @@ export function collectPayloadImages(payload: {
   items?: { image?: string | null; images?: string[] | null }[];
 }): Set<string> {
   const urls = new Set<string>();
-  if (isLocalUpload(payload.mainImage)) urls.add(payload.mainImage);
+  if (isManagedUpload(payload.mainImage)) urls.add(payload.mainImage);
   for (const item of payload.items ?? []) {
-    if (isLocalUpload(item.image)) urls.add(item.image);
+    if (isManagedUpload(item.image)) urls.add(item.image);
     for (const url of item.images ?? []) {
-      if (isLocalUpload(url)) urls.add(url);
+      if (isManagedUpload(url)) urls.add(url);
     }
   }
   return urls;
@@ -47,10 +48,10 @@ export async function collectOutfitImages(outfitId: string): Promise<string[]> {
   if (!outfit) return [];
 
   const urls: string[] = [];
-  if (isLocalUpload(outfit.mainImage)) urls.push(outfit.mainImage);
+  if (isManagedUpload(outfit.mainImage)) urls.push(outfit.mainImage);
   for (const row of outfit.outfitItems) {
     for (const img of row.catalogItem.images) {
-      if (isLocalUpload(img.url)) urls.push(img.url);
+      if (isManagedUpload(img.url)) urls.push(img.url);
     }
   }
   return urls;
@@ -78,28 +79,37 @@ export async function isUploadReferenced(url: string): Promise<boolean> {
   return submissions.some((row) => imagesInRawJson(row.rawJson).includes(url));
 }
 
+async function removeUploadFile(url: string): Promise<void> {
+  if (isObjectStorageConfigured()) {
+    await deleteUploadObject(url);
+    return;
+  }
+  await unlink(localUploadFilePath(url));
+}
+
 export async function deleteUploadIfOrphaned(url: string): Promise<void> {
-  if (!isLocalUpload(url)) return;
+  if (!isManagedUpload(url)) return;
   if (await isUploadReferenced(url)) return;
 
   try {
-    await unlink(uploadFilePath(url));
+    await removeUploadFile(url);
   } catch (err) {
     const code = (err as NodeJS.ErrnoException).code;
-    if (code !== "ENOENT") {
-      console.error("[delete-upload] failed:", url, err);
-    }
+    const status = (err as { $metadata?: { httpStatusCode?: number } })
+      .$metadata?.httpStatusCode;
+    if (code === "ENOENT" || status === 404) return;
+    console.error("[delete-upload] failed:", url, err);
   }
 }
 
-/** Delete local uploads that were removed between previous and next image sets. */
+/** Delete uploads that were removed between previous and next image sets. */
 export async function cleanupReplacedUploads(
   previousUrls: Iterable<string>,
   nextUrls: Set<string>
 ): Promise<void> {
   const seen = new Set<string>();
   for (const url of previousUrls) {
-    if (!isLocalUpload(url) || nextUrls.has(url) || seen.has(url)) continue;
+    if (!isManagedUpload(url) || nextUrls.has(url) || seen.has(url)) continue;
     seen.add(url);
     await deleteUploadIfOrphaned(url);
   }
@@ -111,8 +121,10 @@ export async function cleanupRemovedCatalogImages(
 ): Promise<void> {
   const seen = new Set<string>();
   for (const url of urls) {
-    if (!isLocalUpload(url) || seen.has(url)) continue;
+    if (!isManagedUpload(url) || seen.has(url)) continue;
     seen.add(url);
     await deleteUploadIfOrphaned(url);
   }
 }
+
+export { UPLOAD_PREFIX };

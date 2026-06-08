@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { assetUrl } from "@/lib/asset-url";
+import { cdnImageProps } from "@/lib/remote-image";
 import { brandHref } from "@/lib/brand";
 import { ITEM_TYPES, normalizeItemType } from "@/lib/types";
 import FavoriteButton from "./FavoriteButton";
@@ -80,6 +81,7 @@ export default function ItemList({
                     className="object-contain"
                     sizes="(max-width: 1024px) 100px, 230px"
                     loading="lazy"
+                    {...cdnImageProps()}
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center px-2 text-center text-[10px] leading-tight text-neutral-400">
