@@ -33,6 +33,7 @@ export default function ItemCard({
     <article className="group min-w-0 overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md">
       <Link
         href={itemHref({ id, productName, brand, type })}
+        prefetch={false}
         onClick={() => saveHomeScrollIfHome()}
         className="relative block aspect-square w-full overflow-hidden bg-white"
       >
@@ -60,6 +61,7 @@ export default function ItemCard({
         {productName && (
           <Link
             href={itemHref({ id, productName, brand, type })}
+            prefetch={false}
             onClick={() => saveHomeScrollIfHome()}
             className="block break-words text-sm font-medium leading-snug text-neutral-900 line-clamp-2 hover:underline"
           >
@@ -69,6 +71,7 @@ export default function ItemCard({
         {brand && (
           <Link
             href={brandHref(brand)}
+            prefetch={false}
             className="block truncate text-xs text-neutral-600 hover:text-neutral-900 hover:underline"
           >
             {brand}

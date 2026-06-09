@@ -103,7 +103,7 @@ async function queryItemList(
 const getCachedFirstPage = unstable_cache(
   async () => queryItemList(8, 0, DEFAULT_ITEM_SORT, true),
   ["items-list-first-page"],
-  { revalidate: 60, tags: ["outfits"] }
+  { revalidate: 60, tags: ["items"] }
 );
 
 export async function getItemList(

@@ -3,7 +3,8 @@ import type { NextConfig } from "next";
 function assetRemotePatterns(): NonNullable<
   NextConfig["images"]
 >["remotePatterns"] {
-  const base = process.env.NEXT_PUBLIC_ASSET_BASE_URL;
+  const base =
+    process.env.ASSET_BASE_URL || process.env.NEXT_PUBLIC_ASSET_BASE_URL;
   if (!base) return [];
   try {
     const url = new URL(base);

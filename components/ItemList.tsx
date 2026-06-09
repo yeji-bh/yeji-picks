@@ -72,6 +72,7 @@ export default function ItemList({
             <div className="detail-item-thumb-wrap">
               <Link
                 href={itemHref({ id: item.id, productName: item.productName, brand: item.brand, type: item.type })}
+                prefetch={false}
                 className="detail-item-thumb block cursor-pointer transition-opacity hover:opacity-90"
               >
                 {item.image ? (
@@ -101,6 +102,7 @@ export default function ItemList({
                   {item.brand && (
                     <Link
                       href={brandHref(item.brand)}
+                      prefetch={false}
                       className="mt-1.5 block text-xs text-neutral-600 hover:text-neutral-900 hover:underline sm:text-sm"
                     >
                       {item.brand}
@@ -109,6 +111,7 @@ export default function ItemList({
                   {item.productName && (
                     <Link
                       href={itemHref({ id: item.id, productName: item.productName, brand: item.brand, type: item.type })}
+                      prefetch={false}
                       className="mt-1 block break-words text-sm font-medium leading-snug text-neutral-900 hover:underline sm:text-base"
                     >
                       {item.productName}
@@ -117,6 +120,7 @@ export default function ItemList({
                   {item.useCount > 0 && (
                     <Link
                       href={itemHref({ id: item.id, productName: item.productName, brand: item.brand, type: item.type })}
+                      prefetch={false}
                       className="mt-1 block text-[11px] text-muted hover:text-neutral-900 hover:underline"
                     >
                       {t("item.useCount", { count: item.useCount })}

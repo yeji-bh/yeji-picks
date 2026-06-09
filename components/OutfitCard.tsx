@@ -55,6 +55,7 @@ export default function OutfitCard({
   return (
     <Link
       href={outfitHref({ id, date, eventName })}
+      prefetch={false}
       onClick={() => saveHomeScrollIfHome()}
       className="group block min-w-0 overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md"
     >

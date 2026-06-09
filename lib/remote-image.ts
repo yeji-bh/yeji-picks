@@ -1,6 +1,8 @@
+import { hasAssetBaseUrl } from "@/lib/asset-base";
+
 /** R2/CDN images are already WebP — skip Next.js optimizer round-trip. */
 export function useCdnDirectImages(): boolean {
-  return !!process.env.NEXT_PUBLIC_ASSET_BASE_URL;
+  return hasAssetBaseUrl();
 }
 
 export function cdnImageProps(): { unoptimized?: true } {

@@ -232,14 +232,16 @@ export default function HomeContent({
 
     const restore = () => window.scrollTo(0, y);
     restore();
-    const timers = [50, 150, 350, 600].map((ms) =>
-      setTimeout(() => {
-        restore();
-        if (ms === 600) clearHomeScroll();
-      }, ms)
-    );
+    const raf = requestAnimationFrame(restore);
+    const timer = setTimeout(() => {
+      restore();
+      clearHomeScroll();
+    }, 200);
 
-    return () => timers.forEach(clearTimeout);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
+    };
   }, [pageReady, outfits.length, items.length, typeFilter, query]);
 
   const hasMore = viewMode === "outfit" ? outfitHasMore : itemHasMore;

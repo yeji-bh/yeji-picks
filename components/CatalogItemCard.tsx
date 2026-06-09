@@ -30,6 +30,7 @@ export default function CatalogItemCard({
   return (
     <Link
       href={itemHref({ id, productName, brand, type })}
+      prefetch={false}
       className="group block min-w-0 overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md"
     >
       <div className="relative aspect-square w-full overflow-hidden bg-white">

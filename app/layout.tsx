@@ -14,6 +14,7 @@ import {
 } from "@/lib/i18n/resolve-locale";
 import { LOCALE_COOKIE } from "@/lib/i18n/settings";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
+import { getAssetBaseUrl } from "@/lib/asset-base";
 import "./globals.css";
 
 const SITE_TITLE = "YEJI Picks";
@@ -22,6 +23,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: SITE_TITLE,
     description: "YEJI Picks — outfits & favorites",
+    icons: {
+      icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    },
   };
 }
 
@@ -43,9 +47,19 @@ export default async function RootLayout({
     headerStore.get("accept-language")
   );
   const initialUser = await getCurrentUser();
+  const assetBase = getAssetBaseUrl();
 
   return (
     <html lang={locale}>
+      <head>
+        {assetBase ? (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.__ASSET_BASE__=${JSON.stringify(assetBase)}`,
+            }}
+          />
+        ) : null}
+      </head>
       <body className="flex min-h-dvh flex-col">
         <I18nProvider initialLocale={locale}>
           <AuthProvider initialUser={initialUser}>
