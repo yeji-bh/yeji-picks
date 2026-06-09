@@ -30,6 +30,9 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 86400,
   },
+  env: {
+    NEXT_PUBLIC_ASSET_BASE_URL: "https://pub-fc029cff34fc46ae89e5263ee0ea8417.r2.dev",
+  }
 };
 
 export default nextConfig;

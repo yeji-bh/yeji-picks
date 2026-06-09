@@ -16,5 +16,8 @@
       "binding": "WORKER_SELF_REFERENCE",
       "service": "yeji-picks"
     }
-  ]
+  ],
+  "vars": {
+    "NEXT_PUBLIC_ASSET_BASE_URL": "https://pub-fc029cff34fc46ae89e5263ee0ea8417.r2.dev"
+  }
 }
