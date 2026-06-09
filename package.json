@@ -9,7 +9,7 @@
     "cf:build": "opennextjs-cloudflare build",
     "cf:deploy": "opennextjs-cloudflare deploy",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "deploy": "opennextjs-cloudflare build",
     "start": "next start",
     "lint": "next lint",
     "db:push": "node -e \"const u=process.env.DATABASE_URL||'';if(!u.startsWith('file:')){console.error('\\n  此專案使用 Turso（libsql://），請改用：\\n  npm run db:setup-turso\\n');process.exit(1)}\" && prisma db push",
