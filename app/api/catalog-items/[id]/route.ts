@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { syncCatalogImages, toDisplayItem } from "@/lib/catalog-item";
 import { isAdminUser } from "@/lib/auth";
 import { resolveCanonicalBrand } from "@/lib/brand-db";
-import { cleanupRemovedCatalogImages } from "@/lib/delete-upload";
 import { prisma } from "@/lib/db";
 import { formatOutfitTitle } from "@/lib/outfit";
 import { normalizeItemType } from "@/lib/types";
@@ -101,6 +100,7 @@ export async function PATCH(
       }
     });
 
+    const { cleanupRemovedCatalogImages } = await import("@/lib/delete-upload");
     await cleanupRemovedCatalogImages(removedCatalogImages);
 
     const updated = await prisma.catalogItem.findUnique({

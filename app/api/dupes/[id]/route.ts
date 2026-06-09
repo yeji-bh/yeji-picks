@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, isAdminUser } from "@/lib/auth";
 import { deleteCatalogDupe, listCatalogDupes } from "@/lib/catalog-dupe";
 import { resolveVoterKey } from "@/lib/dupe-actor";
-import { deleteUploadIfOrphaned } from "@/lib/delete-upload";
 
 export async function DELETE(
   request: NextRequest,
@@ -20,6 +19,7 @@ export async function DELETE(
       return NextResponse.json({ error: "找不到平替" }, { status: 404 });
     }
 
+    const { deleteUploadIfOrphaned } = await import("@/lib/delete-upload");
     await deleteUploadIfOrphaned(removed.image);
 
     const user = await getCurrentUser();

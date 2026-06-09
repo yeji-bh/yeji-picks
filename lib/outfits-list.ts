@@ -1,6 +1,5 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { toOutfitSummary } from "@/lib/outfit-summary";
@@ -97,12 +96,6 @@ async function queryOutfitList(
   };
 }
 
-const getCachedFirstPage = unstable_cache(
-  async () => queryOutfitList(8, 0, DEFAULT_OUTFIT_SORT, true),
-  ["outfits-list-first-page"],
-  { revalidate: 60, tags: ["outfits"] }
-);
-
 export async function getOutfitList(
   limit: number,
   offset: number,
@@ -110,8 +103,5 @@ export async function getOutfitList(
   includeTotal = true
 ): Promise<OutfitListResult> {
   const parsedSort = parseOutfitSort(sort);
-  if (includeTotal && limit === 8 && offset === 0 && parsedSort === DEFAULT_OUTFIT_SORT) {
-    return getCachedFirstPage();
-  }
   return queryOutfitList(limit, offset, parsedSort, includeTotal);
 }

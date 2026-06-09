@@ -1,6 +1,5 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { toItemSummary } from "@/lib/item-summary";
@@ -100,12 +99,6 @@ async function queryItemList(
   };
 }
 
-const getCachedFirstPage = unstable_cache(
-  async () => queryItemList(8, 0, DEFAULT_ITEM_SORT, true),
-  ["items-list-first-page"],
-  { revalidate: 60, tags: ["items"] }
-);
-
 export async function getItemList(
   limit: number,
   offset: number,
@@ -113,8 +106,5 @@ export async function getItemList(
   includeTotal = true
 ): Promise<ItemListResult> {
   const parsedSort = parseItemSort(sort);
-  if (includeTotal && limit === 8 && offset === 0 && parsedSort === DEFAULT_ITEM_SORT) {
-    return getCachedFirstPage();
-  }
   return queryItemList(limit, offset, parsedSort, includeTotal);
 }

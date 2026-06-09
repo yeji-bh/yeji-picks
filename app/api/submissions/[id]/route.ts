@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { recalcUseCounts, syncOutfitCatalogItems } from "@/lib/catalog-item";
-import {
-  cleanupRemovedCatalogImages,
-  cleanupReplacedUploads,
-  collectOutfitImages,
-  collectPayloadImages,
-  deleteUploadIfOrphaned,
-} from "@/lib/delete-upload";
 import { revalidateOutfitCaches } from "@/lib/revalidate-outfits";
 import { prisma } from "@/lib/db";
 import { validateSubmissionPayload } from "@/lib/submission";
@@ -97,6 +90,13 @@ export async function PATCH(
     const nextStatus =
       submission.status === "rejected" ? "pending" : submission.status;
 
+    const {
+      cleanupRemovedCatalogImages,
+      cleanupReplacedUploads,
+      collectOutfitImages,
+      collectPayloadImages,
+    } = await import("@/lib/delete-upload");
+
     const previousPayload = JSON.parse(
       submission.rawJson
     ) as SubmissionPayload;
@@ -178,6 +178,12 @@ export async function DELETE(
     if (!canManageSubmission(submission, user, localIds)) {
       return NextResponse.json({ error: "無權限" }, { status: 403 });
     }
+
+    const {
+      collectOutfitImages,
+      collectPayloadImages,
+      deleteUploadIfOrphaned,
+    } = await import("@/lib/delete-upload");
 
     const outfitId = submission.outfitId;
     const imagesToMaybeDelete: string[] = [];

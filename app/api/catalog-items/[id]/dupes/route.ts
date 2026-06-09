@@ -4,7 +4,6 @@ import { listCatalogDupes } from "@/lib/catalog-dupe";
 import { moderateText } from "@/lib/content-moderation";
 import { resolveVoterKey } from "@/lib/dupe-actor";
 import { prisma } from "@/lib/db";
-import { saveUploadedFile } from "@/lib/upload";
 
 export async function GET(
   request: NextRequest,
@@ -80,6 +79,7 @@ export async function POST(
       }
     }
 
+    const { saveUploadedFile } = await import("@/lib/upload");
     const imageUrl = await saveUploadedFile(imageFile, "item");
 
     const created = await prisma.catalogDupe.create({

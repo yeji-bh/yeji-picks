@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminUser } from "@/lib/auth";
 import { getOutfitDisplayItems, syncOutfitCatalogItems } from "@/lib/catalog-item";
-import {
-  cleanupRemovedCatalogImages,
-  cleanupReplacedUploads,
-  collectOutfitImages,
-  collectPayloadImages,
-} from "@/lib/delete-upload";
 import { prisma } from "@/lib/db";
 import { revalidateOutfitCaches } from "@/lib/revalidate-outfits";
 import { validateSubmissionPayload } from "@/lib/submission";
@@ -65,6 +59,13 @@ export async function PATCH(
     if (!outfit) {
       return NextResponse.json({ error: "找不到穿搭" }, { status: 404 });
     }
+
+    const {
+      cleanupRemovedCatalogImages,
+      cleanupReplacedUploads,
+      collectOutfitImages,
+      collectPayloadImages,
+    } = await import("@/lib/delete-upload");
 
     const previousImages = await collectOutfitImages(id);
     const nextImages = collectPayloadImages(payload);
