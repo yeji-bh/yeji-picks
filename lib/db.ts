@@ -1,15 +1,15 @@
 import "server-only";
 
 import { PrismaClient } from "@prisma/client";
-import { PrismaLibSQL } from "@prisma/adapter-libsql";
+import { PrismaLibSQL as PrismaLibSQLNode } from "@prisma/adapter-libsql";
+import { PrismaLibSQL as PrismaLibSQLWeb } from "@prisma/adapter-libsql/web";
 
 function createPrismaClient() {
-  const adapter = new PrismaLibSQL({
-    url: process.env.DATABASE_URL ?? "file:./local.db",
-    authToken: process.env.TURSO_AUTH_TOKEN,
-  });
+  const url = process.env.DATABASE_URL ?? "file:./local.db";
+  const config = { url, authToken: process.env.TURSO_AUTH_TOKEN };
 
-  return new PrismaClient({ adapter });
+  const Adapter = url.startsWith("file:") ? PrismaLibSQLNode : PrismaLibSQLWeb;
+  return new PrismaClient({ adapter: new Adapter(config) });
 }
 
 type PrismaClientSingleton = ReturnType<typeof createPrismaClient>;

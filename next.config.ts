@@ -16,7 +16,10 @@ function assetRemotePatterns(): NonNullable<
 
 const nextConfig: NextConfig = {
   serverExternalPackages: [
+    "@libsql/isomorphic-ws",
     "@libsql/client",
+    "@prisma/client",
+    ".prisma/client",
     "@prisma/adapter-libsql",
     "libsql",
   ],
