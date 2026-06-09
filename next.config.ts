@@ -19,8 +19,6 @@ const nextConfig: NextConfig = {
     "@libsql/client",
     "@prisma/adapter-libsql",
     "libsql",
-    "@imgly/background-removal-node",
-    "onnxruntime-node",
   ],
   allowedDevOrigins: ["192.168.100.187"],
   images: {

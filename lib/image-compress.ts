@@ -1,7 +1,6 @@
 import "server-only";
 
 import sharp from "sharp";
-import { maybeRemoveItemBackground } from "@/lib/item-background";
 
 const COVER_MAX = 1200;
 const ITEM_MAX = 800;
@@ -34,11 +33,8 @@ export async function compressImageBuffer(
 ): Promise<Buffer> {
   const { maxEdge, quality } = compressOptions(kind);
 
-  const source =
-    kind === "item" ? await maybeRemoveItemBackground(buffer) : buffer;
-
   try {
-    const image = sharp(source, { failOn: "error" }).rotate();
+    const image = sharp(buffer, { failOn: "error" }).rotate();
 
     const metadata = await image.metadata();
     if (!metadata.width || !metadata.height) {
