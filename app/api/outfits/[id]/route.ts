@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminUser } from "@/lib/auth";
 import { getOutfitDisplayItems, syncOutfitCatalogItems } from "@/lib/catalog-item";
+import { PUBLIC_API_CACHE } from "@/lib/cache-config";
 import { prisma } from "@/lib/db";
 import { revalidateOutfitCaches } from "@/lib/revalidate-outfits";
 import { validateSubmissionPayload } from "@/lib/submission";
@@ -18,23 +19,26 @@ export async function GET(
 
   const items = await getOutfitDisplayItems(id);
 
-  return NextResponse.json({
-    id: outfit.id,
-    eventName: outfit.eventName,
-    date: outfit.date,
-    mainImage: outfit.mainImage,
-    items: items.map((item) => ({
-      catalogItemId: item.id,
-      type: item.type,
-      brand: item.brand ?? "",
-      productName: item.productName ?? "",
-      image: item.image ?? "",
-      images: item.images,
-      officialLink: item.officialLink ?? "",
-      notes: item.notes ?? "",
-      useCount: item.useCount,
-    })),
-  });
+  return NextResponse.json(
+    {
+      id: outfit.id,
+      eventName: outfit.eventName,
+      date: outfit.date,
+      mainImage: outfit.mainImage,
+      items: items.map((item) => ({
+        catalogItemId: item.id,
+        type: item.type,
+        brand: item.brand ?? "",
+        productName: item.productName ?? "",
+        image: item.image ?? "",
+        images: item.images,
+        officialLink: item.officialLink ?? "",
+        notes: item.notes ?? "",
+        useCount: item.useCount,
+      })),
+    },
+    { headers: { "Cache-Control": PUBLIC_API_CACHE } }
+  );
 }
 
 export async function PATCH(

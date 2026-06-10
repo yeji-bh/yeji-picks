@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import type { Prisma } from "@prisma/client";
 import { resolveCanonicalBrand } from "@/lib/brand-db";
 import { catalogFingerprint } from "@/lib/catalog-fingerprint";
@@ -225,16 +226,16 @@ export async function syncOutfitCatalogItems(
   return removedImageUrls;
 }
 
-export async function getOutfitDisplayItems(
-  outfitId: string
-): Promise<OutfitDisplayItem[]> {
-  const rows = await prisma.outfitItem.findMany({
-    where: { outfitId },
-    include: { catalogItem: { include: catalogInclude } },
-  });
+export const getOutfitDisplayItems = cache(
+  async (outfitId: string): Promise<OutfitDisplayItem[]> => {
+    const rows = await prisma.outfitItem.findMany({
+      where: { outfitId },
+      include: { catalogItem: { include: catalogInclude } },
+    });
 
-  return rows.map((row) => toDisplayItem(row.catalogItem));
-}
+    return rows.map((row) => toDisplayItem(row.catalogItem));
+  }
+);
 
 export async function searchCatalogItems(query: string, limit = 12) {
   const q = query.trim();

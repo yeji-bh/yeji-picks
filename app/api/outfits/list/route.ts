@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { PUBLIC_LIST_CACHE } from "@/lib/cache-config";
 import { getOutfitList } from "@/lib/outfits-list";
 
 export async function GET(request: NextRequest) {
@@ -19,8 +20,8 @@ export async function GET(request: NextRequest) {
     headers: {
       "Cache-Control":
         limit === 8 && offset === 0
-          ? "public, s-maxage=60, stale-while-revalidate=120"
-          : "private, max-age=30, stale-while-revalidate=60",
+          ? PUBLIC_LIST_CACHE
+          : "private, max-age=60, stale-while-revalidate=300",
     },
   });
 }

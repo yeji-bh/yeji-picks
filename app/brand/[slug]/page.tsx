@@ -3,8 +3,14 @@ import BrandDetailContent from "@/components/BrandDetailContent";
 import { parseBrandSlug } from "@/lib/brand";
 import { findCatalogItemsByBrandKey, getCanonicalBrandName } from "@/lib/brand-db";
 import { primaryImage } from "@/lib/catalog-item";
+import { listBrandStaticParams } from "@/lib/static-params";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  return listBrandStaticParams();
+}
 
 export default async function BrandDetailPage({
   params,

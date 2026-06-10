@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useState,
 } from "react";
 
@@ -37,7 +38,7 @@ export default function AuthProvider({
   initialUser?: AuthUser | null;
 }) {
   const [user, setUser] = useState<AuthUser | null>(initialUser);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
     try {
@@ -50,6 +51,10 @@ export default function AuthProvider({
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
   return (
     <AuthContext.Provider value={{ user, loading, refresh }}>

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { cookies, headers } from "next/headers";
 import AuthProvider from "@/components/AuthProvider";
 import FavoritesProvider from "@/components/FavoritesProvider";
 import DocumentTitle from "@/components/DocumentTitle";
@@ -7,12 +6,7 @@ import ToastProvider from "@/components/ToastProvider";
 import HeaderNav from "@/components/HeaderNav";
 import I18nProvider from "@/components/I18nProvider";
 import SiteFooter from "@/components/SiteFooter";
-import { getCurrentUser } from "@/lib/auth";
-import {
-  LOCALE_MANUAL_COOKIE,
-  resolveInitialLocale,
-} from "@/lib/i18n/resolve-locale";
-import { LOCALE_COOKIE } from "@/lib/i18n/settings";
+import { DEFAULT_LOCALE } from "@/lib/i18n/settings";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { getAssetBaseUrl } from "@/lib/asset-base";
 import "./globals.css";
@@ -34,23 +28,15 @@ export const viewport = {
   initialScale: 1,
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const headerStore = await headers();
-  const locale = resolveInitialLocale(
-    cookieStore.get(LOCALE_COOKIE)?.value,
-    cookieStore.get(LOCALE_MANUAL_COOKIE)?.value,
-    headerStore.get("accept-language")
-  );
-  const initialUser = await getCurrentUser();
   const assetBase = getAssetBaseUrl();
 
   return (
-    <html lang={locale}>
+    <html lang={DEFAULT_LOCALE}>
       <head>
         {assetBase ? (
           <script
@@ -61,8 +47,8 @@ export default async function RootLayout({
         ) : null}
       </head>
       <body className="flex min-h-dvh flex-col">
-        <I18nProvider initialLocale={locale}>
-          <AuthProvider initialUser={initialUser}>
+        <I18nProvider initialLocale={DEFAULT_LOCALE}>
+          <AuthProvider>
           <FavoritesProvider>
           <DocumentTitle />
           <ToastProvider>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { syncCatalogImages, toDisplayItem } from "@/lib/catalog-item";
 import { isAdminUser } from "@/lib/auth";
 import { resolveCanonicalBrand } from "@/lib/brand-db";
+import { PUBLIC_API_CACHE } from "@/lib/cache-config";
 import { prisma } from "@/lib/db";
 import { formatOutfitTitle } from "@/lib/outfit";
 import { normalizeItemType } from "@/lib/types";
@@ -39,15 +40,18 @@ export async function GET(
 
   const display = toDisplayItem(item);
 
-  return NextResponse.json({
-    ...display,
-    outfits: item.placements.map((row) => ({
-      id: row.outfit.id,
-      mainImage: row.outfit.mainImage,
-      title: formatOutfitTitle(row.outfit.date, row.outfit.eventName),
-      date: row.outfit.date,
-    })),
-  });
+  return NextResponse.json(
+    {
+      ...display,
+      outfits: item.placements.map((row) => ({
+        id: row.outfit.id,
+        mainImage: row.outfit.mainImage,
+        title: formatOutfitTitle(row.outfit.date, row.outfit.eventName),
+        date: row.outfit.date,
+      })),
+    },
+    { headers: { "Cache-Control": PUBLIC_API_CACHE } }
+  );
 }
 
 export async function PATCH(
