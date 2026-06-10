@@ -1,6 +1,5 @@
 import "server-only";
 
-import { unlink } from "fs/promises";
 import path from "path";
 import { prisma } from "@/lib/db";
 import {
@@ -84,6 +83,7 @@ async function removeUploadFile(url: string): Promise<void> {
     await deleteUploadObject(url);
     return;
   }
+  const { unlink } = await import("fs/promises");
   await unlink(localUploadFilePath(url));
 }
 

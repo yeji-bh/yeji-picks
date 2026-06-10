@@ -55,8 +55,9 @@ export default function ItemDupesSection({
       const res = await fetch(`/api/catalog-items/${catalogItemId}/dupes`, {
         headers: dupeGuestHeaders(),
       });
-      const data = await res.json();
-      if (res.ok) setDupes(data.dupes ?? []);
+      if (!res.ok) return;
+      const data = (await res.json()) as { dupes?: DupeSummary[] };
+      setDupes(data.dupes ?? []);
     } catch {
       /* ignore */
     } finally {

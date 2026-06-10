@@ -9,17 +9,22 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const user = await getCurrentUser();
-  const voterKey = resolveVoterKey(request, user?.id);
+  try {
+    const { id } = await params;
+    const user = await getCurrentUser();
+    const voterKey = resolveVoterKey(request, user?.id);
 
-  const item = await prisma.catalogItem.findUnique({ where: { id } });
-  if (!item) {
-    return NextResponse.json({ error: "找不到單品" }, { status: 404 });
+    const item = await prisma.catalogItem.findUnique({ where: { id } });
+    if (!item) {
+      return NextResponse.json({ error: "找不到單品" }, { status: 404 });
+    }
+
+    const dupes = await listCatalogDupes(id, voterKey);
+    return NextResponse.json({ dupes });
+  } catch (err) {
+    console.error("[dupes GET]", err);
+    return NextResponse.json({ error: "載入失敗" }, { status: 500 });
   }
-
-  const dupes = await listCatalogDupes(id, voterKey);
-  return NextResponse.json({ dupes });
 }
 
 export async function POST(

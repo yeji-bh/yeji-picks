@@ -21,14 +21,18 @@ export async function getOutfitNeighbors(id: string) {
     };
   }
 
+  return getOutfitNeighborsByCreatedAt(current.createdAt);
+}
+
+export async function getOutfitNeighborsByCreatedAt(createdAt: Date) {
   const [newer, older] = await Promise.all([
     prisma.outfit.findFirst({
-      where: { createdAt: { gt: current.createdAt } },
+      where: { createdAt: { gt: createdAt } },
       orderBy: { createdAt: "asc" },
       select: { id: true, date: true, eventName: true },
     }),
     prisma.outfit.findFirst({
-      where: { createdAt: { lt: current.createdAt } },
+      where: { createdAt: { lt: createdAt } },
       orderBy: { createdAt: "desc" },
       select: { id: true, date: true, eventName: true },
     }),

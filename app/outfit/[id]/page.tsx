@@ -3,9 +3,9 @@ import { Suspense } from "react";
 import OutfitDetailContent from "@/components/OutfitDetailContent";
 import OutfitDetailHeader from "@/components/OutfitDetailHeader";
 import { getOutfitDisplayItems } from "@/lib/catalog-item";
-import { prisma } from "@/lib/db";
+import { getOutfitRecord } from "@/lib/outfit-cache";
 import { extractIdFromSlugParam } from "@/lib/slug";
-import { getOutfitNeighbors } from "@/lib/outfit-nav";
+import { getOutfitNeighborsByCreatedAt } from "@/lib/outfit-nav";
 import { formatOutfitTitle } from "@/lib/outfit";
 
 function OutfitHeaderSkeleton() {
@@ -37,7 +37,7 @@ function OutfitBodySkeleton() {
 }
 
 async function OutfitHeaderSection({ id }: { id: string }) {
-  const outfit = await prisma.outfit.findUnique({ where: { id } });
+  const outfit = await getOutfitRecord(id);
   if (!outfit) notFound();
 
   const title = formatOutfitTitle(outfit.date, outfit.eventName);
@@ -45,13 +45,13 @@ async function OutfitHeaderSection({ id }: { id: string }) {
 }
 
 async function OutfitBodySection({ id }: { id: string }) {
-  const [outfit, neighbors, items] = await Promise.all([
-    prisma.outfit.findUnique({ where: { id } }),
-    getOutfitNeighbors(id),
+  const outfit = await getOutfitRecord(id);
+  if (!outfit) notFound();
+
+  const [neighbors, items] = await Promise.all([
+    getOutfitNeighborsByCreatedAt(outfit.createdAt),
     getOutfitDisplayItems(id),
   ]);
-
-  if (!outfit) notFound();
 
   const title = formatOutfitTitle(outfit.date, outfit.eventName);
 
