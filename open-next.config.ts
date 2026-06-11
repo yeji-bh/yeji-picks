@@ -6,5 +6,4 @@ import staticAssetsIncrementalCache from "@opennextjs/cloudflare/overrides/incre
 // configuring R2 incremental cache + DO queue — that causes Worker 1101 crashes.
 export default defineCloudflareConfig({
   incrementalCache: staticAssetsIncrementalCache,
-  enableCacheInterception: true,
 });

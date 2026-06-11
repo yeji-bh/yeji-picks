@@ -11,47 +11,52 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
+  try {
+    const { id } = await params;
 
-  const item = await prisma.catalogItem.findUnique({
-    where: { id },
-    include: {
-      images: { orderBy: { sortOrder: "asc" } },
-      placements: {
-        include: {
-          outfit: {
-            select: {
-              id: true,
-              mainImage: true,
-              eventName: true,
-              date: true,
-              createdAt: true,
+    const item = await prisma.catalogItem.findUnique({
+      where: { id },
+      include: {
+        images: { orderBy: { sortOrder: "asc" } },
+        placements: {
+          include: {
+            outfit: {
+              select: {
+                id: true,
+                mainImage: true,
+                eventName: true,
+                date: true,
+              },
             },
           },
+          orderBy: { outfit: { date: "desc" } },
         },
-        orderBy: { outfit: { date: "desc" } },
       },
-    },
-  });
+    });
 
-  if (!item) {
-    return NextResponse.json({ error: "找不到單品" }, { status: 404 });
+    if (!item) {
+      return NextResponse.json({ error: "找不到單品" }, { status: 404 });
+    }
+
+    const display = toDisplayItem(item);
+
+    return NextResponse.json(
+      {
+        ...display,
+        outfits: item.placements.map((row) => ({
+          id: row.outfit.id,
+          mainImage: row.outfit.mainImage,
+          eventName: row.outfit.eventName,
+          title: formatOutfitTitle(row.outfit.date, row.outfit.eventName),
+          date: row.outfit.date,
+        })),
+      },
+      { headers: { "Cache-Control": PUBLIC_API_CACHE } }
+    );
+  } catch (err) {
+    console.error("[catalog-item GET]", err);
+    return NextResponse.json({ error: "載入失敗" }, { status: 500 });
   }
-
-  const display = toDisplayItem(item);
-
-  return NextResponse.json(
-    {
-      ...display,
-      outfits: item.placements.map((row) => ({
-        id: row.outfit.id,
-        mainImage: row.outfit.mainImage,
-        title: formatOutfitTitle(row.outfit.date, row.outfit.eventName),
-        date: row.outfit.date,
-      })),
-    },
-    { headers: { "Cache-Control": PUBLIC_API_CACHE } }
-  );
 }
 
 export async function PATCH(

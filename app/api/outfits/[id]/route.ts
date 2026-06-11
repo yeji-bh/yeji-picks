@@ -3,6 +3,7 @@ import { isAdminUser } from "@/lib/auth";
 import { getOutfitDisplayItems, syncOutfitCatalogItems } from "@/lib/catalog-item";
 import { PUBLIC_API_CACHE } from "@/lib/cache-config";
 import { prisma } from "@/lib/db";
+import { getOutfitNeighborsByCreatedAt } from "@/lib/outfit-nav";
 import { revalidateOutfitCaches } from "@/lib/revalidate-outfits";
 import { validateSubmissionPayload } from "@/lib/submission";
 
@@ -10,35 +11,46 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
+  try {
+    const { id } = await params;
 
-  const outfit = await prisma.outfit.findUnique({ where: { id } });
-  if (!outfit) {
-    return NextResponse.json({ error: "找不到穿搭" }, { status: 404 });
+    const outfit = await prisma.outfit.findUnique({ where: { id } });
+    if (!outfit) {
+      return NextResponse.json({ error: "找不到穿搭" }, { status: 404 });
+    }
+
+    const [items, neighbors] = await Promise.all([
+      getOutfitDisplayItems(id),
+      getOutfitNeighborsByCreatedAt(outfit.createdAt),
+    ]);
+
+    return NextResponse.json(
+      {
+        id: outfit.id,
+        eventName: outfit.eventName,
+        date: outfit.date,
+        mainImage: outfit.mainImage,
+        newer: neighbors.newer,
+        older: neighbors.older,
+        items: items.map((item) => ({
+          id: item.id,
+          type: item.type,
+          brand: item.brand,
+          productName: item.productName,
+          image: item.image,
+          images: item.images,
+          officialLink: item.officialLink,
+          notes: item.notes,
+          linkStatus: item.linkStatus,
+          useCount: item.useCount,
+        })),
+      },
+      { headers: { "Cache-Control": PUBLIC_API_CACHE } }
+    );
+  } catch (err) {
+    console.error("[outfit GET]", err);
+    return NextResponse.json({ error: "載入失敗" }, { status: 500 });
   }
-
-  const items = await getOutfitDisplayItems(id);
-
-  return NextResponse.json(
-    {
-      id: outfit.id,
-      eventName: outfit.eventName,
-      date: outfit.date,
-      mainImage: outfit.mainImage,
-      items: items.map((item) => ({
-        catalogItemId: item.id,
-        type: item.type,
-        brand: item.brand ?? "",
-        productName: item.productName ?? "",
-        image: item.image ?? "",
-        images: item.images,
-        officialLink: item.officialLink ?? "",
-        notes: item.notes ?? "",
-        useCount: item.useCount,
-      })),
-    },
-    { headers: { "Cache-Control": PUBLIC_API_CACHE } }
-  );
 }
 
 export async function PATCH(

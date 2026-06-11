@@ -36,7 +36,7 @@ export default function RootLayout({
   const assetBase = getAssetBaseUrl();
 
   return (
-    <html lang={DEFAULT_LOCALE}>
+    <html lang={DEFAULT_LOCALE} suppressHydrationWarning>
       <head>
         {assetBase ? (
           <script
