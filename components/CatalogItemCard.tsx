@@ -31,15 +31,15 @@ export default function CatalogItemCard({
     <Link
       href={itemHref({ id, productName, brand, type })}
       prefetch={false}
-      className="group block min-w-0 overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md"
+      className="group block min-w-0 overflow-hidden rounded-xl bg-white shadow-[0_4px_24px_rgba(0,0,0,0.12)] transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(0,0,0,0.16)]"
     >
-      <div className="relative aspect-square w-full overflow-hidden bg-white">
+      <div className="relative aspect-square w-full overflow-hidden rounded-t-xl bg-white">
         {image ? (
           <Image
             src={assetUrl(image)}
             alt={productName ?? t(`itemTypes.${type}`)}
             fill
-            className="object-contain p-2 transition-transform duration-200 group-hover:scale-[1.02]"
+            className="object-contain p-2"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             loading="lazy"
             {...cdnImageProps()}
@@ -49,11 +49,11 @@ export default function CatalogItemCard({
             {t(`itemTypes.${type}`)}
           </div>
         )}
-        <div className="absolute right-2 top-2">
+        <div className="absolute right-2.5 top-2.5">
           <FavoriteButton type="item" targetId={id} />
         </div>
       </div>
-      <div className="space-y-1 p-2.5 sm:p-3">
+      <div className="space-y-1 px-3.5 pb-3.5 pt-3 sm:px-4">
         <p className="text-[11px] text-muted">{t(`itemTypes.${type}`)}</p>
         {productName && (
           <p className="break-words text-sm font-medium leading-snug text-neutral-900 line-clamp-2">

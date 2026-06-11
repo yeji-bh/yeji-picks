@@ -53,39 +53,46 @@ export default function OutfitCard({
   }, []);
 
   return (
-    <Link
-      href={outfitHref({ id, date, eventName })}
-      prefetch={false}
-      onClick={() => saveHomeScrollIfHome()}
-      className="group block min-w-0 overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md"
-    >
-      <div
-        ref={imageRef}
-        className={`relative w-full overflow-hidden bg-neutral-100 ${COVER_ASPECT_CLASS}`}
+    <article className="group min-w-0">
+      <Link
+        href={outfitHref({ id, date, eventName })}
+        prefetch={false}
+        onClick={() => saveHomeScrollIfHome()}
+        className="block"
       >
-        {!inView ? (
-          <div className="absolute inset-0 animate-pulse bg-neutral-200" aria-hidden />
-        ) : (
-          <Image
-            src={assetUrl(mainImage)}
-            alt={displayTitle}
-            fill
-            className="object-cover transition-transform duration-200 group-hover:scale-[1.02]"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            loading="lazy"
-            {...cdnImageProps()}
-          />
-        )}
-        <div className="absolute right-2 top-2">
-          <FavoriteButton type="outfit" targetId={id} />
+        <div
+          ref={imageRef}
+          className={`relative w-full overflow-hidden bg-neutral-100 ${COVER_ASPECT_CLASS}`}
+        >
+          {!inView ? (
+            <div className="absolute inset-0 animate-pulse bg-neutral-200" aria-hidden />
+          ) : (
+            <Image
+              src={assetUrl(mainImage)}
+              alt={displayTitle}
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              loading="lazy"
+              {...cdnImageProps()}
+            />
+          )}
         </div>
-      </div>
-      <div className="space-y-1.5 p-2.5 sm:p-3">
-        <p className="break-words text-sm font-medium text-neutral-900 line-clamp-2">
-          {displayTitle}
-        </p>
+      </Link>
+      <div className="mt-2.5 space-y-1.5">
+        <div className="flex items-start justify-between gap-2">
+          <Link
+            href={outfitHref({ id, date, eventName })}
+            prefetch={false}
+            onClick={() => saveHomeScrollIfHome()}
+            className="min-w-0 flex-1 break-words text-base font-semibold leading-snug text-neutral-900 line-clamp-2 hover:underline sm:text-[17px]"
+          >
+            {displayTitle}
+          </Link>
+          <FavoriteButton type="outfit" targetId={id} variant="inline" size="md" />
+        </div>
         <ItemTypeBadges types={itemTypes} />
       </div>
-    </Link>
+    </article>
   );
 }

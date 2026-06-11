@@ -6,6 +6,7 @@ import { useAuth } from "./AuthProvider";
 import { useToast } from "./ToastProvider";
 import type { OutfitReviewSummary } from "@/lib/outfit-review-types";
 import { dupeGuestHeaders } from "@/lib/dupe-guest-id";
+import { formatReviewTime } from "@/lib/review-time";
 
 const PAGE_SIZE = 3;
 const MAX_CONTENT = 100;
@@ -216,92 +217,142 @@ export default function OutfitReviewsSection({
   const showForm = !mine || editingId != null;
 
   return (
-    <section className="mt-8 w-full border-t border-border pt-5">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <div>
-          <h2 className="text-base font-semibold text-neutral-900 sm:text-lg">
-            {t("review.sectionTitle")}
-          </h2>
-          {total > 0 ? (
-            <p className="mt-1 text-sm text-muted">
-              {t("review.count", { count: total })}
-            </p>
-          ) : null}
-        </div>
+    <section className="mt-10 w-full">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-lg font-bold text-neutral-900">
+          {t("review.sectionTitle")}
+        </h2>
+        <span className="text-sm text-neutral-400">
+          {t("review.count", { count: total })}
+        </span>
       </div>
 
+      {showForm ? (
+        <form onSubmit={handleSubmit} className="mt-5">
+          {!user ? (
+            <input
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              placeholder={t("review.nicknamePlaceholder")}
+              maxLength={32}
+              className="mb-3 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm outline-none focus:border-neutral-400"
+            />
+          ) : (
+            <p className="mb-3 text-xs text-neutral-400">
+              {t("review.loggedInAs", { name: user.account })}
+            </p>
+          )}
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={5}
+            maxLength={MAX_CONTENT}
+            required
+            placeholder={t("review.contentPlaceholder")}
+            className="w-full resize-none rounded-lg border border-border bg-white px-4 py-3 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-neutral-400"
+          />
+          <div className="mt-2 flex items-center justify-between gap-3">
+            <span className="text-xs text-neutral-400">
+              {content.length}/{MAX_CONTENT}
+            </span>
+            <div className="flex items-center gap-2">
+              {editingId ? (
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  disabled={submitting}
+                  className="cursor-pointer rounded-lg border border-border px-4 py-2 text-sm text-neutral-700 disabled:opacity-50"
+                >
+                  {t("review.cancelEdit")}
+                </button>
+              ) : null}
+              <button
+                type="submit"
+                disabled={submitting}
+                className="cursor-pointer rounded-lg bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+              >
+                {submitting
+                  ? t("review.submitting")
+                  : editingId
+                    ? t("review.updateBtn")
+                    : t("review.submitBtn")}
+              </button>
+            </div>
+          </div>
+        </form>
+      ) : null}
+
       {loading ? (
-        <p className="mt-4 text-sm text-muted">{t("loading")}</p>
+        <p className="mt-6 text-sm text-neutral-400">{t("loading")}</p>
       ) : loadError ? (
-        <p className="mt-4 text-sm text-red-600">{loadError}</p>
+        <p className="mt-6 text-sm text-red-600">{loadError}</p>
       ) : total === 0 ? (
-        <p className="mt-4 text-sm text-muted">{t("review.empty")}</p>
+        <p className="mt-6 text-sm text-neutral-400">{t("review.empty")}</p>
       ) : (
         <>
-          <ul className="mt-4 space-y-3">
+          <ul className="mt-8 space-y-7">
             {displayReviews.map((review) => (
-              <li
-                key={review.id}
-                className={`rounded-xl border bg-white p-3 sm:p-4 ${
-                  review.isMine ? "border-neutral-300" : "border-border"
-                }`}
-              >
-                <div className="flex flex-wrap items-start justify-between gap-2">
+              <li key={review.id} className="space-y-2">
+                <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-medium text-neutral-900">
-                        {review.isAnonymous
-                          ? t("review.anonymous")
-                          : review.authorName}
+                    <span className="text-sm font-semibold text-neutral-900">
+                      {review.isAnonymous
+                        ? t("review.anonymous")
+                        : review.authorName}
+                    </span>
+                    {review.isMine ? (
+                      <span className="ml-2 text-xs text-neutral-400">
+                        {t("review.mine")}
                       </span>
-                      {review.isMine ? (
-                        <span className="rounded-full bg-neutral-100 px-2 py-px text-[10px] text-muted">
-                          {t("review.mine")}
-                        </span>
-                      ) : null}
-                    </div>
+                    ) : null}
                   </div>
-                  {review.canEdit || review.canDelete ? (
-                    <div className="flex shrink-0 items-center gap-2">
-                      {review.canEdit ? (
-                        <button
-                          type="button"
-                          onClick={() => startEdit(review)}
-                          className="cursor-pointer text-xs text-neutral-600 hover:text-neutral-900 hover:underline"
-                        >
-                          {t("review.edit")}
-                        </button>
-                      ) : null}
-                      {review.canDelete ? (
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(review.id)}
-                          className="cursor-pointer text-xs text-red-600 hover:underline"
-                        >
-                          {t("review.delete")}
-                        </button>
-                      ) : null}
-                    </div>
-                  ) : null}
+                  <time
+                    dateTime={review.createdAt}
+                    className="shrink-0 text-xs text-neutral-400"
+                  >
+                    {formatReviewTime(review.createdAt, t)}
+                  </time>
                 </div>
-                <p className="mt-2 break-words text-sm text-neutral-700">
+                <p className="break-words text-sm leading-relaxed text-neutral-800">
                   {review.content}
                 </p>
+                {review.canEdit || review.canDelete ? (
+                  <div className="flex items-center gap-3 pt-0.5">
+                    {review.canEdit ? (
+                      <button
+                        type="button"
+                        onClick={() => startEdit(review)}
+                        className="cursor-pointer text-xs text-neutral-500 hover:text-neutral-900 hover:underline"
+                      >
+                        {t("review.edit")}
+                      </button>
+                    ) : null}
+                    {review.canDelete ? (
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(review.id)}
+                        className="cursor-pointer text-xs text-neutral-500 hover:text-red-600 hover:underline"
+                      >
+                        {t("review.delete")}
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>
           {hasMore ? (
             <div
               ref={sentinelRef}
-              className="mt-4 flex flex-col items-center gap-2 py-2"
+              className="mt-6 flex flex-col items-center gap-2 py-2"
             >
               {loadingMore ? (
-                <p className="text-xs text-muted">{t("loading")}</p>
+                <p className="text-xs text-neutral-400">{t("loading")}</p>
               ) : (
                 <button
                   type="button"
                   onClick={() => void loadMore()}
-                  className="cursor-pointer text-xs text-neutral-600 underline-offset-2 hover:text-neutral-900 hover:underline"
+                  className="cursor-pointer text-xs text-neutral-500 underline-offset-2 hover:text-neutral-900 hover:underline"
                 >
                   {t("review.loadMore")}
                 </button>
@@ -310,67 +361,6 @@ export default function OutfitReviewsSection({
           ) : null}
         </>
       )}
-
-      {showForm ? (
-        <form
-          onSubmit={handleSubmit}
-          className="mt-5 space-y-3 rounded-xl border border-border bg-neutral-50/50 p-4"
-        >
-          <h3 className="text-sm font-medium text-neutral-900">
-            {editingId ? t("review.editTitle") : t("review.formTitle")}
-          </h3>
-          {!user ? (
-            <input
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              placeholder={t("review.nicknamePlaceholder")}
-              maxLength={32}
-              className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm"
-            />
-          ) : (
-            <p className="text-xs text-muted">
-              {t("review.loggedInAs", { name: user.account })}
-            </p>
-          )}
-          <div>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={3}
-              maxLength={MAX_CONTENT}
-              required
-              placeholder={t("review.contentPlaceholder")}
-              className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm"
-            />
-            <p className="mt-1 text-right text-[11px] text-muted">
-              {content.length}/{MAX_CONTENT}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            {editingId ? (
-              <button
-                type="button"
-                onClick={resetForm}
-                disabled={submitting}
-                className="flex-1 rounded-lg border border-border bg-white px-4 py-2.5 text-sm text-neutral-700 disabled:opacity-50"
-              >
-                {t("review.cancelEdit")}
-              </button>
-            ) : null}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex-1 rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
-            >
-              {submitting
-                ? t("review.submitting")
-                : editingId
-                  ? t("review.updateBtn")
-                  : t("review.submitBtn")}
-            </button>
-          </div>
-        </form>
-      ) : null}
     </section>
   );
 }

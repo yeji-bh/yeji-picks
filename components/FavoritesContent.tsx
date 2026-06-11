@@ -129,7 +129,7 @@ export default function FavoritesContent({
               <h2 className="mb-3 text-sm font-medium text-neutral-700">
                 {t("favorites.outfitsSection")}
               </h2>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4">
                 {visibleOutfits.map((outfit) => (
                   <OutfitCard
                     key={outfit.id}
@@ -165,10 +165,10 @@ export default function FavoritesContent({
                   <Link
                     key={item.id}
                     href={outfitHref({ id: item.outfitId })}
-                    className="flex min-w-0 cursor-pointer gap-3 rounded-xl border border-border bg-white p-3 transition-shadow hover:shadow-sm"
+                    className="flex min-w-0 cursor-pointer gap-3 rounded-none border border-border bg-white p-3 transition-shadow hover:shadow-sm"
                   >
                     {item.image ? (
-                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-white">
+                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-none bg-white">
                         <Image
                           src={assetUrl(item.image)}
                           alt={item.productName ?? item.type}
@@ -180,7 +180,7 @@ export default function FavoritesContent({
                         />
                       </div>
                     ) : (
-                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md bg-neutral-100 text-xs text-muted">
+                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-none bg-neutral-100 text-xs text-muted">
                         {t(`itemTypes.${normalizeItemType(item.type)}`)}
                       </div>
                     )}

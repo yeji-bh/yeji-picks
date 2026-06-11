@@ -4,9 +4,6 @@
     "backToTop": "맨 위로",
     "chooseFile": "파일 선택"
   },
-  "footer": {
-    "disclaimer": "정보 오류나 제안 사항이 있으시면 문제 신고 기능을 통해 연락해 주세요."
-  },
   "nav": {
     "submit": "제출",
     "mySubmissions": "내 제출",
@@ -27,15 +24,13 @@
     "noItemsHint": "심사 통과한 코디 아이템이 여기에 표시됩니다",
     "allItemsLoaded": "전체 아이템 불러옴",
     "noOutfits": "의상이 없습니다",
-    "noOutfitsHint": "제출 후 심사 통과 시 여기에 표시됩니다",
     "filterAll": "전체",
-    "filterLabel": "카테고리",
-    "filterSub": "세부",
-    "filterClear": "필터 초기화",
+    "filterGroupAll": "전체 {{group}}",
     "searchPlaceholder": "행사, 브랜드, 상품 검색...",
     "loadMore": "스크롤하여 더 불러오기",
-    "allLoaded": "전체 코디 불러옴",
     "sortLabel": "정렬",
+    "outfitResultCount": "코디 {{count}}개",
+    "itemResultCount": "아이템 {{count}}개",
     "sort": {
       "newest": "추가일 (최신순)",
       "oldest": "추가일 (오래된순)",
@@ -231,7 +226,6 @@
   "itemTypeGroups": {
     "hat": "모자",
     "top": "상의",
-    "onepiece": "원피스·점프수트",
     "bottom": "하의",
     "shoes": "신발",
     "bag": "가방",
@@ -251,7 +245,6 @@
     "top_jacket": "자켓",
     "top_sleeveless": "민소매/조끼",
     "top_other": "기타 상의",
-    "onepiece": "원피스·점프수트",
     "bottom_pants": "긴바지",
     "bottom_shorts": "반바지",
     "bottom_skirt": "스커트",
@@ -299,7 +292,11 @@
     "nicknamePlaceholder": "닉네임 (선택, 비우면 익명)",
     "loggedInAs": "{{name}}으로 리뷰 작성",
     "ratingLabel": "평점",
-    "contentPlaceholder": "이 코디에 대한 생각을 남겨주세요…",
+    "contentPlaceholder": "리뷰 작성",
+    "timeJustNow": "방금",
+    "timeMinutes": "{{count}}분 전",
+    "timeHours": "{{count}}시간 전",
+    "timeDays": "{{count}}일 전",
     "contentRequired": "리뷰 내용을 입력해 주세요",
     "submitBtn": "리뷰 등록",
     "updateBtn": "리뷰 수정",

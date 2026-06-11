@@ -8,12 +8,14 @@ export default function FavoriteButton({
   targetId,
   className = "",
   variant = "overlay",
+  overlayTone = "light",
   size = "md",
 }: {
   type: "outfit" | "item";
   targetId: string;
   className?: string;
-  variant?: "overlay" | "inline";
+  variant?: "overlay" | "inline" | "plain";
+  overlayTone?: "light" | "muted";
   size?: "sm" | "md" | "lg";
 }) {
   const { t } = useTranslation();
@@ -35,39 +37,55 @@ export default function FavoriteButton({
   const paddingClass =
     size === "lg" ? "p-2.5" : size === "sm" ? "p-1" : "p-1.5";
   const inlineIconClass =
-    size === "lg" ? "h-5 w-5" : size === "sm" ? "h-3.5 w-3.5" : "h-4 w-4";
+    size === "lg" ? "h-6 w-6" : size === "sm" ? "h-[18px] w-[18px]" : "h-5 w-5";
 
   const overlayClass =
-    "rounded-full bg-white/90 p-1.5 shadow-sm backdrop-blur-sm transition-colors hover:bg-white";
+    overlayTone === "muted"
+      ? "rounded-full bg-[#E8E8E8] p-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.1)] transition-colors hover:bg-white"
+      : "rounded-full bg-white p-1.5 shadow-[0_2px_10px_rgba(0,0,0,0.14)] transition-colors hover:bg-white";
   const inlineClass = `rounded-full ${paddingClass} transition-colors ${
     active
-      ? "text-red-500 hover:bg-red-50"
+      ? "text-neutral-900 hover:bg-neutral-100"
+      : "text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+  }`;
+  const plainClass = `shrink-0 rounded-full p-2 transition-colors ${
+    active
+      ? "text-neutral-900 hover:bg-neutral-100"
       : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
   }`;
+
+  const variantClass =
+    variant === "plain"
+      ? plainClass
+      : variant === "inline"
+        ? inlineClass
+        : overlayClass;
+
+  const iconClass =
+    variant === "overlay" || variant === "plain"
+      ? `h-5 w-5 ${active ? "text-neutral-900" : variant === "plain" ? "" : "text-neutral-400"}`
+      : inlineIconClass;
 
   return (
     <button
       type="button"
       onClick={handleClick}
       aria-label={active ? t("favorites.unsave") : t("favorites.save")}
-      className={`cursor-pointer ${variant === "inline" ? inlineClass : overlayClass} ${className}`}
+      className={`cursor-pointer ${variantClass} ${className}`}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill={active ? "currentColor" : "none"}
         stroke="currentColor"
-        strokeWidth={variant === "inline" ? 2 : 1.5}
-        className={
-          variant === "overlay"
-            ? `h-5 w-5 ${active ? "text-red-500" : "text-neutral-400"}`
-            : inlineIconClass
-        }
+        strokeWidth={variant === "inline" ? 1.75 : 1.5}
+        className={iconClass}
+        aria-hidden
       >
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+          d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z"
         />
       </svg>
     </button>

@@ -4,9 +4,6 @@
     "backToTop": "Back to top",
     "chooseFile": "Choose file"
   },
-  "footer": {
-    "disclaimer": "If you find incorrect information or have any suggestions, please contact us through the Problem Report feature."
-  },
   "nav": {
     "submit": "Submit",
     "mySubmissions": "My submissions",
@@ -27,15 +24,13 @@
     "noItemsHint": "Approved outfit items will appear here",
     "allItemsLoaded": "All items loaded",
     "noOutfits": "No outfits yet",
-    "noOutfitsHint": "Submit an outfit and it will appear here after review",
     "filterAll": "All",
-    "filterLabel": "Category",
-    "filterSub": "Subcategory",
-    "filterClear": "Clear filters",
+    "filterGroupAll": "All {{group}}",
     "searchPlaceholder": "Search event, brand, product...",
     "loadMore": "Scroll to load more",
-    "allLoaded": "All outfits loaded",
     "sortLabel": "Sort",
+    "outfitResultCount": "{{count}} outfits",
+    "itemResultCount": "{{count}} items",
     "sort": {
       "newest": "Date added (newest)",
       "oldest": "Date added (oldest)",
@@ -231,7 +226,6 @@
   "itemTypeGroups": {
     "hat": "Hat",
     "top": "Top",
-    "onepiece": "One-piece",
     "bottom": "Bottom",
     "shoes": "Shoes",
     "bag": "Bag",
@@ -251,7 +245,6 @@
     "top_jacket": "Jacket",
     "top_sleeveless": "Sleeveless / vest",
     "top_other": "Other top",
-    "onepiece": "One-piece",
     "bottom_pants": "Pants",
     "bottom_shorts": "Shorts",
     "bottom_skirt": "Skirt",
@@ -299,7 +292,11 @@
     "nicknamePlaceholder": "Nickname (optional, shown as Anonymous if empty)",
     "loggedInAs": "Reviewing as {{name}}",
     "ratingLabel": "Rating",
-    "contentPlaceholder": "Share your thoughts on this outfit…",
+    "contentPlaceholder": "Write a review",
+    "timeJustNow": "Just now",
+    "timeMinutes": "{{count}}m ago",
+    "timeHours": "{{count}}h ago",
+    "timeDays": "{{count}}d ago",
     "contentRequired": "Please enter your review",
     "submitBtn": "Submit review",
     "updateBtn": "Update review",

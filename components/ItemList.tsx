@@ -96,14 +96,14 @@ export default function ItemList({
             <div className="flex min-w-0 flex-1 flex-col justify-center px-4 py-2.5 sm:px-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted sm:text-sm">
+                  <span className="inline-block bg-[#F94B00] px-1.5 py-0.5 text-xs font-medium text-white">
                     {t(`itemTypes.${typeKey}`)}
-                  </p>
+                  </span>
                   {item.brand && (
                     <Link
                       href={brandHref(item.brand)}
                       prefetch={false}
-                      className="mt-1.5 block text-xs text-neutral-600 hover:text-neutral-900 hover:underline sm:text-sm"
+                      className="mt-2 block text-xs text-neutral-600 hover:text-neutral-900 hover:underline sm:text-sm"
                     >
                       {item.brand}
                     </Link>
@@ -115,15 +115,6 @@ export default function ItemList({
                       className="mt-1 block break-words text-sm font-medium leading-snug text-neutral-900 hover:underline sm:text-base"
                     >
                       {item.productName}
-                    </Link>
-                  )}
-                  {item.useCount > 0 && (
-                    <Link
-                      href={itemHref({ id: item.id, productName: item.productName, brand: item.brand, type: item.type })}
-                      prefetch={false}
-                      className="mt-1 block text-[11px] text-muted hover:text-neutral-900 hover:underline"
-                    >
-                      {t("item.useCount", { count: item.useCount })}
                     </Link>
                   )}
                 </div>

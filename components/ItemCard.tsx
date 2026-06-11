@@ -25,61 +25,60 @@ export default function ItemCard({
   type,
   brand,
   productName,
-  useCount,
 }: ItemCardProps) {
   const { t } = useTranslation();
+  const typeLabel = t(`itemTypes.${type}`);
 
   return (
-    <article className="group min-w-0 overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md">
+    <article className="group min-w-0">
       <Link
         href={itemHref({ id, productName, brand, type })}
         prefetch={false}
         onClick={() => saveHomeScrollIfHome()}
-        className="relative block aspect-square w-full overflow-hidden bg-white"
+        className="relative block aspect-[3/4] w-full overflow-hidden bg-neutral-50"
       >
         {image ? (
           <Image
             src={assetUrl(image)}
-            alt={productName ?? t(`itemTypes.${type}`)}
+            alt={productName ?? typeLabel}
             fill
-            className="object-contain p-2 transition-transform duration-200 group-hover:scale-[1.02]"
+            className="object-contain"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             loading="lazy"
             {...cdnImageProps()}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center px-3 text-center text-xs text-neutral-400">
-            {t(`itemTypes.${type}`)}
+            {typeLabel}
           </div>
         )}
-        <div className="absolute right-2 top-2">
-          <FavoriteButton type="item" targetId={id} />
-        </div>
       </Link>
-      <div className="space-y-1 p-2.5 sm:p-3">
-        <p className="text-[11px] text-muted">{t(`itemTypes.${type}`)}</p>
+      <div className="mt-2.5 space-y-1">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1 space-y-0.5">
+            <p className="text-xs text-neutral-500">{typeLabel}</p>
+            {brand && (
+              <Link
+                href={brandHref(brand)}
+                prefetch={false}
+                className="block truncate text-sm font-bold text-neutral-900 hover:underline"
+              >
+                {brand}
+              </Link>
+            )}
+          </div>
+          <FavoriteButton type="item" targetId={id} variant="inline" size="md" />
+        </div>
         {productName && (
           <Link
             href={itemHref({ id, productName, brand, type })}
             prefetch={false}
             onClick={() => saveHomeScrollIfHome()}
-            className="block break-words text-sm font-medium leading-snug text-neutral-900 line-clamp-2 hover:underline"
+            className="block break-words text-base leading-snug text-neutral-800 line-clamp-2 hover:underline sm:text-[17px]"
           >
             {productName}
           </Link>
         )}
-        {brand && (
-          <Link
-            href={brandHref(brand)}
-            prefetch={false}
-            className="block truncate text-xs text-neutral-600 hover:text-neutral-900 hover:underline"
-          >
-            {brand}
-          </Link>
-        )}
-        <p className="text-[11px] text-muted">
-          {t("item.useCount", { count: useCount })}
-        </p>
       </div>
     </article>
   );

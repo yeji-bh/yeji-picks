@@ -1,7 +1,14 @@
 "use client";
 
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ITEM_TYPES, normalizeItemType, type ItemType } from "@/lib/types";
+
+const BADGE_CLASS =
+  "shrink-0 rounded-none bg-subtle px-2.5 py-1 text-xs font-medium text-neutral-600";
+
+const OVERFLOW_CLASS =
+  "shrink-0 rounded-none bg-subtle px-2 py-1 text-xs font-medium text-neutral-600";
 
 export default function ItemTypeBadges({
   types,
@@ -10,22 +17,94 @@ export default function ItemTypeBadges({
   types: string[];
   className?: string;
 }) {
-  const { t } = useTranslation();
-  const normalized = [...new Set(types.map(normalizeItemType))];
-  const sorted = ITEM_TYPES.filter((type) => normalized.includes(type));
+  const { t, i18n } = useTranslation();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [visibleCount, setVisibleCount] = useState<number | null>(null);
+
+  const stableTypesInput = [...new Set(types.map(normalizeItemType))]
+    .sort()
+    .join(",");
+
+  const typesKey = useMemo(() => {
+    const normalized = new Set(stableTypesInput.split(",").filter(Boolean));
+    return ITEM_TYPES.filter((type) => normalized.has(type)).join(",");
+  }, [stableTypesInput]);
+
+  const sorted = useMemo(
+    () => typesKey.split(",").filter(Boolean) as ItemType[],
+    [typesKey]
+  );
+
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el || sorted.length === 0) {
+      setVisibleCount((prev) => (prev === sorted.length ? prev : sorted.length));
+      return;
+    }
+
+    const measure = () => {
+      const badges = el.querySelectorAll<HTMLElement>("[data-type-badge]");
+      const overflow = el.querySelector<HTMLElement>("[data-type-overflow]");
+      if (!overflow || badges.length === 0) return;
+
+      let fit = 0;
+      for (let count = sorted.length; count >= 0; count--) {
+        badges.forEach((badge, index) => {
+          badge.style.display = index < count ? "" : "none";
+        });
+
+        const hidden = sorted.length - count;
+        if (hidden > 0) {
+          overflow.textContent = `${hidden}+`;
+          overflow.style.display = "";
+        } else {
+          overflow.style.display = "none";
+        }
+
+        if (el.scrollWidth <= el.clientWidth + 1) {
+          fit = count;
+          break;
+        }
+      }
+
+      badges.forEach((badge) => {
+        badge.style.display = "";
+      });
+
+      setVisibleCount((prev) => (prev === fit ? prev : fit));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [typesKey, i18n.language, sorted.length]);
 
   if (sorted.length === 0) return null;
 
+  const shown = visibleCount ?? 0;
+  const overflow = Math.max(0, sorted.length - shown);
+
   return (
-    <div className={`flex flex-wrap gap-1.5 ${className}`}>
-      {sorted.map((type) => (
+    <div
+      ref={containerRef}
+      className={`flex min-w-0 flex-nowrap items-center gap-1.5 overflow-hidden ${className}`}
+    >
+      {sorted.map((type, index) => (
         <span
           key={type}
-          className="rounded-full border border-border bg-neutral-50 px-2 py-0.5 text-[10px] font-medium text-neutral-600 sm:text-xs"
+          data-type-badge
+          className={`${BADGE_CLASS} ${index >= shown ? "hidden" : ""}`}
         >
-          {t(`itemTypes.${type as ItemType}`)}
+          {t(`itemTypes.${type}`)}
         </span>
       ))}
+      <span
+        data-type-overflow
+        className={`${OVERFLOW_CLASS} ${overflow > 0 ? "" : "hidden"}`}
+      >
+        {overflow > 0 ? `${overflow}+` : ""}
+      </span>
     </div>
   );
 }

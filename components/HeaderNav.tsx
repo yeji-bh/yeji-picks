@@ -70,17 +70,17 @@ export default function HeaderNav() {
     <>
       <header
         id="site-header"
-        className="sticky top-0 z-10 border-b border-border bg-white/90 backdrop-blur-sm"
+        className="sticky top-0 z-10 border-b border-border bg-[#FFFFFF]"
       >
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:gap-3 sm:px-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-3 py-4 sm:px-5 lg:px-6">
           <Link
             href="/"
-            className="min-w-0 shrink cursor-pointer text-lg font-semibold tracking-tight text-neutral-900 sm:text-xl"
+            className="min-w-0 shrink cursor-pointer text-lg font-bold tracking-tight text-neutral-900 sm:text-[22px]"
           >
             <span className="block truncate">{t("siteTitle")}</span>
           </Link>
 
-          <nav className="hidden items-center gap-2 text-xs text-muted sm:gap-3 sm:text-sm lg:flex">
+          <nav className="hidden items-center gap-1 text-muted lg:flex">
             <NavItem
               href="/submit"
               icon={<IconSubmit />}
@@ -112,15 +112,15 @@ export default function HeaderNav() {
             )}
             {!loading &&
               (user ? (
-                <div className="flex items-center gap-2 border-l border-border pl-2 sm:pl-3">
-                  <span className="flex items-center gap-1 text-neutral-500">
-                    <IconUser className="h-3.5 w-3.5" />
-                    <span className="max-w-[6rem] truncate">{user.account}</span>
+                <div className="flex items-center gap-1">
+                  <span className="flex max-w-[8rem] items-center gap-1.5 truncate rounded-md px-2.5 py-2 text-sm text-neutral-600">
+                    <IconUser />
+                    <span className="truncate">{user.account}</span>
                   </span>
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="flex cursor-pointer items-center gap-1 whitespace-nowrap hover:text-neutral-900"
+                    className="flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-2 text-sm text-neutral-700 transition-colors hover:bg-subtle"
                     title={t("auth.logout")}
                   >
                     <span>{t("auth.logout")}</span>
@@ -129,7 +129,7 @@ export default function HeaderNav() {
               ) : (
                 <Link
                   href="/login"
-                  className="flex cursor-pointer items-center gap-1 whitespace-nowrap border-l border-border pl-2 font-medium text-neutral-900 hover:text-neutral-600 sm:pl-3"
+                  className="flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-md bg-subtle px-3 py-2 text-sm font-medium text-neutral-900 transition-colors hover:bg-neutral-200/60"
                   title={t("auth.login")}
                 >
                   <IconUser />

@@ -362,6 +362,7 @@ export default function HomeContent({
         typeFilter={typeFilter}
         query={query}
         sort={sort}
+        resultCount={filtered.length}
         onViewModeChange={handleViewModeChange}
         onTypeChange={handleTypeFilterChange}
         onQueryChange={handleQueryChange}
@@ -376,21 +377,22 @@ export default function HomeContent({
           </span>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border bg-white p-8 text-center sm:p-12">
+        <div className="rounded-xl bg-white p-8 text-center sm:p-12">
           <p className="text-sm text-muted">
             {viewMode === "outfit"
               ? t("home.noOutfits")
               : t("home.noItems")}
           </p>
-          <p className="mt-1 text-xs text-neutral-400">
-            {viewMode === "outfit"
-              ? t("home.noOutfitsHint")
-              : t("home.noItemsHint")}
-          </p>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <div
+            className={
+              viewMode === "outfit"
+                ? "grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4"
+                : "grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4"
+            }
+          >
             {viewMode === "outfit"
               ? filteredOutfits.map((outfit) => (
                   <OutfitCard
@@ -423,13 +425,6 @@ export default function HomeContent({
                 </span>
               ) : t("home.loadMore")}
             </div>
-          )}
-          {!hasMore && listLength > 0 && (
-            <p className="py-4 text-center text-xs text-muted">
-              {viewMode === "outfit"
-                ? t("home.allLoaded")
-                : t("home.allItemsLoaded")}
-            </p>
           )}
         </>
       )}

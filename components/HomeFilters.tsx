@@ -17,33 +17,73 @@ type HomeFiltersProps = {
   typeFilter: string;
   query: string;
   sort: OutfitSort;
+  resultCount: number;
   onViewModeChange: (mode: HomeViewMode) => void;
   onTypeChange: (type: string) => void;
   onQueryChange: (query: string) => void;
   onSortChange: (sort: OutfitSort) => void;
 };
 
-function modeBtnClass(active: boolean): string {
-  return `cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-    active
-      ? "bg-white text-neutral-900 shadow-sm"
-      : "text-muted hover:text-neutral-900"
-  }`;
+function ViewModeTab({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={active}
+      onClick={onClick}
+      className={`relative shrink-0 cursor-pointer px-1 pb-2.5 text-1rem font-medium transition-colors ${
+        active ? "text-neutral-900" : "text-neutral-400 hover:text-neutral-600"
+      }`}
+    >
+      {label}
+      {active && (
+        <span
+          className="absolute bottom-0 left-1/2 h-0.5 w-[calc(100%+8px)] -translate-x-1/2 bg-neutral-900"
+          aria-hidden
+        />
+      )}
+    </button>
+  );
+}
+
+function FilterTab({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`relative shrink-0 cursor-pointer whitespace-nowrap text-1rem font-medium transition-colors ${
+        active ? "font-semibold text-neutral-900" : "text-neutral-500 hover:text-neutral-700"
+      }`}
+    >
+      {label}
+    </button>
+  );
 }
 
 const searchClass =
-  "box-border h-11 w-full min-w-0 rounded-lg border border-border bg-white px-3 text-base leading-none text-neutral-900 outline-none focus:border-neutral-400 sm:h-10 sm:max-w-md sm:text-sm lg:max-w-lg";
+  "box-border min-h-11 w-full min-w-0 rounded-md border border-border bg-white py-3 pl-9 pr-3 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-neutral-400";
 
 const sortClass =
-  "filter-select box-border h-11 w-full cursor-pointer rounded-lg border border-border bg-white px-2 pr-7 text-xs text-muted outline-none focus:border-neutral-400 sm:h-10 sm:w-auto sm:min-w-[8.5rem]";
+  "filter-select box-border h-9 min-w-[11rem] cursor-pointer rounded-md border border-border bg-white px-2 pr-7 text-sm text-neutral-700 outline-none focus:border-neutral-400";
 
-function pillClass(active: boolean): string {
-  return `shrink-0 cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-    active
-      ? "bg-neutral-900 text-white"
-      : "border border-border bg-white text-neutral-600 hover:border-neutral-300"
-  }`;
-}
+const filterScrollClass =
+  "flex flex-nowrap gap-7 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
 
 function groupForSub(sub: ItemType): ItemTypeGroup {
   for (const group of FILTER_TYPES) {
@@ -60,6 +100,7 @@ export default function HomeFilters({
   typeFilter,
   query,
   sort,
+  resultCount,
   onViewModeChange,
   onTypeChange,
   onQueryChange,
@@ -67,13 +108,12 @@ export default function HomeFilters({
 }: HomeFiltersProps) {
   const { t } = useTranslation();
   const [expandedGroup, setExpandedGroup] = useState<ItemTypeGroup | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(true);
 
   const activeGroup = getFilterGroup(typeFilter);
   const visibleGroup = expandedGroup ?? activeGroup;
-  const subTypes =
-    visibleGroup && ITEM_TYPE_GROUPS[visibleGroup].length > 1
-      ? ITEM_TYPE_GROUPS[visibleGroup]
-      : null;
+  const subTypes = visibleGroup ? ITEM_TYPE_GROUPS[visibleGroup] : null;
+  const showSyntheticSubTab = subTypes != null && subTypes.length <= 1;
 
   function handleMainClick(group: ItemTypeGroup) {
     if (typeFilter === group) {
@@ -82,9 +122,18 @@ export default function HomeFilters({
       return;
     }
     onTypeChange(group);
-    setExpandedGroup(
-      ITEM_TYPE_GROUPS[group].length > 1 ? group : null
-    );
+    setExpandedGroup(group);
+  }
+
+  function handleGroupAllClick(group: ItemTypeGroup) {
+    onTypeChange(group);
+    setExpandedGroup(group);
+  }
+
+  function isSyntheticSubActive(group: ItemTypeGroup): boolean {
+    if (typeFilter === group) return true;
+    const subs = ITEM_TYPE_GROUPS[group];
+    return subs.length === 1 && typeFilter === subs[0];
   }
 
   function handleSubClick(sub: ItemType) {
@@ -107,36 +156,37 @@ export default function HomeFilters({
     return typeFilter === group || activeGroup === group;
   }
 
-  const hasActiveFilter = Boolean(typeFilter);
-
   return (
-    <div className="mb-4 space-y-3 sm:mb-6">
+    <div className="mb-5 space-y-3">
       <div
-        className="inline-flex rounded-lg border border-border bg-neutral-50 p-0.5"
+        className="flex gap-6 border-b border-border"
         role="tablist"
         aria-label={t("home.viewModeLabel")}
       >
-        <button
-          type="button"
-          role="tab"
-          aria-selected={viewMode === "outfit"}
+        <ViewModeTab
+          active={viewMode === "outfit"}
+          label={t("home.modeOutfit")}
           onClick={() => onViewModeChange("outfit")}
-          className={modeBtnClass(viewMode === "outfit")}
-        >
-          {t("home.modeOutfit")}
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={viewMode === "item"}
+        />
+        <ViewModeTab
+          active={viewMode === "item"}
+          label={t("home.modeItem")}
           onClick={() => onViewModeChange("item")}
-          className={modeBtnClass(viewMode === "item")}
-        >
-          {t("home.modeItem")}
-        </button>
+        />
       </div>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative">
+        <svg
+          className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          aria-hidden
+        >
+          <circle cx="11" cy="11" r="7" />
+          <path d="M20 20l-3.5-3.5" strokeLinecap="round" />
+        </svg>
         <input
           type="search"
           value={query}
@@ -144,79 +194,74 @@ export default function HomeFilters({
           placeholder={t("home.searchPlaceholder")}
           className={searchClass}
         />
-        <label className="flex shrink-0 items-center gap-1.5 text-xs text-muted">
-          <span className="hidden whitespace-nowrap sm:inline">
-            {t("home.sortLabel")}
-          </span>
-          <select
-            value={sort}
-            onChange={(e) => onSortChange(e.target.value as OutfitSort)}
-            className={sortClass}
-            aria-label={t("home.sortLabel")}
-          >
-            {OUTFIT_SORT_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {t(`home.sort.${option}`)}
-              </option>
-            ))}
-          </select>
-        </label>
       </div>
 
-      <div className="rounded-xl border border-border bg-white p-3">
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <span className="text-xs font-medium text-neutral-700">
-            {t("home.filterLabel")}
-          </span>
-          {hasActiveFilter && (
-            <button
-              type="button"
-              onClick={clearFilter}
-              className="cursor-pointer text-xs text-muted underline hover:text-neutral-900"
-            >
-              {t("home.filterClear")}
-            </button>
-          )}
-        </div>
+      <div>
+        {filtersOpen && (
+          <div className="pt-2">
+            <div className={filterScrollClass}>
+              <FilterTab
+                active={!typeFilter}
+                label={t("home.filterAll")}
+                onClick={clearFilter}
+              />
+              {FILTER_TYPES.map((group) => (
+                <FilterTab
+                  key={group}
+                  active={isMainActive(group)}
+                  label={t(`itemTypeGroups.${group}`)}
+                  onClick={() => handleMainClick(group)}
+                />
+              ))}
+            </div>
 
-        <div className="-mx-0.5 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={clearFilter}
-            className={pillClass(!typeFilter)}
-          >
-            {t("home.filterAll")}
-          </button>
-
-          {FILTER_TYPES.map((group) => (
-            <button
-              key={group}
-              type="button"
-              onClick={() => handleMainClick(group)}
-              className={pillClass(isMainActive(group))}
-            >
-              {t(`itemTypeGroups.${group}`)}
-            </button>
-          ))}
-        </div>
-
-        {subTypes && (
-          <div className="mt-2.5 flex flex-wrap gap-2 border-t border-border pt-2.5">
-            <span className="w-full text-[10px] text-muted">
-              {t(`itemTypeGroups.${visibleGroup}`)} · {t("home.filterSub")}
-            </span>
-            {subTypes.map((sub) => (
-              <button
-                key={sub}
-                type="button"
-                onClick={() => handleSubClick(sub)}
-                className={pillClass(typeFilter === sub)}
-              >
-                {t(`itemTypes.${sub as ItemType}`)}
-              </button>
-            ))}
+            {visibleGroup && subTypes && (
+              <div className="mt-3">
+                <div className={filterScrollClass}>
+                  {showSyntheticSubTab ? (
+                    <FilterTab
+                      key={`${visibleGroup}-all`}
+                      active={isSyntheticSubActive(visibleGroup)}
+                      label={t("home.filterGroupAll", {
+                        group: t(`itemTypeGroups.${visibleGroup}`),
+                      })}
+                      onClick={() => handleGroupAllClick(visibleGroup)}
+                    />
+                  ) : (
+                    subTypes.map((sub) => (
+                      <FilterTab
+                        key={sub}
+                        active={typeFilter === sub}
+                        label={t(`itemTypes.${sub as ItemType}`)}
+                        onClick={() => handleSubClick(sub)}
+                      />
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
+      </div>
+
+      <div className="flex items-center justify-between gap-3">
+        <p className="shrink-0 text-sm text-neutral-600">
+          {viewMode === "outfit"
+            ? t("home.outfitResultCount", { count: resultCount })
+            : t("home.itemResultCount", { count: resultCount })}
+        </p>
+        <select
+          value={sort}
+          onChange={(e) => onSortChange(e.target.value as OutfitSort)}
+          className={sortClass}
+          aria-label={t("home.sortLabel")}
+        >
+          {OUTFIT_SORT_OPTIONS.map((option) => (
+            <option key={option} value={option}>
+              {t(`home.sort.${option}`)}
+            </option>
+          ))}
+        </select>
       </div>
     </div>
   );

@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --color-surface: #fafafa;
+  --color-surface: #feffff;
+  --color-subtle: #f1f2f5;
   --color-border: #e5e5e5;
   --color-muted: #737373;
 }

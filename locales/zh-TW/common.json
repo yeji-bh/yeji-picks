@@ -4,9 +4,6 @@
     "backToTop": "返回頂部",
     "chooseFile": "選擇檔案"
   },
-  "footer": {
-    "disclaimer": "如發現資料錯誤或有任何建議，歡迎透過問題回報功能與我們聯繫。"
-  },
   "nav": {
     "submit": "投稿",
     "mySubmissions": "我的投稿",
@@ -27,15 +24,13 @@
     "noItemsHint": "審核通過的穿搭單品會顯示在這裡",
     "allItemsLoaded": "已載入全部單品",
     "noOutfits": "尚無穿搭資料",
-    "noOutfitsHint": "歡迎投稿，審核通過後會顯示在這裡",
     "filterAll": "全部",
-    "filterLabel": "分類",
-    "filterSub": "細分",
-    "filterClear": "清除篩選",
+    "filterGroupAll": "全部{{group}}",
     "searchPlaceholder": "搜尋活動、品牌、商品...",
     "loadMore": "向下滑動載入更多",
-    "allLoaded": "已載入全部穿搭",
     "sortLabel": "排序",
+    "outfitResultCount": "共 {{count}} 套穿搭",
+    "itemResultCount": "共 {{count}} 個單品",
     "sort": {
       "newest": "新增日期（新→舊）",
       "oldest": "新增日期（舊→新）",
@@ -231,7 +226,6 @@
   "itemTypeGroups": {
     "hat": "帽子",
     "top": "上衣",
-    "onepiece": "連身衣物",
     "bottom": "下身",
     "shoes": "鞋子",
     "bag": "包包",
@@ -251,7 +245,6 @@
     "top_jacket": "外套",
     "top_sleeveless": "無袖／背心",
     "top_other": "其他上衣",
-    "onepiece": "連身衣物",
     "bottom_pants": "長褲",
     "bottom_shorts": "短褲",
     "bottom_skirt": "裙子",
@@ -299,7 +292,11 @@
     "nicknamePlaceholder": "暱稱（選填，未填顯示匿名）",
     "loggedInAs": "以 {{name}} 身分評價",
     "ratingLabel": "評分",
-    "contentPlaceholder": "分享你對這套穿搭的看法…",
+    "contentPlaceholder": "撰寫評價",
+    "timeJustNow": "剛剛",
+    "timeMinutes": "{{count}} 分鐘前",
+    "timeHours": "{{count}} 小時前",
+    "timeDays": "{{count}} 天前",
     "contentRequired": "請輸入評價內容",
     "submitBtn": "送出評價",
     "updateBtn": "更新評價",

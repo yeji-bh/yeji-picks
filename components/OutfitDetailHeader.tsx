@@ -21,21 +21,12 @@ export default function OutfitDetailHeader({
     outfitTitle === "outfit" ? t("outfit.unnamed") : outfitTitle;
 
   return (
-    <header className="border-b border-border pb-3">
+    <header>
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          <h1 className="min-w-0 break-words text-base font-semibold tracking-tight text-neutral-900 sm:text-lg lg:text-xl">
-            {displayTitle}
-          </h1>
-          <FavoriteButton
-            type="outfit"
-            targetId={outfitId}
-            variant="inline"
-            size="lg"
-            className="shrink-0 bg-neutral-50"
-          />
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <h1 className="min-w-0 flex-1 break-words text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl lg:text-[28px]">
+          {displayTitle}
+        </h1>
+        <div className="flex shrink-0 items-center gap-1">
           {isAdmin && (
             <Link
               href={`${outfitHref({ id: outfitId, eventName: outfitTitle })}/edit`}
@@ -44,6 +35,7 @@ export default function OutfitDetailHeader({
               {t("mySubmissions.edit")}
             </Link>
           )}
+          <FavoriteButton type="outfit" targetId={outfitId} variant="plain" />
           <OutfitReport outfitId={outfitId} outfitTitle={outfitTitle} />
         </div>
       </div>
