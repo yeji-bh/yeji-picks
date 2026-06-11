@@ -21,6 +21,6 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma: PrismaClientSingleton =
   globalForPrisma.prisma ?? createPrismaClient();
 
-if (process.env.NODE_ENV !== "production") {
+if (!globalForPrisma.prisma) {
   globalForPrisma.prisma = prisma;
 }

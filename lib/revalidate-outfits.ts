@@ -1,15 +1,20 @@
 import "server-only";
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 export function revalidateOutfitCaches(outfitId?: string) {
-  revalidateTag("outfits");
-  revalidatePath("/");
-  revalidatePath("/outfit/[id]", "page");
-  revalidatePath("/item/[id]", "page");
-  revalidatePath("/brand/[slug]", "page");
-  revalidatePath("/favorites");
-  if (outfitId) {
-    revalidatePath(`/outfit/${outfitId}`);
+  try {
+    revalidatePath("/");
+    revalidatePath("/outfit/[id]", "page");
+    revalidatePath("/item/[id]", "page");
+    revalidatePath("/brand/[slug]", "page");
+    revalidatePath("/favorites");
+    if (outfitId) {
+      revalidatePath(`/outfit/${outfitId}`);
+    }
+  } catch (err) {
+    // On Cloudflare without D1/R2 ISR setup, on-demand revalidation can throw.
+    // Content updates take effect after the next deploy.
+    console.warn("[revalidateOutfitCaches]", err);
   }
 }

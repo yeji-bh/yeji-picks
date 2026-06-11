@@ -5,7 +5,6 @@ import { findCatalogItemsByBrandKey, getCanonicalBrandName } from "@/lib/brand-d
 import { primaryImage } from "@/lib/catalog-item";
 import { listBrandStaticParams } from "@/lib/static-params";
 
-export const revalidate = 3600;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {

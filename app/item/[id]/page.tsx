@@ -10,7 +10,6 @@ import {
 import { extractIdFromSlugParam } from "@/lib/slug";
 import { listItemStaticParams } from "@/lib/static-params";
 
-export const revalidate = 3600;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
@@ -25,25 +24,30 @@ export default async function ItemDetailPage({
   const { id } = await params;
   const resolvedId = extractIdFromSlugParam(id);
 
-  const [item, placements] = await Promise.all([
-    getCatalogItemRecord(resolvedId),
-    getItemOutfitPlacements(resolvedId),
-  ]);
+  try {
+    const [item, placements] = await Promise.all([
+      getCatalogItemRecord(resolvedId),
+      getItemOutfitPlacements(resolvedId),
+    ]);
 
-  if (!item) notFound();
+    if (!item) notFound();
 
-  return (
-    <div className="min-w-0">
-      <ItemDetailInfo item={toDisplayItem(item)} />
-      <ItemDetailOutfits
-        outfits={placements.map((row) => ({
-          id: row.outfit.id,
-          mainImage: row.outfit.mainImage,
-          eventName: row.outfit.eventName,
-          date: row.outfit.date,
-        }))}
-      />
-      <ItemDupesSection catalogItemId={resolvedId} />
-    </div>
-  );
+    return (
+      <div className="min-w-0">
+        <ItemDetailInfo item={toDisplayItem(item)} />
+        <ItemDetailOutfits
+          outfits={placements.map((row) => ({
+            id: row.outfit.id,
+            mainImage: row.outfit.mainImage,
+            eventName: row.outfit.eventName,
+            date: row.outfit.date,
+          }))}
+        />
+        <ItemDupesSection catalogItemId={resolvedId} />
+      </div>
+    );
+  } catch (err) {
+    console.error("[item page]", resolvedId, err);
+    notFound();
+  }
 }

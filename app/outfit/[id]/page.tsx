@@ -8,7 +8,6 @@ import { formatOutfitTitle } from "@/lib/outfit";
 import { extractIdFromSlugParam } from "@/lib/slug";
 import { listOutfitStaticParams } from "@/lib/static-params";
 
-export const revalidate = 3600;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
@@ -23,27 +22,32 @@ export default async function OutfitDetailPage({
   const { id } = await params;
   const resolvedId = extractIdFromSlugParam(id);
 
-  const outfit = await getOutfitRecord(resolvedId);
-  if (!outfit) notFound();
+  try {
+    const outfit = await getOutfitRecord(resolvedId);
+    if (!outfit) notFound();
 
-  const title = formatOutfitTitle(outfit.date, outfit.eventName);
-  const [neighbors, items] = await Promise.all([
-    getOutfitNeighborsByCreatedAt(outfit.createdAt),
-    getOutfitDisplayItems(resolvedId),
-  ]);
+    const title = formatOutfitTitle(outfit.date, outfit.eventName);
+    const [neighbors, items] = await Promise.all([
+      getOutfitNeighborsByCreatedAt(outfit.createdAt),
+      getOutfitDisplayItems(resolvedId),
+    ]);
 
-  return (
-    <div className="min-w-0">
-      <OutfitDetailHeader outfitId={outfit.id} outfitTitle={title} />
-      <OutfitDetailContent
-        outfitId={outfit.id}
-        outfitTitle={title}
-        mainImage={outfit.mainImage}
-        imageAlt={title}
-        items={items}
-        newer={neighbors.newer}
-        older={neighbors.older}
-      />
-    </div>
-  );
+    return (
+      <div className="min-w-0">
+        <OutfitDetailHeader outfitId={outfit.id} outfitTitle={title} />
+        <OutfitDetailContent
+          outfitId={outfit.id}
+          outfitTitle={title}
+          mainImage={outfit.mainImage}
+          imageAlt={title}
+          items={items}
+          newer={neighbors.newer}
+          older={neighbors.older}
+        />
+      </div>
+    );
+  } catch (err) {
+    console.error("[outfit page]", resolvedId, err);
+    notFound();
+  }
 }
