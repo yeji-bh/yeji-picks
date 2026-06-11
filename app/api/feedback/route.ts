@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { moderateText } from "@/lib/content-moderation";
 import { prisma } from "@/lib/db";
-import { saveUploadedFile } from "@/lib/upload";
 
 const FEEDBACK_CATEGORIES = new Set(["suggestion", "same_style"]);
 
@@ -29,6 +28,7 @@ export async function POST(request: NextRequest) {
 
     let imageUrl: string | null = null;
     if (imageFile instanceof File && imageFile.size > 0) {
+      const { saveUploadedFile } = await import("@/lib/upload");
       imageUrl = await saveUploadedFile(imageFile, "feedback");
     }
 

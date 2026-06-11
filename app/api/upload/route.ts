@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { ImageKind } from "@/lib/image-compress";
-import { saveUploadedFile } from "@/lib/upload";
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,9 +13,12 @@ export async function POST(request: NextRequest) {
 
     const kind: ImageKind =
       kindRaw === "cover" ? "cover" : kindRaw === "feedback" ? "feedback" : "item";
+
+    const { saveUploadedFile } = await import("@/lib/upload");
     const url = await saveUploadedFile(file, kind);
     return NextResponse.json({ url });
   } catch (err) {
+    console.error("[upload POST]", err);
     const message = err instanceof Error ? err.message : "上傳失敗";
     return NextResponse.json({ error: message }, { status: 400 });
   }

@@ -17,12 +17,14 @@ function assetRemotePatterns(): NonNullable<
 
 const nextConfig: NextConfig = {
   serverExternalPackages: [
+    "@cf-wasm/photon",
     "@libsql/isomorphic-ws",
     "@libsql/client",
     "@prisma/client",
     ".prisma/client",
     "@prisma/adapter-libsql",
     "libsql",
+    "sharp",
   ],
   allowedDevOrigins: ["192.168.100.187"],
   images: {

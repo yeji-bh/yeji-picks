@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.758.0",
+    "@cf-wasm/photon": "^0.3.6",
     "@libsql/client": "^0.14.0",
     "@opennextjs/cloudflare": "^1.19.11",
     "@prisma/adapter-libsql": "^6.4.1",

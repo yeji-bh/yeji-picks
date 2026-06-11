@@ -1,6 +1,5 @@
 import "server-only";
 
-import path from "path";
 import { randomUUID } from "crypto";
 import { compressImageBuffer, type ImageKind } from "@/lib/image-compress";
 import {
@@ -9,7 +8,6 @@ import {
 } from "@/lib/object-storage";
 import { objectKeyToUploadPath } from "@/lib/upload-path";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 const ALLOWED_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -18,9 +16,11 @@ const ALLOWED_TYPES = new Set([
 ]);
 
 async function writeLocalUpload(filename: string, data: Buffer): Promise<void> {
+  const path = await import("path");
   const { mkdir, writeFile } = await import("fs/promises");
-  await mkdir(UPLOAD_DIR, { recursive: true });
-  await writeFile(path.join(UPLOAD_DIR, filename), data);
+  const uploadDir = path.join(process.cwd(), "public", "uploads");
+  await mkdir(uploadDir, { recursive: true });
+  await writeFile(path.join(uploadDir, filename), data);
 }
 
 export async function saveUploadedFile(
