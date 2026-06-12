@@ -62,7 +62,7 @@ export default function OutfitCard({
       >
         <div
           ref={imageRef}
-          className={`relative w-full overflow-hidden bg-neutral-100 ${COVER_ASPECT_CLASS}`}
+          className={`relative w-full overflow-hidden bg-cover ${COVER_ASPECT_CLASS}`}
         >
           {!inView ? (
             <div className="absolute inset-0 animate-pulse bg-neutral-200" aria-hidden />

@@ -3,7 +3,7 @@ import Link from "next/link";
 type IconProps = { className?: string };
 
 export const NAV_ACTION_CLASS =
-  "flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-2 text-sm text-neutral-700 transition-colors hover:bg-subtle";
+  "flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-2 text-sm text-foreground-secondary transition-colors hover:bg-subtle";
 
 export function IconSubmit({ className = "h-[18px] w-[18px]" }: IconProps) {
   return (

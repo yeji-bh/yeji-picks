@@ -26,7 +26,7 @@ export default function LanguageSwitcher() {
       {open && (
         <>
           <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 z-30 mt-2 min-w-[8rem] rounded-lg border border-border bg-white py-1 shadow-md">
+          <div className="ui-dropdown absolute left-0 z-30 mt-2 min-w-[8rem] py-1">
             {LOCALES.map((loc) => (
               <button
                 key={loc}
@@ -35,10 +35,10 @@ export default function LanguageSwitcher() {
                   changeLanguage(loc);
                   setOpen(false);
                 }}
-                className={`block w-full px-3 py-2 text-left text-sm hover:bg-neutral-50 ${
+                className={`block w-full px-3 py-2 text-left text-sm hover:bg-subtle ${
                   locale === loc
-                    ? "font-medium text-neutral-900"
-                    : "text-neutral-600"
+                    ? "font-medium text-foreground"
+                    : "text-foreground-secondary"
                 }`}
               >
                 {LOCALE_LABELS[loc]}

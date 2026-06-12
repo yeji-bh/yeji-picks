@@ -7,6 +7,8 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "./AuthProvider";
 import FeedbackModal from "./FeedbackModal";
 import LanguageSwitcher from "./LanguageSwitcher";
+import LoginModal from "./LoginModal";
+import ThemeToggle from "./ThemeToggle";
 import {
   IconClipboard,
   IconHeart,
@@ -38,6 +40,7 @@ export default function HeaderNav() {
   const { user, loading, refresh } = useAuth();
   const router = useRouter();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   const isAdmin = user?.role === "admin";
@@ -64,18 +67,18 @@ export default function HeaderNav() {
   }
 
   const drawerLinkClass =
-    "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50";
+    "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-foreground-secondary hover:bg-subtle";
 
   return (
     <>
       <header
         id="site-header"
-        className="sticky top-0 z-20 border-b border-border bg-[#FFFFFF]"
+        className="sticky top-0 z-20 border-b border-border bg-header"
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-3 py-4 sm:px-5 lg:px-6">
           <Link
             href="/"
-            className="min-w-0 shrink cursor-pointer text-lg font-bold tracking-tight text-neutral-900 sm:text-2xl"
+            className="min-w-0 shrink cursor-pointer text-lg font-bold tracking-tight text-foreground sm:text-2xl"
           >
             <span className="block truncate">{t("siteTitle")}</span>
           </Link>
@@ -113,35 +116,37 @@ export default function HeaderNav() {
             {!loading &&
               (user ? (
                 <div className="flex items-center gap-1">
-                  <span className="flex max-w-[8rem] items-center gap-1.5 truncate rounded-md px-2.5 py-2 text-sm text-neutral-600">
+                  <span className="flex max-w-[8rem] items-center gap-1.5 truncate rounded-md px-2.5 py-2 text-sm text-foreground-secondary">
                     <IconUser />
                     <span className="truncate">{user.account}</span>
                   </span>
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-2 text-sm text-neutral-700 transition-colors hover:bg-subtle"
+                    className="flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-2 text-sm text-foreground-secondary transition-colors hover:bg-subtle"
                     title={t("auth.logout")}
                   >
                     <span>{t("auth.logout")}</span>
                   </button>
                 </div>
               ) : (
-                <Link
-                  href="/login"
-                  className="flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-md bg-subtle px-3 py-2 text-sm font-medium text-neutral-900 transition-colors hover:bg-neutral-200/60"
+                <button
+                  type="button"
+                  onClick={() => setLoginOpen(true)}
+                  className="flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-md bg-subtle px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-neutral-200/60 dark:hover:bg-neutral-200/10"
                   title={t("auth.login")}
                 >
                   <IconUser />
                   <span>{t("auth.login")}</span>
-                </Link>
+                </button>
               ))}
+            <ThemeToggle />
           </nav>
 
           <button
             type="button"
             onClick={() => setMenuOpen(true)}
-            className="flex cursor-pointer items-center justify-center rounded-lg p-2 text-neutral-700 hover:bg-neutral-100 lg:hidden"
+            className="flex cursor-pointer items-center justify-center rounded-lg p-2 text-foreground-secondary hover:bg-subtle lg:hidden"
             aria-label={t("nav.openMenu")}
           >
             <IconMenu />
@@ -156,15 +161,15 @@ export default function HeaderNav() {
             onClick={closeMenu}
             aria-hidden
           />
-          <aside className="absolute right-0 top-0 flex h-full w-[min(85vw,18rem)] flex-col bg-white shadow-2xl">
+          <aside className="absolute right-0 top-0 flex h-full w-[min(85vw,18rem)] flex-col bg-card shadow-2xl">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
-              <span className="text-sm font-semibold text-neutral-900">
+              <span className="text-sm font-semibold text-foreground">
                 {t("nav.menu")}
               </span>
               <button
                 type="button"
                 onClick={closeMenu}
-                className="cursor-pointer text-xl leading-none text-neutral-400 hover:text-neutral-700"
+                className="cursor-pointer text-xl leading-none text-inactive hover:text-foreground"
                 aria-label={t("nav.closeMenu")}
               >
                 ×
@@ -226,10 +231,11 @@ export default function HeaderNav() {
                         changeLanguage(loc);
                         closeMenu();
                       }}
-                      className={`cursor-pointer rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-50 ${locale === loc
-                          ? "font-medium text-neutral-900"
-                          : "text-neutral-600"
-                        }`}
+                      className={`cursor-pointer rounded-lg px-3 py-2 text-left text-sm hover:bg-subtle ${
+                        locale === loc
+                          ? "font-medium text-foreground"
+                          : "text-foreground-secondary"
+                      }`}
                     >
                       {LOCALE_LABELS[loc]}
                     </button>
@@ -242,7 +248,7 @@ export default function HeaderNav() {
               {!loading &&
                 (user ? (
                   <div className="space-y-2">
-                    <p className="flex items-center gap-2 px-3 text-sm text-neutral-500">
+                    <p className="flex items-center gap-2 px-3 text-sm text-muted">
                       <IconUser className="h-4 w-4" />
                       <span className="truncate">{user.account}</span>
                     </p>
@@ -255,19 +261,27 @@ export default function HeaderNav() {
                     </button>
                   </div>
                 ) : (
-                  <Link
-                    href="/login"
-                    onClick={closeMenu}
-                    className={drawerLinkClass}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      closeMenu();
+                      setLoginOpen(true);
+                    }}
+                    className={`${drawerLinkClass} w-full text-left`}
                   >
                     <IconUser />
                     <span>{t("auth.login")}</span>
-                  </Link>
+                  </button>
                 ))}
+              <div className="mt-2 flex justify-end px-1">
+                <ThemeToggle />
+              </div>
             </div>
           </aside>
         </div>
       )}
+
+      <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
 
       {!isAdmin && (
         <FeedbackModal

@@ -16,6 +16,13 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu"
   },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "switchLight": "Switch to light mode",
+    "switchDark": "Switch to dark mode"
+  },
   "home": {
     "viewModeLabel": "View mode",
     "modeOutfit": "Outfits",

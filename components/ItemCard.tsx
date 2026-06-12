@@ -49,7 +49,7 @@ export default function ItemCard({
             {...cdnImageProps()}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center px-3 text-center text-xs text-neutral-400">
+          <div className="flex h-full w-full items-center justify-center px-3 text-center text-xs text-muted">
             {typeLabel}
           </div>
         )}
@@ -61,7 +61,7 @@ export default function ItemCard({
               href={detailHref}
               prefetch={false}
               onClick={() => saveHomeScrollIfHome()}
-              className="block text-xs text-neutral-500 hover:text-neutral-700 hover:underline"
+              className="block text-xs text-muted hover:text-foreground-secondary hover:underline"
             >
               {typeLabel}
             </Link>
@@ -69,7 +69,7 @@ export default function ItemCard({
               <Link
                 href={brandHref(brand)}
                 prefetch={false}
-                className="w-fit max-w-full truncate text-sm font-bold text-neutral-900 hover:underline"
+                className="w-fit max-w-full truncate text-sm font-bold text-foreground hover:underline"
               >
                 {brand}
               </Link>
@@ -82,7 +82,7 @@ export default function ItemCard({
             href={detailHref}
             prefetch={false}
             onClick={() => saveHomeScrollIfHome()}
-            className="block break-words text-base leading-snug text-neutral-800 line-clamp-2 hover:underline sm:text-[17px]"
+            className="block break-words text-base leading-snug text-foreground line-clamp-2 hover:underline sm:text-[17px]"
           >
             {productName}
           </Link>

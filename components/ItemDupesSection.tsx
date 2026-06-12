@@ -180,7 +180,7 @@ export default function ItemDupesSection({
     <section className="mt-8 border-t border-border/60 pt-4">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <div>
-          <h2 className="text-base font-medium text-neutral-700">
+          <h2 className="text-base font-medium text-foreground">
             {t("dupe.sectionTitle")}
           </h2>
           <p className="mt-1 text-sm text-muted">{t("dupe.sectionDesc")}</p>
@@ -188,7 +188,7 @@ export default function ItemDupesSection({
         <button
           type="button"
           onClick={() => setFormOpen(true)}
-          className="cursor-pointer text-sm text-neutral-600 underline-offset-2 hover:text-neutral-900 hover:underline"
+          className="cursor-pointer text-sm text-foreground-secondary underline-offset-2 hover:text-foreground hover:underline"
         >
           {t("dupe.addDupe")}
         </button>
@@ -210,19 +210,19 @@ export default function ItemDupesSection({
             onChange={(e) => setBrand(e.target.value)}
             placeholder={`${t("dupe.brand")} *`}
             required
-            className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+            className="ui-field w-full px-3 py-2 text-sm"
           />
           <input
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
             placeholder={t("dupe.productName")}
-            className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+            className="ui-field w-full px-3 py-2 text-sm"
           />
           <input
             value={priceRange}
             onChange={(e) => setPriceRange(e.target.value)}
             placeholder={t("dupe.priceRange")}
-            className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+            className="ui-field w-full px-3 py-2 text-sm"
           />
           <input
             type="url"
@@ -230,18 +230,18 @@ export default function ItemDupesSection({
             onChange={(e) => setBuyLink(e.target.value)}
             placeholder={`${t("dupe.buyLink")} *`}
             required
-            className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+            className="ui-field w-full px-3 py-2 text-sm"
           />
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
             placeholder={t("dupe.notes")}
-            className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+            className="ui-field w-full px-3 py-2 text-sm"
           />
           <FileInputZone onChange={handleImageSelect} disabled={submitting} />
           {imagePreview ? (
-            <div className="relative h-24 w-24 overflow-hidden rounded-lg border border-border bg-white">
+            <div className="item-image-surface relative h-24 w-24 overflow-hidden rounded-lg border border-border">
               <img
                 src={imagePreview}
                 alt=""
@@ -254,14 +254,14 @@ export default function ItemDupesSection({
               type="button"
               onClick={closeForm}
               disabled={submitting}
-              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm text-neutral-700 disabled:opacity-50"
+              className="ui-btn-secondary flex-1 px-4 py-2.5 text-sm"
             >
               {t("dupe.cancelAdd")}
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-fg disabled:opacity-50"
             >
               {submitting ? t("submit.submitting") : t("dupe.submitBtn")}
             </button>
@@ -299,7 +299,7 @@ export default function ItemDupesSection({
                   className={`inline-flex cursor-pointer items-center gap-1 text-sm ${
                     dupe.userVote === "like"
                       ? "text-green-700"
-                      : "text-neutral-500 hover:text-neutral-800"
+                      : "text-muted hover:text-foreground-secondary"
                   }`}
                 >
                   <span className="text-base" aria-hidden>
@@ -313,7 +313,7 @@ export default function ItemDupesSection({
                   className={`inline-flex cursor-pointer items-center gap-1 text-sm ${
                     dupe.userVote === "dislike"
                       ? "text-red-600"
-                      : "text-neutral-500 hover:text-neutral-800"
+                      : "text-muted hover:text-foreground-secondary"
                   }`}
                 >
                   <span className="text-base" aria-hidden>

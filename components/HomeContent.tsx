@@ -390,7 +390,7 @@ export default function HomeContent({
           </span>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-xl bg-white p-8 text-center sm:p-12">
+        <div className="rounded-xl bg-empty p-8 text-center sm:p-12">
           <p className="text-sm text-muted">
             {viewMode === "outfit"
               ? t("home.noOutfits")

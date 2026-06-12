@@ -16,6 +16,13 @@
     "openMenu": "開啟選單",
     "closeMenu": "關閉選單"
   },
+  "theme": {
+    "label": "主題",
+    "light": "亮色",
+    "dark": "暗色",
+    "switchLight": "切換至亮色模式",
+    "switchDark": "切換至暗色模式"
+  },
   "home": {
     "viewModeLabel": "瀏覽模式",
     "modeOutfit": "穿搭",

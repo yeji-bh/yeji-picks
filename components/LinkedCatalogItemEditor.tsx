@@ -41,13 +41,13 @@ export default function LinkedCatalogItemEditor({
   const { t } = useTranslation();
 
   return (
-    <div className="rounded-lg border border-border bg-neutral-50/80">
+    <div className="rounded-lg border border-border bg-subtle">
       <button
         type="button"
         onClick={onToggle}
         className="flex w-full cursor-pointer items-center justify-between gap-2 px-3 py-2.5 text-left"
       >
-        <span className="text-xs font-medium text-neutral-800">
+        <span className="text-xs font-medium text-foreground-secondary">
           {t("item.editLinkedCatalog")}
         </span>
         <svg
@@ -68,19 +68,19 @@ export default function LinkedCatalogItemEditor({
           <ItemTypeSelect
             value={type}
             onChange={onTypeChange}
-            className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm"
+            className="ui-field w-full px-3 py-2 text-sm"
           />
           <BrandAutocomplete
             value={brand}
             onChange={onBrandChange}
             placeholder={t("submit.brand")}
-            className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm"
+            className="ui-field w-full px-3 py-2 text-sm"
           />
           <input
             value={productName}
             onChange={(e) => onProductNameChange(e.target.value)}
             placeholder={t("submit.productName")}
-            className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm"
+            className="ui-field w-full px-3 py-2 text-sm"
           />
           <FileInputZone
             disabled={submitting}
@@ -95,7 +95,7 @@ export default function LinkedCatalogItemEditor({
           )}
           <a
             href={`/item/${catalogItemId}/edit`}
-            className="inline-block text-xs text-muted underline hover:text-neutral-900"
+            className="inline-block text-xs text-muted underline hover:text-foreground"
           >
             {t("item.openCatalogEditPage")}
           </a>

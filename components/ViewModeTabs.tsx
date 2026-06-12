@@ -19,13 +19,13 @@ function ViewModeTab({
       aria-selected={active}
       onClick={onClick}
       className={`relative shrink-0 cursor-pointer pb-2.5 text-1rem font-medium transition-colors ${
-        active ? "text-neutral-900" : "text-neutral-400 hover:text-neutral-600"
+        active ? "text-foreground" : "text-inactive hover:text-foreground-secondary"
       }`}
     >
       {label}
       {active && (
         <span
-          className="absolute bottom-0 left-0 h-0.5 w-full bg-neutral-900"
+          className="absolute bottom-0 left-0 h-0.5 w-full bg-foreground"
           aria-hidden
         />
       )}

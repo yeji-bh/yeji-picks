@@ -53,7 +53,7 @@ export default function CatalogItemPicker({
 
   if (selected) {
     return (
-      <div className="rounded-lg border border-border bg-neutral-50 p-3">
+      <div className="rounded-lg border border-border bg-subtle p-3">
         <div className="flex items-start gap-3">
           {selected.image && (
             <img
@@ -63,7 +63,7 @@ export default function CatalogItemPicker({
             />
           )}
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-neutral-900">
+            <p className="text-sm font-medium text-foreground">
               {selected.productName || selected.brand || t("item.unnamed")}
             </p>
             {selected.brand && selected.productName && (
@@ -73,7 +73,7 @@ export default function CatalogItemPicker({
           <button
             type="button"
             onClick={onClear}
-            className="text-xs text-muted underline hover:text-neutral-900"
+            className="text-xs text-muted underline hover:text-foreground"
           >
             {t("item.unlink")}
           </button>
@@ -89,11 +89,11 @@ export default function CatalogItemPicker({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={t("item.searchPlaceholder")}
-        className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-neutral-400"
+        className="ui-field w-full px-3 py-2 text-sm"
       />
       {loading && <p className="text-xs text-muted">{t("loading")}</p>}
       {results.length > 0 && (
-        <ul className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-border bg-white p-1">
+        <ul className="ui-dropdown max-h-48 space-y-1 overflow-y-auto p-1">
           {results.map((item) => (
             <li key={item.id}>
               <button
@@ -103,7 +103,7 @@ export default function CatalogItemPicker({
                   setQuery("");
                   setResults([]);
                 }}
-                className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-neutral-50"
+                className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-left hover:bg-subtle"
               >
                 {item.image && (
                   <img
@@ -113,7 +113,7 @@ export default function CatalogItemPicker({
                   />
                 )}
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm text-neutral-900">
+                  <span className="block truncate text-sm text-foreground">
                     {item.productName || item.brand || "—"}
                   </span>
                   {item.brand && (

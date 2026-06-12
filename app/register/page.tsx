@@ -64,7 +64,7 @@ export default function RegisterPage() {
             autoComplete="username"
             value={account}
             onChange={(e) => setAccount(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm outline-none focus:border-neutral-400"
+            className="mt-1 w-full ui-field px-3 py-2.5 text-sm"
           />
         </label>
         <label className="block">
@@ -76,19 +76,19 @@ export default function RegisterPage() {
             autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm outline-none focus:border-neutral-400"
+            className="mt-1 w-full ui-field px-3 py-2.5 text-sm"
           />
         </label>
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+          className="ui-btn-primary w-full px-4 py-2.5 text-sm"
         >
           {loading ? t("loading") : t("auth.register")}
         </button>
         <p className="text-center text-sm text-muted">
           {t("auth.hasAccount")}{" "}
-          <Link href="/login" className="text-neutral-900 underline hover:text-neutral-600">
+          <Link href="/login" className="text-foreground underline hover:text-foreground-secondary">
             {t("auth.login")}
           </Link>
         </p>

@@ -6,7 +6,7 @@ import { ITEM_TYPE_GROUPS, type ItemType, type ItemTypeGroup } from "@/lib/types
 export default function ItemTypeSelect({
   value,
   onChange,
-  className = "mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-neutral-400",
+  className = "ui-field mt-1 px-3 py-2 text-sm",
 }: {
   value: ItemType;
   onChange: (value: ItemType) => void;

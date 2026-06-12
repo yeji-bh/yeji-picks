@@ -219,10 +219,10 @@ export default function OutfitReviewsSection({
   return (
     <section className="mt-10 w-full">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-bold text-neutral-900">
+        <h2 className="text-lg font-bold text-foreground">
           {t("review.sectionTitle")}
         </h2>
-        <span className="text-sm text-neutral-400">
+        <span className="text-sm text-muted">
           {t("review.count", { count: total })}
         </span>
       </div>
@@ -235,10 +235,10 @@ export default function OutfitReviewsSection({
               onChange={(e) => setNickname(e.target.value)}
               placeholder={t("review.nicknamePlaceholder")}
               maxLength={32}
-              className="mb-3 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm outline-none focus:border-neutral-400"
+              className="ui-field mb-3 px-3 py-2 text-sm"
             />
           ) : (
-            <p className="mb-3 text-xs text-neutral-400">
+            <p className="mb-3 text-xs text-muted">
               {t("review.loggedInAs", { name: user.account })}
             </p>
           )}
@@ -249,10 +249,10 @@ export default function OutfitReviewsSection({
             maxLength={MAX_CONTENT}
             required
             placeholder={t("review.contentPlaceholder")}
-            className="w-full resize-none rounded-lg border border-border bg-white px-4 py-3 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-neutral-400"
+            className="ui-field w-full resize-none px-4 py-3 text-sm"
           />
           <div className="mt-2 flex items-center justify-between gap-3">
-            <span className="text-xs text-neutral-400">
+            <span className="text-xs text-muted">
               {content.length}/{MAX_CONTENT}
             </span>
             <div className="flex items-center gap-2">
@@ -261,7 +261,7 @@ export default function OutfitReviewsSection({
                   type="button"
                   onClick={resetForm}
                   disabled={submitting}
-                  className="cursor-pointer rounded-lg border border-border px-4 py-2 text-sm text-neutral-700 disabled:opacity-50"
+                  className="ui-btn-secondary cursor-pointer px-4 py-2 text-sm"
                 >
                   {t("review.cancelEdit")}
                 </button>
@@ -269,7 +269,7 @@ export default function OutfitReviewsSection({
               <button
                 type="submit"
                 disabled={submitting}
-                className="cursor-pointer rounded-lg bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+                className="ui-btn-primary cursor-pointer px-5 py-2.5 text-sm"
               >
                 {submitting
                   ? t("review.submitting")
@@ -283,11 +283,11 @@ export default function OutfitReviewsSection({
       ) : null}
 
       {loading ? (
-        <p className="mt-6 text-sm text-neutral-400">{t("loading")}</p>
+        <p className="mt-6 text-sm text-muted">{t("loading")}</p>
       ) : loadError ? (
         <p className="mt-6 text-sm text-red-600">{loadError}</p>
       ) : total === 0 ? (
-        <p className="mt-6 text-sm text-neutral-400">{t("review.empty")}</p>
+        <p className="mt-6 text-sm text-muted">{t("review.empty")}</p>
       ) : (
         <>
           <ul className="mt-8 space-y-7">
@@ -295,25 +295,25 @@ export default function OutfitReviewsSection({
               <li key={review.id} className="space-y-2">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <span className="text-sm font-semibold text-neutral-900">
+                    <span className="text-sm font-semibold text-foreground">
                       {review.isAnonymous
                         ? t("review.anonymous")
                         : review.authorName}
                     </span>
                     {review.isMine ? (
-                      <span className="ml-2 text-xs text-neutral-400">
+                      <span className="ml-2 text-xs text-muted">
                         {t("review.mine")}
                       </span>
                     ) : null}
                   </div>
                   <time
                     dateTime={review.createdAt}
-                    className="shrink-0 text-xs text-neutral-400"
+                    className="shrink-0 text-xs text-muted"
                   >
                     {formatReviewTime(review.createdAt, t)}
                   </time>
                 </div>
-                <p className="break-words text-sm leading-relaxed text-neutral-800">
+                <p className="break-words text-sm leading-relaxed text-foreground-secondary">
                   {review.content}
                 </p>
                 {review.canEdit || review.canDelete ? (
@@ -322,7 +322,7 @@ export default function OutfitReviewsSection({
                       <button
                         type="button"
                         onClick={() => startEdit(review)}
-                        className="cursor-pointer text-xs text-neutral-500 hover:text-neutral-900 hover:underline"
+                        className="cursor-pointer text-xs text-muted hover:text-foreground hover:underline"
                       >
                         {t("review.edit")}
                       </button>
@@ -331,7 +331,7 @@ export default function OutfitReviewsSection({
                       <button
                         type="button"
                         onClick={() => handleDelete(review.id)}
-                        className="cursor-pointer text-xs text-neutral-500 hover:text-red-600 hover:underline"
+                        className="cursor-pointer text-xs text-muted hover:text-red-600 hover:underline"
                       >
                         {t("review.delete")}
                       </button>
@@ -347,12 +347,12 @@ export default function OutfitReviewsSection({
               className="mt-6 flex flex-col items-center gap-2 py-2"
             >
               {loadingMore ? (
-                <p className="text-xs text-neutral-400">{t("loading")}</p>
+                <p className="text-xs text-muted">{t("loading")}</p>
               ) : (
                 <button
                   type="button"
                   onClick={() => void loadMore()}
-                  className="cursor-pointer text-xs text-neutral-500 underline-offset-2 hover:text-neutral-900 hover:underline"
+                  className="cursor-pointer text-xs text-muted underline-offset-2 hover:text-foreground hover:underline"
                 >
                   {t("review.loadMore")}
                 </button>

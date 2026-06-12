@@ -1,11 +1,37 @@
 @import "tailwindcss";
+@import "../styles/theme-colors.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-surface: #feffff;
-  --color-subtle: #f1f2f5;
-  --color-item-image: #f5f5f5;
-  --color-border: #e5e5e5;
-  --color-muted: #737373;
+  --color-surface: var(--theme-surface);
+  --color-subtle: var(--theme-subtle);
+  --color-header: var(--theme-header);
+  --color-card: var(--theme-card);
+  --color-item-image: var(--theme-item-image);
+  --color-cover: var(--theme-cover);
+  --color-border: var(--theme-border);
+  --color-muted: var(--theme-muted);
+  --color-foreground: var(--theme-foreground);
+  --color-foreground-secondary: var(--theme-foreground-secondary);
+  --color-input: var(--theme-input);
+  --color-favorite: var(--theme-favorite);
+  --color-primary: var(--theme-primary-bg);
+  --color-primary-fg: var(--theme-primary-fg);
+  --color-inactive: var(--theme-inactive);
+  --color-empty: var(--theme-empty);
+
+  --color-neutral-50: var(--theme-neutral-50);
+  --color-neutral-100: var(--theme-neutral-100);
+  --color-neutral-200: var(--theme-neutral-200);
+  --color-neutral-300: var(--theme-neutral-300);
+  --color-neutral-400: var(--theme-neutral-400);
+  --color-neutral-500: var(--theme-neutral-500);
+  --color-neutral-600: var(--theme-neutral-600);
+  --color-neutral-700: var(--theme-neutral-700);
+  --color-neutral-800: var(--theme-neutral-800);
+  --color-neutral-900: var(--theme-neutral-900);
+  --color-neutral-950: var(--theme-neutral-950);
 }
 
 .item-image-surface {
@@ -18,33 +44,36 @@ html {
 
 body {
   background-color: var(--color-surface);
-  color: #171717;
-  color-scheme: light;
+  color: var(--color-foreground);
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
   min-height: 100dvh;
+  font-family: var(--font-inter), "Pretendard Variable", -apple-system, "system-ui",
+    system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo",
+    "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", sans-serif;
 }
 
-/* 日期選擇器固定亮色主題 */
 input[type="date"] {
-  color-scheme: light;
-  background-color: #ffffff;
+  color-scheme: light dark;
+  background-color: var(--color-input);
+  color: var(--color-foreground);
 }
 
-/* 檔案上傳區：虛線框提示可點擊 */
 .file-input-zone {
   display: block;
   width: 100%;
   padding: 0.625rem 0.75rem;
   border: 1px dashed var(--color-border);
   border-radius: 0.5rem;
-  background-color: #ffffff;
+  background-color: var(--color-input);
+  color: var(--color-foreground);
   transition: border-color 0.15s, background-color 0.15s;
 }
 
 .file-input-zone:not([data-disabled="true"]):hover {
-  border-color: #a3a3a3;
-  background-color: #fafafa;
+  border-color: var(--theme-input-border-hover);
+  background-color: var(--theme-input-hover);
 }
 
 .file-input-zone[data-disabled="true"] {
@@ -55,23 +84,22 @@ input[type="date"] {
 .file-input-zone-btn {
   border: 0;
   border-radius: 0.375rem;
-  background-color: #f5f5f5;
+  background-color: var(--color-subtle);
   padding: 0.375rem 0.75rem;
   font-size: 0.875rem;
   line-height: 1.25rem;
-  color: #171717;
+  color: var(--color-foreground);
   cursor: pointer;
 }
 
 .file-input-zone-btn:hover:not(:disabled) {
-  background-color: #e5e5e5;
+  background-color: var(--color-neutral-200);
 }
 
 .file-input-zone-btn:disabled {
   cursor: not-allowed;
 }
 
-/* 可點擊元素 */
 a[href],
 button:not(:disabled),
 select,
@@ -81,7 +109,6 @@ summary,
   cursor: pointer;
 }
 
-/* 內容區一般圖片 */
 .prose img,
 img:not([data-nimg]):not(.lightbox-img) {
   max-width: 100%;
@@ -102,13 +129,18 @@ img.lightbox-img {
   appearance: none;
   border: 1px solid var(--color-border);
   padding-right: 2rem;
+  background-color: var(--color-input);
+  color: var(--color-foreground);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23737373' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.625rem center;
   background-size: 1rem;
 }
 
-/* 穿搭封面固定 3:4，避免圖片撐破版面 */
+.dark .filter-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
 .cover-aspect {
   position: relative;
   width: 100%;
@@ -118,7 +150,6 @@ img.lightbox-img {
   contain: layout paint;
 }
 
-/* 詳情頁左欄封面：撐滿單品列表高度，sticky 捲動時固定 */
 .detail-cover-column {
   position: relative;
   align-self: stretch;
@@ -137,7 +168,6 @@ img.lightbox-img {
   }
 }
 
-/* 詳情頁封面：固定 3:4 */
 .detail-cover-frame {
   position: relative;
   display: block;
@@ -164,7 +194,6 @@ img.lightbox-img {
   object-fit: cover;
 }
 
-/* 詳情頁單品列 660×230（1920 基準） */
 .detail-item-list {
   width: 100%;
   max-width: clamp(100%, 34.375vw, 660px);
@@ -174,7 +203,7 @@ img.lightbox-img {
   display: flex;
   width: 100%;
   min-height: clamp(112px, 9.5vw, 190px);
-  padding-top: .5rem;
+  padding-top: 0.5rem;
   padding-bottom: 1rem;
 }
 
@@ -214,4 +243,86 @@ img.lightbox-img {
   max-width: none !important;
   max-height: 100% !important;
   object-fit: cover;
+}
+
+/* Shared UI patterns (theme-aware) */
+.ui-panel {
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-card);
+}
+
+.ui-field {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-input);
+  color: var(--color-foreground);
+  outline: none;
+}
+
+.ui-field:focus {
+  border-color: var(--theme-neutral-400);
+}
+
+.ui-field::placeholder {
+  color: var(--color-inactive);
+}
+
+.ui-btn-primary {
+  border-radius: 0.5rem;
+  background-color: var(--color-primary);
+  color: var(--color-primary-fg);
+  font-weight: 500;
+}
+
+.ui-btn-primary:disabled {
+  opacity: 0.5;
+}
+
+.ui-btn-secondary {
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-card);
+  color: var(--color-foreground-secondary);
+}
+
+.ui-btn-secondary:disabled {
+  opacity: 0.5;
+}
+
+.ui-dropdown {
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-card);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.12);
+}
+
+.dark .ui-dropdown {
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.45);
+}
+
+.dark .bg-white:not(.item-image-surface):not(.item-image-surface *) {
+  background-color: var(--color-card);
+}
+
+.dark input.bg-white,
+.dark textarea.bg-white,
+.dark select.bg-white {
+  background-color: var(--color-input);
+  color: var(--color-foreground);
+}
+
+.dark .bg-neutral-900.text-white,
+.dark button.bg-neutral-900.text-white,
+.dark .bg-neutral-900:not(.item-image-surface) {
+  background-color: var(--color-primary);
+  color: var(--color-primary-fg);
+}
+
+.dark input[class*="border-border"]:not(.sr-only):not([type="checkbox"]):not([type="radio"]),
+.dark textarea[class*="border-border"],
+.dark select[class*="border-border"] {
+  background-color: var(--color-input);
+  color: var(--color-foreground);
 }

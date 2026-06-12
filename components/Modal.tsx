@@ -50,7 +50,7 @@ export default function Modal({
         }}
       />
       <div
-        className={`relative z-10 w-full ${maxWidthClass} overflow-hidden rounded-xl border border-border bg-white shadow-2xl`}
+        className={`relative z-10 w-full ${maxWidthClass} overflow-hidden rounded-xl border border-border bg-card shadow-2xl`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? "modal-title" : undefined}
@@ -62,7 +62,7 @@ export default function Modal({
               {title ? (
                 <h3
                   id="modal-title"
-                  className="text-sm font-semibold text-neutral-900"
+                  className="text-sm font-semibold text-foreground"
                 >
                   {title}
                 </h3>

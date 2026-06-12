@@ -6,7 +6,7 @@ import Modal from "./Modal";
 import ReportTarget from "./ReportTarget";
 
 const reportBtnClass =
-  "shrink-0 cursor-pointer rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900";
+  "shrink-0 cursor-pointer rounded-full p-2 text-muted transition-colors hover:bg-subtle hover:text-foreground";
 
 function ReportIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -103,7 +103,7 @@ export default function OutfitReport({
             onChange={(e) => setMessage(e.target.value)}
             rows={4}
             placeholder={t("report.placeholder")}
-            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-neutral-400"
+            className="ui-field w-full px-3 py-2 text-sm"
           />
           {error && <p className="text-xs text-red-600">{error}</p>}
           {done && (
@@ -114,14 +114,14 @@ export default function OutfitReport({
               type="button"
               onClick={handleClose}
               disabled={loading}
-              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm text-neutral-700 disabled:opacity-50"
+              className="ui-btn-secondary flex-1 px-4 py-2.5 text-sm"
             >
               {t("report.close")}
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-fg disabled:opacity-50"
             >
               {loading ? t("report.sending") : t("report.submit")}
             </button>

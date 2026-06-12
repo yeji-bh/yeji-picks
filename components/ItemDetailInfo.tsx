@@ -12,7 +12,7 @@ import FavoriteButton from "./FavoriteButton";
 import ProgressiveImage from "./ProgressiveImage";
 
 const actionBtnClass =
-  "shrink-0 cursor-pointer rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900";
+  "shrink-0 cursor-pointer rounded-full p-2 text-muted transition-colors hover:bg-subtle hover:text-foreground";
 
 function ExternalLinkIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -87,29 +87,13 @@ export default function ItemDetailInfo({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <p className="text-sm text-neutral-500">{t(`itemTypes.${item.type}`)}</p>
-              {item.productName && (
-                <h1 className="mt-1 break-words text-xl font-semibold leading-snug text-neutral-900 sm:text-2xl">
-                  {item.productName}
-                </h1>
-              )}
-              {item.brand && (
-                <Link
-                  href={brandHref(item.brand)}
-                  className="mt-2 w-fit max-w-full text-sm font-medium uppercase tracking-wide text-neutral-500 hover:text-neutral-800 hover:underline"
-                >
-                  {item.brand}
-                </Link>
-              )}
-            </div>
-
+            <p className="text-sm text-muted">{t(`itemTypes.${item.type}`)}</p>
             <div className="flex shrink-0 items-center gap-1">
               {isAdmin && (
                 <button
                   type="button"
                   onClick={() => setEditOpen(true)}
-                  className="cursor-pointer rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50 sm:text-sm"
+                  className="cursor-pointer rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground-secondary hover:bg-subtle sm:text-sm"
                 >
                   {t("item.editCatalogBtn")}
                 </button>
@@ -132,6 +116,20 @@ export default function ItemDetailInfo({
               <FavoriteButton type="item" targetId={item.id} variant="plain" />
             </div>
           </div>
+
+          {item.productName && (
+            <h1 className="mt-0.5 break-words text-xl font-semibold leading-snug text-foreground sm:mt-1 sm:text-2xl">
+              {item.productName}
+            </h1>
+          )}
+          {item.brand && (
+            <Link
+              href={brandHref(item.brand)}
+              className="mt-2 w-fit max-w-full text-sm font-medium uppercase tracking-wide text-muted hover:text-foreground-secondary hover:underline"
+            >
+              {item.brand}
+            </Link>
+          )}
 
           {item.linkStatus === "dead" && item.officialLink && (
             <p className="mt-3 text-xs text-red-500">{t("outfit.linkDead")}</p>

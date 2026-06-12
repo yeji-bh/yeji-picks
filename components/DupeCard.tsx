@@ -34,13 +34,13 @@ export default function DupeCard({
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1 space-y-1">
             {dupe.priceRange ? (
-              <p className="text-sm text-neutral-500">{dupe.priceRange}</p>
+              <p className="text-sm text-muted">{dupe.priceRange}</p>
             ) : null}
             <a
               href={dupe.buyLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="block truncate text-base font-bold text-neutral-900 hover:underline"
+              className="block truncate text-base font-bold text-foreground hover:underline"
             >
               {dupe.brand}
             </a>
@@ -49,7 +49,7 @@ export default function DupeCard({
                 href={dupe.buyLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block break-words text-lg leading-snug text-neutral-800 line-clamp-2 hover:underline"
+                className="block break-words text-lg leading-snug text-foreground-secondary line-clamp-2 hover:underline"
               >
                 {dupe.productName}
               </a>

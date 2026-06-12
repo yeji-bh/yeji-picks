@@ -42,8 +42,8 @@ const emptyItem = (): PendingItem => ({
 function modeBtn(active: boolean): string {
   return `cursor-pointer rounded-full px-3 py-1 text-xs font-medium ${
     active
-      ? "bg-neutral-900 text-white"
-      : "border border-border bg-white text-neutral-600"
+      ? "bg-primary text-primary-fg"
+      : "border border-border bg-card text-foreground-secondary"
   }`;
 }
 
@@ -347,8 +347,8 @@ export default function SubmitForm() {
         </p>
       )}
 
-      <section className="space-y-4 rounded-xl border border-border bg-white p-4">
-        <h2 className="text-sm font-semibold text-neutral-900">
+      <section className="ui-panel space-y-4 p-4">
+        <h2 className="text-sm font-semibold text-foreground">
           {t("submit.outfitInfo")}
         </h2>
 
@@ -356,25 +356,25 @@ export default function SubmitForm() {
           <label className="block">
             <span className="text-xs text-muted">
               {t("submit.eventName")}{" "}
-              <span className="text-neutral-400">({t("submit.optional")})</span>
+              <span className="text-inactive">({t("submit.optional")})</span>
             </span>
             <input
               value={eventName}
               onChange={(e) => setEventName(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-neutral-400"
+              className="mt-1 w-full ui-field px-3 py-2 text-sm"
             />
           </label>
 
           <label className="block">
             <span className="text-xs text-muted">
               {t("submit.date")}{" "}
-              <span className="text-neutral-400">({t("submit.optional")})</span>
+              <span className="text-inactive">({t("submit.optional")})</span>
             </span>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm outline-none focus:border-neutral-400"
+              className="ui-field mt-1 px-3 py-2 text-sm"
             />
           </label>
 
@@ -406,14 +406,14 @@ export default function SubmitForm() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-neutral-900">
+        <h2 className="text-sm font-semibold text-foreground">
           {t("submit.items")}
         </h2>
 
         {items.map((item, index) => (
           <div
             key={index}
-            className="space-y-3 rounded-xl border border-border bg-white p-4"
+            className="ui-panel space-y-3 p-4"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-muted">#{index + 1}</span>
@@ -562,7 +562,7 @@ export default function SubmitForm() {
                     onChange={(e) =>
                       updateItem(index, "productName", e.target.value)
                     }
-                    className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-neutral-400"
+                    className="mt-1 w-full ui-field px-3 py-2 text-sm"
                   />
                 </label>
 
@@ -596,7 +596,7 @@ export default function SubmitForm() {
                 onChange={(e) =>
                   updateItem(index, "officialLink", e.target.value)
                 }
-                className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-neutral-400"
+                className="mt-1 w-full ui-field px-3 py-2 text-sm"
                 placeholder="https://"
               />
             </label>
@@ -607,7 +607,7 @@ export default function SubmitForm() {
                 value={item.notes ?? ""}
                 onChange={(e) => updateItem(index, "notes", e.target.value)}
                 rows={2}
-                className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-neutral-400"
+                className="mt-1 w-full ui-field px-3 py-2 text-sm"
               />
             </label>
           </div>
@@ -616,7 +616,7 @@ export default function SubmitForm() {
         <button
           type="button"
           onClick={addItem}
-          className="text-xs text-neutral-600 underline hover:text-neutral-900"
+          className="text-xs text-foreground-secondary underline hover:text-foreground"
         >
           {t("submit.addItem")}
         </button>
@@ -625,7 +625,7 @@ export default function SubmitForm() {
       <button
         type="submit"
         disabled={submitting || !hasMainImage}
-        className="w-full rounded-lg bg-neutral-900 px-4 py-3 text-sm font-medium text-white disabled:opacity-50"
+        className="ui-btn-primary w-full px-4 py-3 text-sm"
       >
         {submitting
           ? t("submit.submitting")

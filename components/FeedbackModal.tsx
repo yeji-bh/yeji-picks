@@ -120,7 +120,7 @@ export default function FeedbackModal({
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as FeedbackCategory)}
-              className="filter-select mt-1 box-border h-10 w-full cursor-pointer rounded-lg border border-border bg-white px-3 pr-8 text-sm text-neutral-900 outline-none focus:border-neutral-400"
+              className="filter-select ui-field mt-1 box-border h-10 w-full cursor-pointer px-3 pr-8 text-sm"
             >
               {CATEGORY_OPTIONS.map((value) => (
                 <option key={value} value={value}>
@@ -136,7 +136,7 @@ export default function FeedbackModal({
             onChange={(e) => setMessage(e.target.value)}
             rows={4}
             placeholder={placeholder}
-            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-neutral-400"
+            className="ui-field w-full px-3 py-2 text-sm"
           />
 
           <div className="block">
@@ -161,7 +161,7 @@ export default function FeedbackModal({
                   type="button"
                   onClick={handleRemoveImage}
                   disabled={loading}
-                  className="text-xs text-muted underline hover:text-neutral-900 disabled:opacity-50"
+                  className="text-xs text-muted underline hover:text-foreground disabled:opacity-50"
                 >
                   {t("feedback.removeImage")}
                 </button>
@@ -175,14 +175,14 @@ export default function FeedbackModal({
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm text-neutral-700 disabled:opacity-50"
+              className="ui-btn-secondary flex-1 px-4 py-2.5 text-sm"
             >
               {t("feedback.close")}
             </button>
             <button
               type="submit"
               disabled={loading || imageProcessing}
-              className="flex-1 rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+              className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-fg disabled:opacity-50"
             >
               {loading ? t("feedback.sending") : t("feedback.submit")}
             </button>

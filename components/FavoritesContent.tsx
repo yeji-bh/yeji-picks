@@ -106,11 +106,11 @@ export default function FavoritesContent({
   return (
     <div className="min-w-0">
       <div className="mb-4 sm:mb-5">
-        <h1 className="text-xl font-semibold text-neutral-900 sm:text-2xl">
+        <h1 className="text-xl font-semibold text-foreground sm:text-2xl">
           {t("favorites.title")}
         </h1>
         {!loading && !authLoading && totalCount > 0 && (
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-muted">
             {t("favorites.totalCount", { count: totalCount })}
           </p>
         )}
@@ -125,11 +125,11 @@ export default function FavoritesContent({
       {loading || authLoading ? (
         <p className="text-sm text-muted">{t("loading")}</p>
       ) : isEmpty ? (
-        <div className="rounded-xl border border-dashed border-border bg-white p-8 text-center sm:p-12">
+        <div className="rounded-xl border border-dashed border-border bg-empty p-8 text-center sm:p-12">
           <p className="text-sm text-muted">{t("favorites.empty")}</p>
         </div>
       ) : tabEmpty ? (
-        <div className="rounded-xl bg-white p-8 text-center sm:p-12">
+        <div className="rounded-xl bg-empty p-8 text-center sm:p-12">
           <p className="text-sm text-muted">
             {viewMode === "outfit"
               ? t("home.noOutfits")

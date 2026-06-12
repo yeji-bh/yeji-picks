@@ -1,0 +1,97 @@
+/**
+ * Light / dark theme tokens — edit colors here only.
+ * Mapped to Tailwind via app/globals.css @theme.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --theme-surface: #feffff;
+  --theme-subtle: #f1f2f5;
+  --theme-header: #ffffff;
+  --theme-card: #ffffff;
+  --theme-item-image: #f5f5f5;
+  --theme-cover: #f5f5f5;
+  --theme-empty: #ffffff;
+
+  /* Text */
+  --theme-foreground: #171717;
+  --theme-foreground-secondary: #404040;
+  --theme-muted: #737373;
+  --theme-inactive: #737373;
+
+  /* Borders & overlays */
+  --theme-border: #e5e5e5;
+  --theme-overlay: rgb(0 0 0 / 0.4);
+
+  /* Inputs & controls */
+  --theme-input: #ffffff;
+  --theme-input-hover: #fafafa;
+  --theme-input-border-hover: #a3a3a3;
+
+  /* Buttons */
+  --theme-primary-bg: #171717;
+  --theme-primary-fg: #ffffff;
+  --theme-secondary-bg: #ffffff;
+  --theme-secondary-fg: #525252;
+
+  /* Accent */
+  --theme-favorite: #f85580;
+
+  /* Tailwind neutral scale */
+  --theme-neutral-50: #fafafa;
+  --theme-neutral-100: #f5f5f5;
+  --theme-neutral-200: #e5e5e5;
+  --theme-neutral-300: #d4d4d4;
+  --theme-neutral-400: #a3a3a3;
+  --theme-neutral-500: #737373;
+  --theme-neutral-600: #525252;
+  --theme-neutral-700: #404040;
+  --theme-neutral-800: #262626;
+  --theme-neutral-900: #171717;
+  --theme-neutral-950: #0a0a0a;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --theme-surface: #0c0c0c;
+  --theme-subtle: #1a1a1a;
+  --theme-header: #0c0c0c;
+  --theme-card: #141414;
+  --theme-item-image: #1c1c1c;
+  --theme-cover: #1a1a1a;
+  --theme-empty: #141414;
+
+  --theme-foreground: #f5f5f5;
+  --theme-foreground-secondary: #d4d4d4;
+  --theme-muted: #a3a3a3;
+  --theme-inactive: #9ca3af;
+
+  --theme-border: #2e2e2e;
+  --theme-overlay: rgb(0 0 0 / 0.65);
+
+  --theme-input: #1a1a1a;
+  --theme-input-hover: #222222;
+  --theme-input-border-hover: #525252;
+
+  --theme-primary-bg: #f5f5f5;
+  --theme-primary-fg: #171717;
+  --theme-secondary-bg: #1a1a1a;
+  --theme-secondary-fg: #d4d4d4;
+
+  --theme-favorite: #f85580;
+
+  --theme-neutral-50: #0a0a0a;
+  --theme-neutral-100: #141414;
+  --theme-neutral-200: #262626;
+  --theme-neutral-300: #404040;
+  --theme-neutral-400: #9ca3af;
+  --theme-neutral-500: #a3a3a3;
+  --theme-neutral-600: #b8b8b8;
+  --theme-neutral-700: #d4d4d4;
+  --theme-neutral-800: #e5e5e5;
+  --theme-neutral-900: #f5f5f5;
+  --theme-neutral-950: #fafafa;
+}

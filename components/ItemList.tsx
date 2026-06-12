@@ -25,7 +25,7 @@ type Item = {
 };
 
 const actionBtnClass =
-  "shrink-0 cursor-pointer rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900";
+  "shrink-0 cursor-pointer rounded-full p-2 text-muted transition-colors hover:bg-subtle hover:text-foreground";
 
 function ExternalLinkIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -98,7 +98,7 @@ export default function ItemList({
                     {...cdnImageProps()}
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center px-2 text-center text-[10px] leading-tight text-neutral-400">
+                  <div className="flex h-full w-full items-center justify-center px-2 text-center text-[10px] leading-tight text-muted">
                     {t(`itemTypes.${typeKey}`)}
                   </div>
                 )}
@@ -111,7 +111,7 @@ export default function ItemList({
                   <Link
                     href={brandHref(item.brand)}
                     prefetch={false}
-                    className="w-fit max-w-full truncate text-[11px] font-medium uppercase tracking-wide text-neutral-400 hover:text-neutral-600 hover:underline"
+                    className="w-fit max-w-full truncate text-[11px] font-medium uppercase tracking-wide text-muted hover:text-foreground-secondary hover:underline"
                   >
                     {item.brand}
                   </Link>
@@ -125,12 +125,12 @@ export default function ItemList({
                       type: item.type,
                     })}
                     prefetch={false}
-                    className="block break-words text-base font-semibold leading-snug text-neutral-900 hover:underline"
+                    className="block break-words text-base font-semibold leading-snug text-foreground hover:underline"
                   >
                     {item.productName}
                   </Link>
                 )}
-                <p className="text-sm text-neutral-500">
+                <p className="text-sm text-muted">
                   {t(`itemTypes.${typeKey}`)}
                 </p>
               </div>

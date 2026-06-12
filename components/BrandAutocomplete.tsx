@@ -6,7 +6,7 @@ export default function BrandAutocomplete({
   value,
   onChange,
   placeholder,
-  className = "mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-neutral-400",
+  className = "ui-field mt-1 px-3 py-2 text-sm",
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -76,12 +76,12 @@ export default function BrandAutocomplete({
         autoComplete="off"
       />
       {open && suggestions.length > 0 && (
-        <ul className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-border bg-white py-1 shadow-md">
+        <ul className="ui-dropdown absolute z-20 mt-1 max-h-48 w-full overflow-auto py-1">
           {suggestions.map((brand) => (
             <li key={brand}>
               <button
                 type="button"
-                className="w-full cursor-pointer px-3 py-2 text-left text-sm hover:bg-neutral-50"
+                className="w-full cursor-pointer px-3 py-2 text-left text-sm text-foreground hover:bg-subtle"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => pick(brand)}
               >
