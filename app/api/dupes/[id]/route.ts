@@ -19,8 +19,10 @@ export async function DELETE(
       return NextResponse.json({ error: "找不到平替" }, { status: 404 });
     }
 
-    const { deleteUploadIfOrphaned } = await import("@/lib/delete-upload");
-    await deleteUploadIfOrphaned(removed.image);
+    const { deleteUploadIfUnreferencedInDb } = await import(
+      "@/lib/delete-upload"
+    );
+    await deleteUploadIfUnreferencedInDb(removed.image);
 
     const user = await getCurrentUser();
     const voterKey = resolveVoterKey(request, user?.id);

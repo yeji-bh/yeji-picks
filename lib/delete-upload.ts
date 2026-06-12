@@ -64,17 +64,25 @@ function imagesInRawJson(rawJson: string): string[] {
   }
 }
 
-export async function isUploadReferenced(url: string): Promise<boolean> {
-  const [outfitCount, imageCount, feedbackCount, dupeCount, submissions] =
+/** Live DB references only — submission snapshots must not block R2 cleanup. */
+export async function isUploadReferencedInDb(url: string): Promise<boolean> {
+  const [outfitCount, imageCount, feedbackCount, dupeCount] =
     await Promise.all([
       prisma.outfit.count({ where: { mainImage: url } }),
       prisma.catalogItemImage.count({ where: { url } }),
       prisma.siteFeedback.count({ where: { image: url } }),
       prisma.catalogDupe.count({ where: { image: url } }),
-      prisma.submission.findMany({ select: { rawJson: true } }),
     ]);
 
-  if (outfitCount + imageCount + feedbackCount + dupeCount > 0) return true;
+  return outfitCount + imageCount + feedbackCount + dupeCount > 0;
+}
+
+export async function isUploadReferenced(url: string): Promise<boolean> {
+  if (await isUploadReferencedInDb(url)) return true;
+
+  const submissions = await prisma.submission.findMany({
+    select: { rawJson: true },
+  });
   return submissions.some((row) => imagesInRawJson(row.rawJson).includes(url));
 }
 
@@ -87,9 +95,8 @@ async function removeUploadFile(url: string): Promise<void> {
   await unlink(localUploadFilePath(url));
 }
 
-export async function deleteUploadIfOrphaned(url: string): Promise<void> {
+async function safeRemoveUpload(url: string): Promise<void> {
   if (!isManagedUpload(url)) return;
-  if (await isUploadReferenced(url)) return;
 
   try {
     await removeUploadFile(url);
@@ -102,6 +109,35 @@ export async function deleteUploadIfOrphaned(url: string): Promise<void> {
   }
 }
 
+/** Delete from storage when no live DB row references the URL. */
+export async function deleteUploadIfUnreferencedInDb(
+  url: string
+): Promise<void> {
+  if (!isManagedUpload(url)) return;
+  if (await isUploadReferencedInDb(url)) return;
+  await safeRemoveUpload(url);
+}
+
+export async function deleteUploadIfOrphaned(url: string): Promise<void> {
+  if (!isManagedUpload(url)) return;
+  if (await isUploadReferenced(url)) return;
+  await safeRemoveUpload(url);
+}
+
+/** Delete a managed upload from storage (entity that owned it was removed). */
+export async function deleteUpload(url: string): Promise<void> {
+  await safeRemoveUpload(url);
+}
+
+export async function purgeUploads(urls: Iterable<string>): Promise<void> {
+  const seen = new Set<string>();
+  for (const url of urls) {
+    if (!isManagedUpload(url) || seen.has(url)) continue;
+    seen.add(url);
+    await deleteUploadIfUnreferencedInDb(url);
+  }
+}
+
 /** Delete uploads that were removed between previous and next image sets. */
 export async function cleanupReplacedUploads(
   previousUrls: Iterable<string>,
@@ -111,7 +147,7 @@ export async function cleanupReplacedUploads(
   for (const url of previousUrls) {
     if (!isManagedUpload(url) || nextUrls.has(url) || seen.has(url)) continue;
     seen.add(url);
-    await deleteUploadIfOrphaned(url);
+    await deleteUploadIfUnreferencedInDb(url);
   }
 }
 
@@ -119,12 +155,37 @@ export async function cleanupReplacedUploads(
 export async function cleanupRemovedCatalogImages(
   urls: Iterable<string>
 ): Promise<void> {
-  const seen = new Set<string>();
-  for (const url of urls) {
-    if (!isManagedUpload(url) || seen.has(url)) continue;
-    seen.add(url);
-    await deleteUploadIfOrphaned(url);
+  await purgeUploads(urls);
+}
+
+/** Remove catalog items with useCount 0 and purge their images (incl. dupes). */
+export async function deleteOrphanCatalogItems(
+  catalogItemIds: Iterable<string>
+): Promise<void> {
+  const urlsToPurge: string[] = [];
+
+  for (const id of [...new Set(catalogItemIds)]) {
+    const item = await prisma.catalogItem.findUnique({
+      where: { id },
+      select: {
+        useCount: true,
+        images: { select: { url: true } },
+        dupes: { select: { image: true } },
+      },
+    });
+    if (!item || item.useCount > 0) continue;
+
+    for (const img of item.images) {
+      if (isManagedUpload(img.url)) urlsToPurge.push(img.url);
+    }
+    for (const dupe of item.dupes) {
+      if (isManagedUpload(dupe.image)) urlsToPurge.push(dupe.image);
+    }
+
+    await prisma.catalogItem.delete({ where: { id } });
   }
+
+  await purgeUploads(urlsToPurge);
 }
 
 export { UPLOAD_PREFIX };

@@ -197,12 +197,17 @@ export async function recalcUseCounts(
   }
 }
 
+export type SyncOutfitCatalogItemsResult = {
+  removedImageUrls: string[];
+  orphanCatalogIds: string[];
+};
+
 /** Replace all outfit placements from submission items. */
 export async function syncOutfitCatalogItems(
   tx: Prisma.TransactionClient,
   outfitId: string,
   items: SubmissionItem[]
-): Promise<string[]> {
+): Promise<SyncOutfitCatalogItemsResult> {
   const previous = await tx.outfitItem.findMany({
     where: { outfitId },
     select: { catalogItemId: true },
@@ -223,7 +228,18 @@ export async function syncOutfitCatalogItems(
   }
 
   await recalcUseCounts(tx, [...previousIds, ...nextIds]);
-  return removedImageUrls;
+
+  const orphanCatalogIds: string[] = [];
+  const orphanCandidates = previousIds.filter((id) => !nextIds.includes(id));
+  for (const id of orphanCandidates) {
+    const row = await tx.catalogItem.findUnique({
+      where: { id },
+      select: { useCount: true },
+    });
+    if (row && row.useCount === 0) orphanCatalogIds.push(id);
+  }
+
+  return { removedImageUrls, orphanCatalogIds };
 }
 
 export const getOutfitDisplayItems = cache(

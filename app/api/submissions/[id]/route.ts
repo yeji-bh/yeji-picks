@@ -95,6 +95,7 @@ export async function PATCH(
       cleanupReplacedUploads,
       collectOutfitImages,
       collectPayloadImages,
+      deleteOrphanCatalogItems,
     } = await import("@/lib/delete-upload");
 
     const previousPayload = JSON.parse(
@@ -108,6 +109,7 @@ export async function PATCH(
       previousImages = new Set(previousUrls);
 
       let removedCatalogImages: string[] = [];
+      let orphanCatalogIds: string[] = [];
       await prisma.$transaction(async (tx) => {
         await tx.outfit.update({
           where: { id: submission.outfitId! },
@@ -118,11 +120,13 @@ export async function PATCH(
           },
         });
 
-        removedCatalogImages = await syncOutfitCatalogItems(
+        const syncResult = await syncOutfitCatalogItems(
           tx,
           submission.outfitId!,
           payload.items
         );
+        removedCatalogImages = syncResult.removedImageUrls;
+        orphanCatalogIds = syncResult.orphanCatalogIds;
 
         await tx.submission.update({
           where: { id },
@@ -132,6 +136,7 @@ export async function PATCH(
 
       await cleanupReplacedUploads(previousImages, nextImages);
       await cleanupRemovedCatalogImages(removedCatalogImages);
+      await deleteOrphanCatalogItems(orphanCatalogIds);
       revalidateOutfitCaches(submission.outfitId);
     } else {
       previousImages = collectPayloadImages(previousPayload);
@@ -180,38 +185,51 @@ export async function DELETE(
     }
 
     const {
-      collectOutfitImages,
+      cleanupReplacedUploads,
       collectPayloadImages,
-      deleteUploadIfOrphaned,
+      deleteOrphanCatalogItems,
+      purgeUploads,
     } = await import("@/lib/delete-upload");
 
     const outfitId = submission.outfitId;
-    const imagesToMaybeDelete: string[] = [];
+    let mainImage: string | null = null;
+    let catalogIds: string[] = [];
 
     if (outfitId) {
-      imagesToMaybeDelete.push(...(await collectOutfitImages(outfitId)));
-    } else {
-      imagesToMaybeDelete.push(
-        ...collectPayloadImages(JSON.parse(submission.rawJson) as SubmissionPayload)
-      );
+      const outfit = await prisma.outfit.findUnique({
+        where: { id: outfitId },
+        select: { mainImage: true },
+      });
+      mainImage = outfit?.mainImage ?? null;
+      catalogIds = (
+        await prisma.outfitItem.findMany({
+          where: { outfitId },
+          select: { catalogItemId: true },
+        })
+      ).map((row) => row.catalogItemId);
     }
+
+    const pendingImages = outfitId
+      ? null
+      : collectPayloadImages(
+          JSON.parse(submission.rawJson) as SubmissionPayload
+        );
 
     await prisma.$transaction(async (tx) => {
       if (outfitId) {
-        const catalogIds = (
-          await tx.outfitItem.findMany({
-            where: { outfitId },
-            select: { catalogItemId: true },
-          })
-        ).map((row) => row.catalogItemId);
         await tx.outfit.delete({ where: { id: outfitId } });
         await recalcUseCounts(tx, catalogIds);
       }
       await tx.submission.delete({ where: { id } });
     });
 
-    for (const url of imagesToMaybeDelete) {
-      await deleteUploadIfOrphaned(url);
+    if (outfitId) {
+      await deleteOrphanCatalogItems(catalogIds);
+      if (mainImage) {
+        await purgeUploads([mainImage]);
+      }
+    } else if (pendingImages) {
+      await cleanupReplacedUploads(pendingImages, new Set());
     }
 
     if (outfitId) {

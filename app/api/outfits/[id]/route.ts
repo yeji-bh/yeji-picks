@@ -81,12 +81,14 @@ export async function PATCH(
       cleanupReplacedUploads,
       collectOutfitImages,
       collectPayloadImages,
+      deleteOrphanCatalogItems,
     } = await import("@/lib/delete-upload");
 
     const previousImages = await collectOutfitImages(id);
     const nextImages = collectPayloadImages(payload);
 
     let removedCatalogImages: string[] = [];
+    let orphanCatalogIds: string[] = [];
     await prisma.$transaction(async (tx) => {
       await tx.outfit.update({
         where: { id },
@@ -97,7 +99,9 @@ export async function PATCH(
         },
       });
 
-      removedCatalogImages = await syncOutfitCatalogItems(tx, id, payload.items);
+      const syncResult = await syncOutfitCatalogItems(tx, id, payload.items);
+      removedCatalogImages = syncResult.removedImageUrls;
+      orphanCatalogIds = syncResult.orphanCatalogIds;
 
       await tx.submission.updateMany({
         where: { outfitId: id },
@@ -107,6 +111,7 @@ export async function PATCH(
 
     await cleanupReplacedUploads(previousImages, nextImages);
     await cleanupRemovedCatalogImages(removedCatalogImages);
+    await deleteOrphanCatalogItems(orphanCatalogIds);
 
     revalidateOutfitCaches(id);
 
