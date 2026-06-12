@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { compressImageForUpload } from "@/lib/compress-image-client";
 import { prepareImageFile } from "@/lib/prepare-image-file";
 import FileInputZone from "./FileInputZone";
 import Modal from "./Modal";
@@ -82,7 +83,12 @@ export default function FeedbackModal({
       const formData = new FormData();
       formData.append("category", category);
       formData.append("message", message);
-      if (imageFile) formData.append("image", imageFile);
+      if (imageFile) {
+        formData.append(
+          "image",
+          await compressImageForUpload(imageFile, "feedback")
+        );
+      }
 
       const res = await fetch("/api/feedback", {
         method: "POST",

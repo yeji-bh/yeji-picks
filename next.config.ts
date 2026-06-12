@@ -17,7 +17,6 @@ function assetRemotePatterns(): NonNullable<
 
 const nextConfig: NextConfig = {
   serverExternalPackages: [
-    "@cf-wasm/photon",
     "@libsql/isomorphic-ws",
     "@libsql/client",
     "@prisma/client",

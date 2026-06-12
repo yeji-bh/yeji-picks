@@ -7,6 +7,7 @@ import { useAuth } from "./AuthProvider";
 import FileInputZone from "./FileInputZone";
 import Modal from "./Modal";
 import { useToast } from "./ToastProvider";
+import { compressImageForUpload } from "@/lib/compress-image-client";
 import { prepareImageFile } from "@/lib/prepare-image-file";
 import type { DupeSummary, DupeVoteType } from "@/lib/catalog-dupe-types";
 import { dupeGuestHeaders } from "@/lib/dupe-guest-id";
@@ -112,7 +113,10 @@ export default function ItemDupesSection({
       if (productName) formData.append("productName", productName);
       if (priceRange) formData.append("priceRange", priceRange);
       if (notes) formData.append("notes", notes);
-      formData.append("image", imageFile);
+      formData.append(
+        "image",
+        await compressImageForUpload(imageFile, "item")
+      );
 
       const res = await fetch(`/api/catalog-items/${catalogItemId}/dupes`, {
         method: "POST",

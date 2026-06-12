@@ -1,0 +1,74 @@
+{
+  "api": {
+    "fields": {
+      "eventName": "活動名稱",
+      "brand": "品牌",
+      "productName": "單品名稱",
+      "notes": "備註",
+      "nickname": "暱稱",
+      "reviewContent": "評價內容",
+      "feedback": "反饋內容",
+      "report": "回報內容",
+      "dupeBrand": "品牌",
+      "dupeLink": "購買連結",
+      "content": "內容"
+    },
+    "moderation": {
+      "empty": "{{field}}不可為空",
+      "tooLong": "{{field}}過長",
+      "blocked": "{{field}}含有不允許的內容",
+      "invalid": "{{field}}格式異常"
+    },
+    "account": {
+      "length": "帳號長度不符合規範",
+      "blocked": "此帳號名稱不可使用",
+      "allDigits": "帳號不可全為數字",
+      "format": "帳號 2–32 字，僅限字母、數字、底線、點、連字號或中文",
+      "inUse": "此帳號已被使用"
+    },
+    "errors": {
+      "unauthorized": "未授權",
+      "notLoggedIn": "未登入",
+      "forbidden": "無權限",
+      "notFoundOutfit": "找不到穿搭",
+      "notFoundItem": "找不到單品",
+      "notFoundReview": "找不到評價",
+      "notFoundSubmission": "找不到投稿",
+      "notFoundDupe": "找不到平替",
+      "loadFailed": "載入失敗",
+      "updateFailed": "更新失敗",
+      "deleteFailed": "刪除失敗",
+      "submitFailed": "送出失敗",
+      "invalidPayload": "資料格式不正確",
+      "invalidParams": "無效參數",
+      "invalidAction": "無效操作",
+      "invalidVote": "無效的投票",
+      "invalidRequest": "請求無效",
+      "voterUnidentified": "無法識別投票者",
+      "actorUnidentified": "無法識別使用者",
+      "voteFailed": "投票失敗",
+      "operationFailed": "操作失敗",
+      "selectImage": "請選擇圖片",
+      "enterFeedback": "請輸入反饋內容",
+      "enterBrand": "請輸入品牌",
+      "enterLink": "請輸入購買連結",
+      "missingIds": "缺少 ids 參數",
+      "registerFailed": "註冊失敗",
+      "loginFailed": "登入失敗",
+      "loginCredentials": "帳號或密碼錯誤",
+      "loginRequired": "請輸入帳號與密碼",
+      "passwordMin": "密碼至少 6 個字元",
+      "submissionProcessed": "此投稿已處理",
+      "submissionApprovedEdit": "已通過的投稿請由管理員編輯穿搭",
+      "submissionNotEditable": "此投稿已無法編輯",
+      "reviewAlreadyExists": "你已評價過此穿搭，請編輯既有評價",
+      "translationFailed": "翻譯失敗",
+      "review": {
+        "contentRequired": "請輸入評價內容",
+        "contentMax": "評價內容最多 {{max}} 字",
+        "nicknameInvalid": "暱稱格式不正確",
+        "nicknameMax": "暱稱最多 {{max}} 字"
+      }
+    }
+  }
+}

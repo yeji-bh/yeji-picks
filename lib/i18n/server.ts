@@ -11,10 +11,10 @@ import {
   parseApiLocale,
 } from "@/lib/i18n/resolve-locale";
 
-import zhCN from "@/locales/zh-CN/common.json";
-import zhTW from "@/locales/zh-TW/common.json";
-import en from "@/locales/en/common.json";
-import ko from "@/locales/ko/common.json";
+import zhCN from "@/locales/zh-CN/api.json";
+import zhTW from "@/locales/zh-TW/api.json";
+import en from "@/locales/en/api.json";
+import ko from "@/locales/ko/api.json";
 
 type Dict = Record<string, unknown>;
 

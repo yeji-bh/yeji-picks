@@ -23,21 +23,6 @@ function isCloudflareWorker(): boolean {
   );
 }
 
-function fitInside(
-  width: number,
-  height: number,
-  maxEdge: number
-): { width: number; height: number } {
-  if (width <= maxEdge && height <= maxEdge) {
-    return { width, height };
-  }
-  const scale = Math.min(maxEdge / width, maxEdge / height);
-  return {
-    width: Math.max(1, Math.round(width * scale)),
-    height: Math.max(1, Math.round(height * scale)),
-  };
-}
-
 function isUnsupportedImageError(err: unknown): boolean {
   const msg = err instanceof Error ? err.message.toLowerCase() : String(err);
   return (
@@ -46,51 +31,6 @@ function isUnsupportedImageError(err: unknown): boolean {
     msg.includes("bad seek") ||
     msg.includes("unsupported")
   );
-}
-
-async function compressWithPhoton(
-  buffer: Buffer,
-  kind: ImageKind
-): Promise<Buffer> {
-  const { PhotonImage, SamplingFilter, resize } = await import(
-    "@cf-wasm/photon/workerd"
-  );
-  const { maxEdge } = compressOptions(kind);
-
-  const inputImage = PhotonImage.new_from_byteslice(new Uint8Array(buffer));
-  try {
-    const width = inputImage.get_width();
-    const height = inputImage.get_height();
-
-    if (!width || !height) {
-      throw new Error("無法讀取圖片");
-    }
-    if (width < 40 || height < 40) {
-      throw new Error("圖片尺寸過小");
-    }
-
-    const target = fitInside(width, height, maxEdge);
-    const outputImage =
-      target.width === width && target.height === height
-        ? inputImage
-        : resize(
-            inputImage,
-            target.width,
-            target.height,
-            SamplingFilter.Lanczos3
-          );
-
-    try {
-      const outputBytes = outputImage.get_bytes_webp();
-      return Buffer.from(outputBytes);
-    } finally {
-      if (outputImage !== inputImage) {
-        outputImage.free();
-      }
-    }
-  } finally {
-    inputImage.free();
-  }
 }
 
 async function compressWithSharp(
@@ -123,10 +63,12 @@ export async function compressImageBuffer(
   buffer: Buffer,
   kind: ImageKind = "item"
 ): Promise<Buffer> {
+  if (isCloudflareWorker()) {
+    // Browser compresses to WebP before upload; avoid bundling WASM on Workers.
+    return buffer;
+  }
+
   try {
-    if (isCloudflareWorker()) {
-      return await compressWithPhoton(buffer, kind);
-    }
     return await compressWithSharp(buffer, kind);
   } catch (err) {
     if (isUnsupportedImageError(err)) {

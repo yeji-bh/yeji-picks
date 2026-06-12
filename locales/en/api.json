@@ -1,0 +1,74 @@
+{
+  "api": {
+    "fields": {
+      "eventName": "Event name",
+      "brand": "Brand",
+      "productName": "Item name",
+      "notes": "Notes",
+      "nickname": "Nickname",
+      "reviewContent": "Review",
+      "feedback": "Feedback",
+      "report": "Report",
+      "dupeBrand": "Brand",
+      "dupeLink": "Purchase link",
+      "content": "Content"
+    },
+    "moderation": {
+      "empty": "{{field}} is required",
+      "tooLong": "{{field}} is too long",
+      "blocked": "{{field}} contains disallowed content",
+      "invalid": "{{field}} format is invalid"
+    },
+    "account": {
+      "length": "Account length is invalid",
+      "blocked": "This account name is not allowed",
+      "allDigits": "Account cannot be all digits",
+      "format": "Account must be 2–32 characters (letters, numbers, _, ., -, or CJK)",
+      "inUse": "This account is already taken"
+    },
+    "errors": {
+      "unauthorized": "Unauthorized",
+      "notLoggedIn": "Not signed in",
+      "forbidden": "Forbidden",
+      "notFoundOutfit": "Outfit not found",
+      "notFoundItem": "Item not found",
+      "notFoundReview": "Review not found",
+      "notFoundSubmission": "Submission not found",
+      "notFoundDupe": "Dupe not found",
+      "loadFailed": "Failed to load",
+      "updateFailed": "Failed to update",
+      "deleteFailed": "Failed to delete",
+      "submitFailed": "Failed to submit",
+      "invalidPayload": "Invalid data format",
+      "invalidParams": "Invalid parameters",
+      "invalidAction": "Invalid action",
+      "invalidVote": "Invalid vote",
+      "invalidRequest": "Invalid request",
+      "voterUnidentified": "Could not identify voter",
+      "actorUnidentified": "Could not identify user",
+      "voteFailed": "Vote failed",
+      "operationFailed": "Operation failed",
+      "selectImage": "Please select an image",
+      "enterFeedback": "Please enter feedback",
+      "enterBrand": "Please enter a brand",
+      "enterLink": "Please enter a purchase link",
+      "missingIds": "Missing ids parameter",
+      "registerFailed": "Registration failed",
+      "loginFailed": "Sign-in failed",
+      "loginCredentials": "Incorrect account or password",
+      "loginRequired": "Please enter account and password",
+      "passwordMin": "Password must be at least 6 characters",
+      "submissionProcessed": "This submission was already processed",
+      "submissionApprovedEdit": "Approved submissions must be edited by an admin",
+      "submissionNotEditable": "This submission can no longer be edited",
+      "reviewAlreadyExists": "You already reviewed this outfit — edit your existing review",
+      "translationFailed": "Translation failed",
+      "review": {
+        "contentRequired": "Please enter a review",
+        "contentMax": "Review must be at most {{max}} characters",
+        "nicknameInvalid": "Invalid nickname format",
+        "nicknameMax": "Nickname must be at most {{max}} characters"
+      }
+    }
+  }
+}
