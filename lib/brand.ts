@@ -3,16 +3,21 @@ export function brandKey(brand: string): string {
   return brand.trim().toLowerCase();
 }
 
+/** Route param value (unencoded); Next.js encodes spaces in URLs. */
 export function brandSlug(brand: string): string {
-  return encodeURIComponent(brandKey(brand));
+  return brandKey(brand);
 }
 
 export function parseBrandSlug(slug: string): string {
-  return brandKey(decodeURIComponent(slug));
+  try {
+    return brandKey(decodeURIComponent(slug));
+  } catch {
+    return brandKey(slug);
+  }
 }
 
 export function brandHref(brand: string): string {
-  return `/brand/${brandSlug(brand)}`;
+  return `/brand/${encodeURIComponent(brandSlug(brand))}`;
 }
 
 /** Prefer the spelling that appears most often in the database. */
