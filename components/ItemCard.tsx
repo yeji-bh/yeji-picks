@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { assetUrl } from "@/lib/asset-url";
+import { useAssetUrl } from "@/lib/use-asset-url";
 import { cdnImageProps } from "@/lib/remote-image";
 import { brandHref } from "@/lib/brand";
 import { itemHref } from "@/lib/entity-href";
@@ -29,6 +29,7 @@ export default function ItemCard({
   const { t } = useTranslation();
   const typeLabel = t(`itemTypes.${type}`);
   const detailHref = itemHref({ id, productName, brand, type });
+  const imageSrc = useAssetUrl(image);
 
   return (
     <article className="group min-w-0">
@@ -40,7 +41,7 @@ export default function ItemCard({
       >
         {image ? (
           <Image
-            src={assetUrl(image)}
+            src={imageSrc}
             alt={productName ?? typeLabel}
             fill
             className="object-contain"

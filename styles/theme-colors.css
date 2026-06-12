@@ -11,7 +11,7 @@
   --theme-subtle: #f1f2f5;
   --theme-header: #ffffff;
   --theme-card: #ffffff;
-  --theme-item-image: #f5f5f5;
+  --theme-item-image: #F6F6F6;
   --theme-cover: #f5f5f5;
   --theme-empty: #ffffff;
 
@@ -20,7 +20,6 @@
   --theme-foreground-secondary: #404040;
   --theme-muted: #737373;
   --theme-inactive: #737373;
-
   /* Borders & overlays */
   --theme-border: #e5e5e5;
   --theme-overlay: rgb(0 0 0 / 0.4);
@@ -60,7 +59,7 @@
   --theme-subtle: #1a1a1a;
   --theme-header: #0c0c0c;
   --theme-card: #141414;
-  --theme-item-image: #1c1c1c;
+  --theme-item-image: #2a2a2a;
   --theme-cover: #1a1a1a;
   --theme-empty: #141414;
 

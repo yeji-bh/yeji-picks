@@ -6,6 +6,7 @@ import ToastProvider from "@/components/ToastProvider";
 import HeaderNav from "@/components/HeaderNav";
 import I18nProvider from "@/components/I18nProvider";
 import SiteFooter from "@/components/SiteFooter";
+import AssetCacheBustProvider from "@/components/AssetCacheBustProvider";
 import ThemeProvider from "@/components/ThemeProvider";
 import { DEFAULT_LOCALE } from "@/lib/i18n/settings";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
@@ -56,6 +57,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} flex min-h-dvh flex-col`}>
         <ThemeProvider>
+          <AssetCacheBustProvider>
           <I18nProvider initialLocale={DEFAULT_LOCALE}>
             <AuthProvider>
               <FavoritesProvider>
@@ -71,6 +73,7 @@ export default function RootLayout({
               </FavoritesProvider>
             </AuthProvider>
           </I18nProvider>
+          </AssetCacheBustProvider>
         </ThemeProvider>
       </body>
     </html>

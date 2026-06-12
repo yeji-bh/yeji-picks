@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { assetUrl } from "@/lib/asset-url";
+import { useAssetUrl } from "@/lib/use-asset-url";
 import { cdnImageProps } from "@/lib/remote-image";
 import { COVER_ASPECT_CLASS } from "@/lib/image";
 import { outfitHref } from "@/lib/entity-href";
@@ -33,6 +33,7 @@ export default function OutfitCard({
   const displayTitle = title === "outfit" ? t("outfit.unnamed") : title;
   const imageRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
+  const mainImageSrc = useAssetUrl(mainImage);
 
   useEffect(() => {
     const el = imageRef.current;
@@ -68,7 +69,7 @@ export default function OutfitCard({
             <div className="absolute inset-0 animate-pulse bg-neutral-200" aria-hidden />
           ) : (
             <Image
-              src={assetUrl(mainImage)}
+              src={mainImageSrc}
               alt={displayTitle}
               fill
               className="object-cover"
