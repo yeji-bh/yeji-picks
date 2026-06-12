@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { apiError } from "@/lib/api-error";
 import {
   listCatalogDupes,
   setDupeVote,
@@ -15,7 +16,7 @@ export async function POST(
   const user = await getCurrentUser();
   const voterKey = resolveVoterKey(request, user?.id);
   if (!voterKey) {
-    return NextResponse.json({ error: "無法識別投票者" }, { status: 400 });
+    return apiError(request, "api.errors.voterUnidentified", 400);
   }
 
   const { id } = await params;
@@ -24,7 +25,7 @@ export async function POST(
     const body = await request.json();
     const vote = body.vote;
     if (vote !== "like" && vote !== "dislike") {
-      return NextResponse.json({ error: "無效的投票" }, { status: 400 });
+      return apiError(request, "api.errors.invalidVote", 400);
     }
 
     const dupe = await prisma.catalogDupe.findUnique({
@@ -32,17 +33,17 @@ export async function POST(
       select: { catalogItemId: true },
     });
     if (!dupe) {
-      return NextResponse.json({ error: "找不到平替" }, { status: 404 });
+      return apiError(request, "api.errors.notFoundDupe", 404);
     }
 
     const updated = await setDupeVote(id, voterKey, vote as DupeVoteType);
     if (!updated) {
-      return NextResponse.json({ error: "找不到平替" }, { status: 404 });
+      return apiError(request, "api.errors.notFoundDupe", 404);
     }
 
     const dupes = await listCatalogDupes(dupe.catalogItemId, voterKey);
     return NextResponse.json({ dupe: updated, dupes });
   } catch {
-    return NextResponse.json({ error: "投票失敗" }, { status: 500 });
+    return apiError(request, "api.errors.voteFailed", 500);
   }
 }

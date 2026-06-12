@@ -1,6 +1,11 @@
-import { ITEM_TYPES, normalizeItemType } from "@/lib/types";
-import { OUTFIT_SORT_OPTIONS, type OutfitSort } from "@/lib/outfit-sort";
 import type { ItemSummary } from "@/lib/item-summary";
+import type { Locale } from "@/lib/i18n/settings";
+import { compareLocaleFields } from "@/lib/locale-collator";
+import {
+  OUTFIT_SORT_OPTIONS,
+  type OutfitSort,
+  typeCategoryRank,
+} from "@/lib/outfit-sort";
 
 export const ITEM_SORT_OPTIONS = OUTFIT_SORT_OPTIONS;
 export type ItemSort = OutfitSort;
@@ -13,17 +18,41 @@ export function parseItemSort(value: string | null | undefined): ItemSort {
   return DEFAULT_ITEM_SORT;
 }
 
-export function itemCategorySortIndex(type: string): number {
-  const normalized = normalizeItemType(type);
-  const index = ITEM_TYPES.indexOf(normalized);
-  return index >= 0 ? index : ITEM_TYPES.length;
+export function itemNameSortFields(item: ItemSummary): string[] {
+  return [item.productName ?? "", item.brand ?? "", item.id];
 }
 
-export function compareItemsByCategory(a: ItemSummary, b: ItemSummary): number {
-  const diff = itemCategorySortIndex(a.type) - itemCategorySortIndex(b.type);
+export function compareItemsByCategory(
+  a: ItemSummary,
+  b: ItemSummary,
+  locale?: Locale
+): number {
+  const diff = typeCategoryRank(a.type) - typeCategoryRank(b.type);
   if (diff !== 0) return diff;
-  return (
-    new Date(b.outfitCreatedAt).getTime() -
-    new Date(a.outfitCreatedAt).getTime()
+
+  if (locale) {
+    const nameDiff = compareLocaleFields(
+      locale,
+      "asc",
+      itemNameSortFields(a),
+      itemNameSortFields(b)
+    );
+    if (nameDiff !== 0) return nameDiff;
+  }
+
+  return a.id.localeCompare(b.id);
+}
+
+export function compareItemsByName(
+  a: ItemSummary,
+  b: ItemSummary,
+  locale: Locale,
+  direction: "asc" | "desc"
+): number {
+  return compareLocaleFields(
+    locale,
+    direction,
+    itemNameSortFields(a),
+    itemNameSortFields(b)
   );
 }

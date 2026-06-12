@@ -15,46 +15,69 @@ const BLOCKED_ACCOUNT_PATTERNS = [
 const MAX_TEXT_LENGTH = 2000;
 const MAX_ACCOUNT_LENGTH = 32;
 
+export type ModerationField =
+  | "eventName"
+  | "brand"
+  | "productName"
+  | "notes"
+  | "nickname"
+  | "reviewContent"
+  | "feedback"
+  | "report"
+  | "dupeBrand"
+  | "dupeLink"
+  | "content";
+
+export type ModerationCode = "empty" | "tooLong" | "blocked" | "invalid";
+
+export type ModerationFailure = {
+  ok: false;
+  code: ModerationCode;
+  field: ModerationField;
+};
+
 export function moderateText(
   text: string,
-  field = "內容"
-): { ok: true } | { ok: false; error: string } {
+  field: ModerationField
+): { ok: true } | ModerationFailure {
   const trimmed = text.trim();
   if (!trimmed) {
-    return { ok: false, error: `${field}不可為空` };
+    return { ok: false, code: "empty", field };
   }
   if (trimmed.length > MAX_TEXT_LENGTH) {
-    return { ok: false, error: `${field}過長` };
+    return { ok: false, code: "tooLong", field };
   }
   if (SPAM_PATTERNS.some((pattern) => pattern.test(trimmed))) {
-    return { ok: false, error: `${field}含有不允許的內容` };
+    return { ok: false, code: "blocked", field };
   }
   if (/(.)\1{12,}/.test(trimmed)) {
-    return { ok: false, error: `${field}格式異常` };
+    return { ok: false, code: "invalid", field };
   }
   return { ok: true };
 }
 
+export type AccountModerationCode = "length" | "blocked" | "allDigits";
+
 export function moderateAccount(
   account: string
-): { ok: true } | { ok: false; error: string } {
+): { ok: true } | { ok: false; code: AccountModerationCode } {
   const trimmed = account.trim();
   if (trimmed.length < 2 || trimmed.length > MAX_ACCOUNT_LENGTH) {
-    return { ok: false, error: "帳號長度不符合規範" };
+    return { ok: false, code: "length" };
   }
   if (BLOCKED_ACCOUNT_PATTERNS.some((pattern) => pattern.test(trimmed))) {
-    return { ok: false, error: "此帳號名稱不可使用" };
+    return { ok: false, code: "blocked" };
   }
   if (/^\d+$/.test(trimmed)) {
-    return { ok: false, error: "帳號不可全為數字" };
+    return { ok: false, code: "allDigits" };
   }
   return { ok: true };
 }
 
 export function moderateOptionalText(
   text: string | null | undefined,
-  field: string
-): { ok: true } | { ok: false; error: string } {
+  field: ModerationField
+): { ok: true } | ModerationFailure {
   if (!text?.trim()) return { ok: true };
   return moderateText(text, field);
 }

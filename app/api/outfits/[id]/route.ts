@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminUser } from "@/lib/auth";
+import { apiError } from "@/lib/api-error";
 import { getOutfitDisplayItems, syncOutfitCatalogItems } from "@/lib/catalog-item";
 import { PUBLIC_API_CACHE } from "@/lib/cache-config";
 import { prisma } from "@/lib/db";
@@ -8,7 +9,7 @@ import { revalidateOutfitCaches } from "@/lib/revalidate-outfits";
 import { validateSubmissionPayload } from "@/lib/submission";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -16,7 +17,7 @@ export async function GET(
 
     const outfit = await prisma.outfit.findUnique({ where: { id } });
     if (!outfit) {
-      return NextResponse.json({ error: "找不到穿搭" }, { status: 404 });
+      return apiError(request, "api.errors.notFoundOutfit", 404);
     }
 
     const [items, neighbors] = await Promise.all([
@@ -49,7 +50,7 @@ export async function GET(
     );
   } catch (err) {
     console.error("[outfit GET]", err);
-    return NextResponse.json({ error: "載入失敗" }, { status: 500 });
+    return apiError(request, "api.errors.loadFailed", 500);
   }
 }
 
@@ -58,7 +59,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await isAdminUser())) {
-    return NextResponse.json({ error: "未授權" }, { status: 401 });
+    return apiError(request, "api.errors.unauthorized", 401);
   }
 
   const { id } = await params;
@@ -68,12 +69,12 @@ export async function PATCH(
     const payload = validateSubmissionPayload(body);
 
     if (!payload) {
-      return NextResponse.json({ error: "資料格式不正確" }, { status: 400 });
+      return apiError(request, "api.errors.invalidPayload", 400);
     }
 
     const outfit = await prisma.outfit.findUnique({ where: { id } });
     if (!outfit) {
-      return NextResponse.json({ error: "找不到穿搭" }, { status: 404 });
+      return apiError(request, "api.errors.notFoundOutfit", 404);
     }
 
     const {
@@ -117,6 +118,6 @@ export async function PATCH(
 
     return NextResponse.json({ ok: true });
   } catch {
-    return NextResponse.json({ error: "更新失敗" }, { status: 500 });
+    return apiError(request, "api.errors.updateFailed", 500);
   }
 }

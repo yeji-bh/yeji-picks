@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, isAdminUser } from "@/lib/auth";
 import { resolveVoterKey } from "@/lib/dupe-actor";
+import { apiError, moderationError } from "@/lib/api-error";
 import { moderateText } from "@/lib/content-moderation";
 import {
   REVIEW_PAGE_SIZE,
@@ -32,7 +33,7 @@ export async function GET(
 
   const outfit = await prisma.outfit.findUnique({ where: { id } });
   if (!outfit) {
-    return NextResponse.json({ error: "找不到穿搭" }, { status: 404 });
+    return apiError(request, "api.errors.notFoundOutfit", 404);
   }
 
   const page = await getOutfitReviewPage(id, actorKey, isAdmin, offset, limit);
@@ -47,40 +48,37 @@ export async function POST(
   const user = await getCurrentUser();
   const actorKey = resolveVoterKey(request, user?.id);
   if (!actorKey) {
-    return NextResponse.json({ error: "無法識別使用者" }, { status: 400 });
+    return apiError(request, "api.errors.actorUnidentified", 400);
   }
 
   const outfit = await prisma.outfit.findUnique({ where: { id } });
   if (!outfit) {
-    return NextResponse.json({ error: "找不到穿搭" }, { status: 404 });
+    return apiError(request, "api.errors.notFoundOutfit", 404);
   }
 
   const existing = await prisma.outfitReview.findUnique({
     where: { outfitId_actorKey: { outfitId: id, actorKey } },
   });
   if (existing) {
-    return NextResponse.json(
-      { error: "你已評價過此穿搭，請編輯既有評價" },
-      { status: 409 }
-    );
+    return apiError(request, "api.errors.reviewAlreadyExists", 409);
   }
 
   try {
     const body = await request.json();
     const parsed = validateReviewInput(body);
     if (!parsed.ok) {
-      return NextResponse.json({ error: parsed.error }, { status: 400 });
+      return apiError(request, parsed.errorKey, 400, parsed.params);
     }
 
     const nickname = user ? null : parsed.nickname;
-    for (const [label, text] of [
-      ["暱稱", nickname],
-      ["評價內容", parsed.content],
+    for (const [field, text] of [
+      ["nickname", nickname],
+      ["reviewContent", parsed.content],
     ] as const) {
       if (!text) continue;
-      const check = moderateText(text, label);
+      const check = moderateText(text, field);
       if (!check.ok) {
-        return NextResponse.json({ error: check.error }, { status: 400 });
+        return moderationError(request, check.field, check.code);
       }
     }
 
@@ -93,6 +91,6 @@ export async function POST(
     const page = await getOutfitReviewPage(id, actorKey, isAdmin, 0);
     return NextResponse.json({ ok: true, ...page });
   } catch {
-    return NextResponse.json({ error: "送出失敗" }, { status: 500 });
+    return apiError(request, "api.errors.submitFailed", 500);
   }
 }

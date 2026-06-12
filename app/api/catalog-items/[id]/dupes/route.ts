@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { apiError, moderationError } from "@/lib/api-error";
 import { listCatalogDupes } from "@/lib/catalog-dupe";
-import { moderateText } from "@/lib/content-moderation";
+import { moderateOptionalText, moderateText } from "@/lib/content-moderation";
 import { resolveVoterKey } from "@/lib/dupe-actor";
 import { prisma } from "@/lib/db";
 
@@ -16,14 +17,14 @@ export async function GET(
 
     const item = await prisma.catalogItem.findUnique({ where: { id } });
     if (!item) {
-      return NextResponse.json({ error: "找不到單品" }, { status: 404 });
+      return apiError(request, "api.errors.notFoundItem", 404);
     }
 
     const dupes = await listCatalogDupes(id, voterKey);
     return NextResponse.json({ dupes });
   } catch (err) {
     console.error("[dupes GET]", err);
-    return NextResponse.json({ error: "載入失敗" }, { status: 500 });
+    return apiError(request, "api.errors.loadFailed", 500);
   }
 }
 
@@ -36,7 +37,7 @@ export async function POST(
 
   const item = await prisma.catalogItem.findUnique({ where: { id } });
   if (!item) {
-    return NextResponse.json({ error: "找不到單品" }, { status: 404 });
+    return apiError(request, "api.errors.notFoundItem", 404);
   }
 
   try {
@@ -49,13 +50,13 @@ export async function POST(
     const imageFile = formData.get("image");
 
     if (typeof brandRaw !== "string" || !brandRaw.trim()) {
-      return NextResponse.json({ error: "請輸入品牌" }, { status: 400 });
+      return apiError(request, "api.errors.enterBrand", 400);
     }
     if (typeof buyLinkRaw !== "string" || !buyLinkRaw.trim()) {
-      return NextResponse.json({ error: "請輸入購買連結" }, { status: 400 });
+      return apiError(request, "api.errors.enterLink", 400);
     }
     if (!(imageFile instanceof File) || imageFile.size === 0) {
-      return NextResponse.json({ error: "請選擇圖片" }, { status: 400 });
+      return apiError(request, "api.errors.selectImage", 400);
     }
 
     const brand = brandRaw.trim();
@@ -71,16 +72,24 @@ export async function POST(
     const notes =
       typeof notesRaw === "string" && notesRaw.trim() ? notesRaw.trim() : null;
 
-    for (const [label, text] of [
-      ["品牌", brand],
-      ["商品名稱", productName],
-      ["價格區間", priceRange],
-      ["備註", notes],
+    const brandCheck = moderateText(brand, "dupeBrand");
+    if (!brandCheck.ok) {
+      return moderationError(request, brandCheck.field, brandCheck.code);
+    }
+
+    const linkCheck = moderateText(buyLink, "dupeLink");
+    if (!linkCheck.ok) {
+      return moderationError(request, linkCheck.field, linkCheck.code);
+    }
+
+    for (const [value, field] of [
+      [productName, "productName"],
+      [priceRange, "notes"],
+      [notes, "notes"],
     ] as const) {
-      if (!text) continue;
-      const check = moderateText(text, label);
+      const check = moderateOptionalText(value, field);
       if (!check.ok) {
-        return NextResponse.json({ error: check.error }, { status: 400 });
+        return moderationError(request, check.field, check.code);
       }
     }
 
@@ -106,8 +115,7 @@ export async function POST(
     const dupe = dupes.find((row) => row.id === created.id);
 
     return NextResponse.json({ ok: true, dupe, dupes });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "送出失敗";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return apiError(request, "api.errors.submitFailed", 500);
   }
 }

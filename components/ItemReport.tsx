@@ -36,6 +36,7 @@ export default function ItemReport({
   itemBrand,
   itemProductName,
   variant = "text",
+  compact = false,
 }: {
   outfitId: string;
   itemId: string;
@@ -44,6 +45,7 @@ export default function ItemReport({
   itemBrand: string | null;
   itemProductName: string | null;
   variant?: "text" | "icon";
+  compact?: boolean;
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -95,11 +97,15 @@ export default function ItemReport({
         aria-label={t("report.itemButton")}
         className={
           variant === "icon"
-            ? reportBtnClass
+            ? `${reportBtnClass} ${compact ? "p-1.5" : ""}`
             : "cursor-pointer text-xs text-muted underline hover:text-neutral-900"
         }
       >
-        {variant === "icon" ? <ReportIcon /> : t("report.itemButton")}
+        {variant === "icon" ? (
+          <ReportIcon className={compact ? "h-[18px] w-[18px]" : "h-5 w-5"} />
+        ) : (
+          t("report.itemButton")
+        )}
       </button>
 
       <Modal

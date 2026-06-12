@@ -2,9 +2,12 @@ import "server-only";
 
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import type { ItemSummary } from "@/lib/item-summary";
 import { toItemSummary } from "@/lib/item-summary";
+import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/settings";
 import {
   compareItemsByCategory,
+  compareItemsByName,
   DEFAULT_ITEM_SORT,
   type ItemSort,
   parseItemSort,
@@ -54,21 +57,47 @@ function prismaOrderBy(sort: ItemSort): Prisma.CatalogItemOrderByWithRelationInp
   }
 }
 
+function sortItemsInMemory(
+  items: ItemSummary[],
+  sort: ItemSort,
+  locale: Locale
+): ItemSummary[] {
+  if (sort === "category") {
+    return [...items].sort((a, b) => compareItemsByCategory(a, b, locale));
+  }
+  if (sort === "name_asc" || sort === "name_desc") {
+    const direction = sort === "name_asc" ? "asc" : "desc";
+    return [...items].sort((a, b) =>
+      compareItemsByName(a, b, locale, direction)
+    );
+  }
+  return items;
+}
+
+function needsInMemorySort(sort: ItemSort): boolean {
+  return sort === "category" || sort === "name_asc" || sort === "name_desc";
+}
+
 async function queryItemList(
   limit: number,
   offset: number,
   sort: ItemSort = DEFAULT_ITEM_SORT,
-  includeTotal = true
+  includeTotal = true,
+  locale: Locale = DEFAULT_LOCALE
 ): Promise<ItemListResult> {
-  if (sort === "category") {
+  if (needsInMemorySort(sort)) {
     const rows = await prisma.catalogItem.findMany({ select: catalogSelect });
-    const sorted = rows.map(toItemSummary).sort(compareItemsByCategory);
+    const sorted = sortItemsInMemory(rows.map(toItemSummary), sort, locale);
     const items = sorted.slice(offset, offset + limit);
-    const total = includeTotal ? sorted.length : offset + items.length + (items.length === limit ? 1 : 0);
+    const total = includeTotal
+      ? sorted.length
+      : offset + items.length + (items.length === limit ? 1 : 0);
     return {
       items,
       total,
-      hasMore: offset + items.length < (includeTotal ? total : offset + items.length + (items.length === limit ? 1 : 0)),
+      hasMore:
+        offset + items.length <
+        (includeTotal ? total : offset + items.length + (items.length === limit ? 1 : 0)),
     };
   }
 
@@ -103,8 +132,10 @@ export async function getItemList(
   limit: number,
   offset: number,
   sort?: string | null,
-  includeTotal = true
+  includeTotal = true,
+  locale?: string | null
 ): Promise<ItemListResult> {
   const parsedSort = parseItemSort(sort);
-  return queryItemList(limit, offset, parsedSort, includeTotal);
+  const parsedLocale = locale && isLocale(locale) ? locale : DEFAULT_LOCALE;
+  return queryItemList(limit, offset, parsedSort, includeTotal, parsedLocale);
 }

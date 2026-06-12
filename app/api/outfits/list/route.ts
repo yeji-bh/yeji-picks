@@ -13,8 +13,9 @@ export async function GET(request: NextRequest) {
   );
 
   const sort = request.nextUrl.searchParams.get("sort");
+  const locale = request.nextUrl.searchParams.get("locale");
   const withTotal = request.nextUrl.searchParams.get("withTotal") !== "0";
-  const data = await getOutfitList(limit, offset, sort, withTotal);
+  const data = await getOutfitList(limit, offset, sort, withTotal, locale);
 
   return NextResponse.json(data, {
     headers: {

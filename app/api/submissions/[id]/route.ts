@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { apiError } from "@/lib/api-error";
 import { recalcUseCounts, syncOutfitCatalogItems } from "@/lib/catalog-item";
 import { revalidateOutfitCaches } from "@/lib/revalidate-outfits";
 import { prisma } from "@/lib/db";
@@ -27,11 +28,11 @@ export async function GET(
     const submission = await prisma.submission.findUnique({ where: { id } });
 
     if (!submission) {
-      return NextResponse.json({ error: "找不到投稿" }, { status: 404 });
+      return apiError(request, "api.errors.notFoundSubmission", 404);
     }
 
     if (!canManageSubmission(submission, user, localIds)) {
-      return NextResponse.json({ error: "無權限" }, { status: 403 });
+      return apiError(request, "api.errors.forbidden", 403);
     }
 
     return NextResponse.json({
@@ -42,7 +43,7 @@ export async function GET(
       payload: JSON.parse(submission.rawJson) as SubmissionPayload,
     });
   } catch {
-    return NextResponse.json({ error: "載入失敗" }, { status: 500 });
+    return apiError(request, "api.errors.loadFailed", 500);
   }
 }
 
@@ -58,18 +59,15 @@ export async function PATCH(
     const submission = await prisma.submission.findUnique({ where: { id } });
 
     if (!submission) {
-      return NextResponse.json({ error: "找不到投稿" }, { status: 404 });
+      return apiError(request, "api.errors.notFoundSubmission", 404);
     }
 
     if (!canManageSubmission(submission, user, localIds)) {
-      return NextResponse.json({ error: "無權限" }, { status: 403 });
+      return apiError(request, "api.errors.forbidden", 403);
     }
 
     if (submission.status === "approved" && user?.role !== "admin") {
-      return NextResponse.json(
-        { error: "已通過的投稿請由管理員編輯穿搭" },
-        { status: 400 }
-      );
+      return apiError(request, "api.errors.submissionApprovedEdit", 400);
     }
 
     if (
@@ -77,14 +75,14 @@ export async function PATCH(
       submission.status !== "rejected" &&
       submission.status !== "approved"
     ) {
-      return NextResponse.json({ error: "此投稿已無法編輯" }, { status: 400 });
+      return apiError(request, "api.errors.submissionNotEditable", 400);
     }
 
     const body = await request.json();
     const payload = validateSubmissionPayload(body);
 
     if (!payload) {
-      return NextResponse.json({ error: "資料格式不正確" }, { status: 400 });
+      return apiError(request, "api.errors.invalidPayload", 400);
     }
 
     const nextStatus =
@@ -161,7 +159,7 @@ export async function PATCH(
       payload,
     });
   } catch {
-    return NextResponse.json({ error: "更新失敗" }, { status: 500 });
+    return apiError(request, "api.errors.updateFailed", 500);
   }
 }
 
@@ -177,11 +175,11 @@ export async function DELETE(
     const submission = await prisma.submission.findUnique({ where: { id } });
 
     if (!submission) {
-      return NextResponse.json({ error: "找不到投稿" }, { status: 404 });
+      return apiError(request, "api.errors.notFoundSubmission", 404);
     }
 
     if (!canManageSubmission(submission, user, localIds)) {
-      return NextResponse.json({ error: "無權限" }, { status: 403 });
+      return apiError(request, "api.errors.forbidden", 403);
     }
 
     const {
@@ -240,6 +238,6 @@ export async function DELETE(
 
     return NextResponse.json({ ok: true });
   } catch {
-    return NextResponse.json({ error: "刪除失敗" }, { status: 500 });
+    return apiError(request, "api.errors.deleteFailed", 500);
   }
 }

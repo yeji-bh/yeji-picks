@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { isLocale } from "@/lib/i18n/settings";
 import { translateTexts } from "@/lib/translate";
 
@@ -7,7 +8,7 @@ export async function POST(request: NextRequest) {
     const { texts, to } = await request.json();
 
     if (!Array.isArray(texts) || !isLocale(to)) {
-      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+      return apiError(request, "api.errors.invalidRequest", 400);
     }
 
     const validTexts = texts.filter((t) => typeof t === "string");
@@ -15,6 +16,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ translations });
   } catch {
-    return NextResponse.json({ error: "Translation failed" }, { status: 500 });
+    return apiError(request, "api.errors.translationFailed", 500);
   }
 }

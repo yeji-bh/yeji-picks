@@ -1,4 +1,4 @@
-import { Inter } from "next/font/google";
+import { Inter, Noto_Sans_SC, Noto_Sans_TC } from "next/font/google";
 
 export const inter = Inter({
   subsets: ["latin"],
@@ -6,5 +6,16 @@ export const inter = Inter({
   variable: "--font-inter",
 });
 
-export const APP_FONT_FAMILY =
-  'var(--font-inter), "Pretendard Variable", -apple-system, "system-ui", system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif';
+export const notoSansSC = Noto_Sans_SC({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-noto-sc",
+});
+
+export const notoSansTC = Noto_Sans_TC({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-noto-tc",
+});

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { resolveVoterKey } from "@/lib/dupe-actor";
+import { apiError, moderationError } from "@/lib/api-error";
 import { moderateText } from "@/lib/content-moderation";
 import {
   getOutfitReviewPage,
@@ -18,9 +19,11 @@ async function canManageReview(
     where: { id: reviewId },
     select: { actorKey: true, outfitId: true },
   });
-  if (!review) return { ok: false as const, status: 404, error: "找不到評價" };
+  if (!review) {
+    return { ok: false as const, status: 404, errorKey: "api.errors.notFoundReview" };
+  }
   if (!isAdmin && (!actorKey || review.actorKey !== actorKey)) {
-    return { ok: false as const, status: 403, error: "未授權" };
+    return { ok: false as const, status: 403, errorKey: "api.errors.unauthorized" };
   }
   return { ok: true as const, review };
 }
@@ -36,28 +39,28 @@ export async function PATCH(
 
   const access = await canManageReview(reviewId, actorKey, isAdmin);
   if (!access.ok) {
-    return NextResponse.json({ error: access.error }, { status: access.status });
+    return apiError(request, access.errorKey, access.status);
   }
   if (access.review.outfitId !== id) {
-    return NextResponse.json({ error: "找不到評價" }, { status: 404 });
+    return apiError(request, "api.errors.notFoundReview", 404);
   }
 
   try {
     const body = await request.json();
     const parsed = validateReviewInput(body);
     if (!parsed.ok) {
-      return NextResponse.json({ error: parsed.error }, { status: 400 });
+      return apiError(request, parsed.errorKey, 400, parsed.params);
     }
 
     const nickname = user ? null : parsed.nickname;
-    for (const [label, text] of [
-      ["暱稱", nickname],
-      ["評價內容", parsed.content],
+    for (const [field, text] of [
+      ["nickname", nickname],
+      ["reviewContent", parsed.content],
     ] as const) {
       if (!text) continue;
-      const check = moderateText(text, label);
+      const check = moderateText(text, field);
       if (!check.ok) {
-        return NextResponse.json({ error: check.error }, { status: 400 });
+        return moderationError(request, check.field, check.code);
       }
     }
 
@@ -69,7 +72,7 @@ export async function PATCH(
     const page = await getOutfitReviewPage(id, actorKey, isAdmin, 0);
     return NextResponse.json({ ok: true, ...page });
   } catch {
-    return NextResponse.json({ error: "更新失敗" }, { status: 500 });
+    return apiError(request, "api.errors.updateFailed", 500);
   }
 }
 
@@ -84,10 +87,10 @@ export async function DELETE(
 
   const access = await canManageReview(reviewId, actorKey, isAdmin);
   if (!access.ok) {
-    return NextResponse.json({ error: access.error }, { status: access.status });
+    return apiError(request, access.errorKey, access.status);
   }
   if (access.review.outfitId !== id) {
-    return NextResponse.json({ error: "找不到評價" }, { status: 404 });
+    return apiError(request, "api.errors.notFoundReview", 404);
   }
 
   try {
@@ -96,6 +99,6 @@ export async function DELETE(
     const page = await getOutfitReviewPage(id, actorKey, isAdmin, 0);
     return NextResponse.json({ ok: true, ...page });
   } catch {
-    return NextResponse.json({ error: "刪除失敗" }, { status: 500 });
+    return apiError(request, "api.errors.deleteFailed", 500);
   }
 }

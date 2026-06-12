@@ -39,7 +39,7 @@ function FilterTab({
       type="button"
       onClick={onClick}
       className={`relative shrink-0 cursor-pointer whitespace-nowrap text-1rem font-medium transition-colors ${
-        active ? "font-semibold text-foreground" : "text-inactive hover:text-foreground-secondary"
+        active ? "font-semibold text-accent" : "text-inactive hover:text-foreground-secondary"
       }`}
     >
       {label}
@@ -48,10 +48,10 @@ function FilterTab({
 }
 
 const searchClass =
-  "box-border min-h-11 w-full min-w-0 rounded-md border border-border bg-input py-3 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-inactive focus:border-neutral-400";
+  "box-border min-h-11 w-full min-w-0 rounded-sm border border-border bg-input py-3 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-inactive focus:border-neutral-400";
 
 const sortClass =
-  "filter-select box-border h-9 min-w-[11rem] cursor-pointer rounded-md border border-border bg-input px-2 pr-7 text-sm text-foreground-secondary outline-none focus:border-neutral-400";
+  "filter-select box-border h-9 min-w-[11rem] cursor-pointer rounded-sm border border-border bg-input px-2 pr-7 text-sm text-foreground-secondary outline-none focus:border-neutral-400";
 
 const filterScrollClass =
   "flex flex-nowrap gap-7 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";

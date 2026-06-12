@@ -183,7 +183,6 @@ export default function ItemDupesSection({
           <h2 className="text-base font-medium text-foreground">
             {t("dupe.sectionTitle")}
           </h2>
-          <p className="mt-1 text-sm text-muted">{t("dupe.sectionDesc")}</p>
         </div>
         <button
           type="button"
@@ -198,7 +197,6 @@ export default function ItemDupesSection({
         open={formOpen}
         onClose={closeForm}
         title={t("dupe.addDupe")}
-        description={t("dupe.sectionDesc")}
         closeDisabled={submitting}
       >
         <form

@@ -36,7 +36,8 @@
   --theme-secondary-fg: #525252;
 
   /* Accent */
-  --theme-favorite: #f85580;
+  --theme-accent: #f74b75;
+  --theme-favorite: #f74b75;
 
   /* Tailwind neutral scale */
   --theme-neutral-50: #fafafa;
@@ -59,7 +60,7 @@
   --theme-subtle: #1a1a1a;
   --theme-header: #0c0c0c;
   --theme-card: #141414;
-  --theme-item-image: #2a2a2a;
+  --theme-item-image: #3a3a3a;
   --theme-cover: #1a1a1a;
   --theme-empty: #141414;
 
@@ -80,7 +81,8 @@
   --theme-secondary-bg: #1a1a1a;
   --theme-secondary-fg: #d4d4d4;
 
-  --theme-favorite: #f85580;
+  --theme-accent: #f74b75;
+  --theme-favorite: #f74b75;
 
   --theme-neutral-50: #0a0a0a;
   --theme-neutral-100: #141414;

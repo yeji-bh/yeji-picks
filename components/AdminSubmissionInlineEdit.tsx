@@ -124,7 +124,7 @@ export default function AdminSubmissionInlineEdit({
     <div className="space-y-3">
       <div className="grid gap-2 sm:grid-cols-2">
         <label className="block min-w-0">
-          <span className="text-[10px] text-muted">{t("submit.eventName")}</span>
+          <span className="text-sm text-muted">{t("submit.eventName")}</span>
           <input
             value={form.eventName}
             onChange={(e) => updateField("eventName", e.target.value)}
@@ -132,7 +132,7 @@ export default function AdminSubmissionInlineEdit({
           />
         </label>
         <label className="block min-w-0">
-          <span className="text-[10px] text-muted">{t("submit.date")}</span>
+          <span className="text-sm text-muted">{t("submit.date")}</span>
           <input
             type="date"
             value={form.date}
@@ -152,13 +152,13 @@ export default function AdminSubmissionInlineEdit({
               className="space-y-1.5 rounded-lg border border-border bg-neutral-50 p-2.5"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-medium text-muted">
+                <span className="text-sm font-medium text-muted">
                   #{index + 1}
                 </span>
                 <button
                   type="button"
                   onClick={() => removeItem(index)}
-                  className="text-[10px] text-red-500 hover:text-red-700"
+                  className="text-sm text-red-500 hover:text-red-700"
                 >
                   {t("submit.remove")}
                 </button>

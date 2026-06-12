@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { isAdminUser } from "@/lib/auth";
+import { apiError } from "@/lib/api-error";
 import { prisma } from "@/lib/db";
 import { checkLink } from "@/lib/link-check";
 import { formatOutfitTitle } from "@/lib/outfit";
@@ -42,9 +43,9 @@ const deadLinkSelect = {
   },
 } as const;
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   if (!(await isAdminUser())) {
-    return NextResponse.json({ error: "未授權" }, { status: 401 });
+    return apiError(request, "api.errors.unauthorized", 401);
   }
 
   const items = await prisma.catalogItem.findMany({
@@ -84,9 +85,9 @@ export async function POST() {
   });
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   if (!(await isAdminUser())) {
-    return NextResponse.json({ error: "未授權" }, { status: 401 });
+    return apiError(request, "api.errors.unauthorized", 401);
   }
 
   const deadLinks = await prisma.catalogItem.findMany({

@@ -1,13 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useAssetUrl } from "@/lib/use-asset-url";
-import { cdnImageProps } from "@/lib/remote-image";
 import { brandHref } from "@/lib/brand";
 import { itemHref } from "@/lib/entity-href";
 import FavoriteButton from "./FavoriteButton";
+import ProgressiveImage from "./ProgressiveImage";
 import { saveHomeScrollIfHome } from "@/lib/home-scroll";
 
 type ItemCardProps = {
@@ -40,14 +39,13 @@ export default function ItemCard({
         className="item-image-surface relative block aspect-[3/4] w-full overflow-hidden"
       >
         {image ? (
-          <Image
+          <ProgressiveImage
             src={imageSrc}
+            uploadPath={image}
             alt={productName ?? typeLabel}
             fill
             className="object-contain"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            loading="lazy"
-            {...cdnImageProps()}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center px-3 text-center text-xs text-muted">

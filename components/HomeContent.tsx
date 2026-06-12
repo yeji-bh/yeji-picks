@@ -74,7 +74,7 @@ export default function HomeContent({
 }: {
   initialData?: InitialData;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [viewMode, setViewMode] = useState<HomeViewMode>("outfit");
   const [sort, setSort] = useState<OutfitSort>(DEFAULT_OUTFIT_SORT);
   const [outfits, setOutfits] = useState<OutfitSummary[]>(
@@ -115,26 +115,26 @@ export default function HomeContent({
     async (offset: number, limit: number, nextSort: OutfitSort) => {
       const withTotal = offset === 0 ? "1" : "0";
       const res = await fetch(
-        `/api/outfits/list?limit=${limit}&offset=${offset}&sort=${nextSort}&withTotal=${withTotal}`
+        `/api/outfits/list?limit=${limit}&offset=${offset}&sort=${nextSort}&withTotal=${withTotal}&locale=${encodeURIComponent(i18n.language)}`
       );
       const data = await res.json();
       if (!res.ok) throw new Error();
       return data as OutfitListData;
     },
-    []
+    [i18n.language]
   );
 
   const fetchItems = useCallback(
     async (offset: number, limit: number, nextSort: OutfitSort) => {
       const withTotal = offset === 0 ? "1" : "0";
       const res = await fetch(
-        `/api/items/list?limit=${limit}&offset=${offset}&sort=${nextSort}&withTotal=${withTotal}`
+        `/api/items/list?limit=${limit}&offset=${offset}&sort=${nextSort}&withTotal=${withTotal}&locale=${encodeURIComponent(i18n.language)}`
       );
       const data = await res.json();
       if (!res.ok) throw new Error();
       return data as ItemListData;
     },
-    []
+    [i18n.language]
   );
 
   const reloadFromStart = useCallback(

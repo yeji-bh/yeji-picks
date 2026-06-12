@@ -104,23 +104,33 @@ export function validateReviewInput(body: {
   content?: unknown;
 }):
   | { ok: true; nickname: string | null; content: string }
-  | { ok: false; error: string } {
+  | { ok: false; errorKey: string; params?: Record<string, number> } {
   const content =
     typeof body.content === "string" ? body.content.trim() : "";
-  if (!content) return { ok: false, error: "請輸入評價內容" };
+  if (!content) {
+    return { ok: false, errorKey: "api.errors.review.contentRequired" };
+  }
   if (content.length > MAX_CONTENT) {
-    return { ok: false, error: `評價內容最多 ${MAX_CONTENT} 字` };
+    return {
+      ok: false,
+      errorKey: "api.errors.review.contentMax",
+      params: { max: MAX_CONTENT },
+    };
   }
 
   let nickname: string | null = null;
   if (body.nickname != null && body.nickname !== "") {
     if (typeof body.nickname !== "string") {
-      return { ok: false, error: "暱稱格式不正確" };
+      return { ok: false, errorKey: "api.errors.review.nicknameInvalid" };
     }
     nickname = body.nickname.trim();
     if (!nickname) nickname = null;
     else if (nickname.length > MAX_NICKNAME) {
-      return { ok: false, error: `暱稱最多 ${MAX_NICKNAME} 字` };
+      return {
+        ok: false,
+        errorKey: "api.errors.review.nicknameMax",
+        params: { max: MAX_NICKNAME },
+      };
     }
   }
 

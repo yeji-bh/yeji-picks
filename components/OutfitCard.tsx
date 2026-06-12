@@ -1,16 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAssetUrl } from "@/lib/use-asset-url";
-import { cdnImageProps } from "@/lib/remote-image";
 import { COVER_ASPECT_CLASS } from "@/lib/image";
 import { outfitHref } from "@/lib/entity-href";
 import { formatOutfitTitle } from "@/lib/outfit";
 import FavoriteButton from "./FavoriteButton";
 import ItemTypeBadges from "./ItemTypeBadges";
+import ProgressiveImage from "./ProgressiveImage";
 import { saveHomeScrollIfHome } from "@/lib/home-scroll";
 
 type OutfitCardProps = {
@@ -31,27 +29,7 @@ export default function OutfitCard({
   const { t } = useTranslation();
   const title = formatOutfitTitle(date, eventName);
   const displayTitle = title === "outfit" ? t("outfit.unnamed") : title;
-  const imageRef = useRef<HTMLDivElement>(null);
-  const [inView, setInView] = useState(false);
   const mainImageSrc = useAssetUrl(mainImage);
-
-  useEffect(() => {
-    const el = imageRef.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "120px" }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <article className="group min-w-0">
@@ -61,23 +39,15 @@ export default function OutfitCard({
         onClick={() => saveHomeScrollIfHome()}
         className="block"
       >
-        <div
-          ref={imageRef}
-          className={`relative w-full overflow-hidden bg-cover ${COVER_ASPECT_CLASS}`}
-        >
-          {!inView ? (
-            <div className="absolute inset-0 animate-pulse bg-neutral-200" aria-hidden />
-          ) : (
-            <Image
-              src={mainImageSrc}
-              alt={displayTitle}
-              fill
-              className="object-cover"
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              loading="lazy"
-              {...cdnImageProps()}
-            />
-          )}
+        <div className={`relative w-full overflow-hidden bg-cover ${COVER_ASPECT_CLASS}`}>
+          <ProgressiveImage
+            src={mainImageSrc}
+            uploadPath={mainImage}
+            alt={displayTitle}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          />
         </div>
       </Link>
       <div className="mt-2.5 space-y-1.5">

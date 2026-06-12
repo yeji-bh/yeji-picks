@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { prisma } from "@/lib/db";
 import { normalizeItemType } from "@/lib/types";
 
@@ -6,7 +7,7 @@ export async function GET(request: NextRequest) {
   const idsParam = request.nextUrl.searchParams.get("ids");
 
   if (!idsParam) {
-    return NextResponse.json({ error: "缺少 ids 參數" }, { status: 400 });
+    return apiError(request, "api.errors.missingIds", 400);
   }
 
   const ids = idsParam.split(",").filter(Boolean);

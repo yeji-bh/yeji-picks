@@ -143,14 +143,17 @@ export default function HeaderNav() {
             <ThemeToggle />
           </nav>
 
-          <button
-            type="button"
-            onClick={() => setMenuOpen(true)}
-            className="flex cursor-pointer items-center justify-center rounded-lg p-2 text-foreground-secondary hover:bg-subtle lg:hidden"
-            aria-label={t("nav.openMenu")}
-          >
-            <IconMenu />
-          </button>
+          <div className="flex items-center gap-0.5 lg:hidden">
+            <ThemeToggle />
+            <button
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              className="flex cursor-pointer items-center justify-center rounded-lg p-2 text-foreground-secondary hover:bg-subtle"
+              aria-label={t("nav.openMenu")}
+            >
+              <IconMenu />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -273,9 +276,6 @@ export default function HeaderNav() {
                     <span>{t("auth.login")}</span>
                   </button>
                 ))}
-              <div className="mt-2 flex justify-end px-1">
-                <ThemeToggle />
-              </div>
             </div>
           </aside>
         </div>

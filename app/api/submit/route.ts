@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { approveSubmission } from "@/lib/approve-submission";
+import { apiError, moderationError } from "@/lib/api-error";
 import { moderateOptionalText, moderateText } from "@/lib/content-moderation";
 import { prisma } from "@/lib/db";
 import { validateSubmissionPayload } from "@/lib/submission";
@@ -11,25 +12,25 @@ export async function POST(request: NextRequest) {
     const payload = validateSubmissionPayload(body);
 
     if (!payload) {
-      return NextResponse.json({ error: "資料格式不正確" }, { status: 400 });
+      return apiError(request, "api.errors.invalidPayload", 400);
     }
 
     if (payload.eventName.trim()) {
-      const nameCheck = moderateText(payload.eventName, "活動名稱");
+      const nameCheck = moderateText(payload.eventName, "eventName");
       if (!nameCheck.ok) {
-        return NextResponse.json({ error: nameCheck.error }, { status: 400 });
+        return moderationError(request, nameCheck.field, nameCheck.code);
       }
     }
 
     for (const item of payload.items) {
       for (const [value, field] of [
-        [item.brand, "品牌"],
-        [item.productName, "商品名稱"],
-        [item.notes, "備註"],
+        [item.brand, "brand"],
+        [item.productName, "productName"],
+        [item.notes, "notes"],
       ] as const) {
         const check = moderateOptionalText(value, field);
         if (!check.ok) {
-          return NextResponse.json({ error: check.error }, { status: 400 });
+          return moderationError(request, check.field, check.code);
         }
       }
     }
@@ -56,6 +57,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ id: submission.id, status: "pending" });
   } catch {
-    return NextResponse.json({ error: "送出失敗" }, { status: 500 });
+    return apiError(request, "api.errors.submitFailed", 500);
   }
 }

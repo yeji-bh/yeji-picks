@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { apiError } from "@/lib/api-error";
 import { prisma } from "@/lib/db";
 
 const VALID_TYPES = new Set(["outfit", "item"]);
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const user = await getCurrentUser();
   if (!user) {
-    return NextResponse.json({ error: "未登入" }, { status: 401 });
+    return apiError(request, "api.errors.notLoggedIn", 401);
   }
 
   const favorites = await prisma.favorite.findMany({
@@ -28,7 +29,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const user = await getCurrentUser();
   if (!user) {
-    return NextResponse.json({ error: "未登入" }, { status: 401 });
+    return apiError(request, "api.errors.notLoggedIn", 401);
   }
 
   const body = await request.json();
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
           : null;
 
   if (!type || !targetId || !VALID_TYPES.has(type)) {
-    return NextResponse.json({ error: "無效參數" }, { status: 400 });
+    return apiError(request, "api.errors.invalidParams", 400);
   }
 
   if (type === "outfit") {
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
       select: { id: true },
     });
     if (!exists) {
-      return NextResponse.json({ error: "找不到穿搭" }, { status: 404 });
+      return apiError(request, "api.errors.notFoundOutfit", 404);
     }
   } else {
     const exists = await prisma.catalogItem.findUnique({
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
       select: { id: true },
     });
     if (!exists) {
-      return NextResponse.json({ error: "找不到單品" }, { status: 404 });
+      return apiError(request, "api.errors.notFoundItem", 404);
     }
   }
 
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const user = await getCurrentUser();
   if (!user) {
-    return NextResponse.json({ error: "未登入" }, { status: 401 });
+    return apiError(request, "api.errors.notLoggedIn", 401);
   }
 
   const type = request.nextUrl.searchParams.get("type");
@@ -95,7 +96,7 @@ export async function DELETE(request: NextRequest) {
     request.nextUrl.searchParams.get("itemId");
 
   if (!type || !targetId || !VALID_TYPES.has(type)) {
-    return NextResponse.json({ error: "無效參數" }, { status: 400 });
+    return apiError(request, "api.errors.invalidParams", 400);
   }
 
   await prisma.favorite.deleteMany({

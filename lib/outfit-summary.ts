@@ -5,6 +5,7 @@ type OutfitWithItems = {
   mainImage: string;
   eventName: string;
   date: string;
+  createdAt?: Date;
   outfitItems: {
     catalogItem: {
       type: string;
@@ -22,6 +23,7 @@ export function toOutfitSummary(outfit: OutfitWithItems) {
     mainImage: outfit.mainImage,
     eventName: outfit.eventName,
     date: outfit.date,
+    createdAt: outfit.createdAt?.toISOString(),
     itemTypes: [
       ...new Set(catalogItems.map((item) => normalizeItemType(item.type))),
     ],

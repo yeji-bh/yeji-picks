@@ -117,7 +117,7 @@ export default function CatalogItemPicker({
                     {item.productName || item.brand || "—"}
                   </span>
                   {item.brand && (
-                    <span className="block truncate text-[11px] text-muted">
+                    <span className="block truncate text-sm text-muted">
                       {item.brand}
                     </span>
                   )}

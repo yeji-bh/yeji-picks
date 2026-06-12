@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies, headers } from "next/headers";
 import AuthProvider from "@/components/AuthProvider";
 import FavoritesProvider from "@/components/FavoritesProvider";
 import DocumentTitle from "@/components/DocumentTitle";
@@ -6,12 +7,15 @@ import ToastProvider from "@/components/ToastProvider";
 import HeaderNav from "@/components/HeaderNav";
 import I18nProvider from "@/components/I18nProvider";
 import SiteFooter from "@/components/SiteFooter";
-import AssetCacheBustProvider from "@/components/AssetCacheBustProvider";
 import ThemeProvider from "@/components/ThemeProvider";
-import { DEFAULT_LOCALE } from "@/lib/i18n/settings";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { getAssetBaseUrl } from "@/lib/asset-base";
-import { inter } from "@/lib/fonts";
+import { inter, notoSansSC, notoSansTC } from "@/lib/fonts";
+import {
+  LOCALE_MANUAL_COOKIE,
+  resolveInitialLocale,
+} from "@/lib/i18n/resolve-locale";
+import { LOCALE_COOKIE } from "@/lib/i18n/settings";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
@@ -32,15 +36,22 @@ export const viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const assetBase = getAssetBaseUrl();
+  const cookieStore = await cookies();
+  const headerStore = await headers();
+  const locale = resolveInitialLocale(
+    cookieStore.get(LOCALE_COOKIE)?.value,
+    cookieStore.get(LOCALE_MANUAL_COOKIE)?.value,
+    headerStore.get("accept-language")
+  );
 
   return (
-    <html lang={DEFAULT_LOCALE} suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <link
           rel="stylesheet"
@@ -55,10 +66,11 @@ export default function RootLayout({
           />
         ) : null}
       </head>
-      <body className={`${inter.variable} flex min-h-dvh flex-col`}>
+      <body
+        className={`${inter.variable} ${notoSansSC.variable} ${notoSansTC.variable} flex min-h-dvh flex-col`}
+      >
         <ThemeProvider>
-          <AssetCacheBustProvider>
-          <I18nProvider initialLocale={DEFAULT_LOCALE}>
+          <I18nProvider initialLocale={locale}>
             <AuthProvider>
               <FavoritesProvider>
                 <DocumentTitle />
@@ -73,7 +85,6 @@ export default function RootLayout({
               </FavoritesProvider>
             </AuthProvider>
           </I18nProvider>
-          </AssetCacheBustProvider>
         </ThemeProvider>
       </body>
     </html>

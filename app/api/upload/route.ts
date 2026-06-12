@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import type { ImageKind } from "@/lib/image-compress";
 
 export async function POST(request: NextRequest) {
@@ -8,7 +9,7 @@ export async function POST(request: NextRequest) {
     const kindRaw = formData.get("kind");
 
     if (!file || !(file instanceof File)) {
-      return NextResponse.json({ error: "請選擇圖片" }, { status: 400 });
+      return apiError(request, "api.errors.selectImage", 400);
     }
 
     const kind: ImageKind =
@@ -19,7 +20,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url });
   } catch (err) {
     console.error("[upload POST]", err);
-    const message = err instanceof Error ? err.message : "上傳失敗";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return apiError(request, "api.errors.operationFailed", 400);
   }
 }

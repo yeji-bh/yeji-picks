@@ -5,6 +5,7 @@ import {
   isValidAccount,
   normalizeAccount,
 } from "@/lib/auth";
+import { apiError } from "@/lib/api-error";
 import { moderateAccount } from "@/lib/content-moderation";
 import { syncBrowserDataToUser } from "@/lib/browser-sync";
 import { prisma } from "@/lib/db";
@@ -18,22 +19,16 @@ export async function POST(request: NextRequest) {
       await request.json();
 
     if (typeof account !== "string" || !isValidAccount(account)) {
-      return NextResponse.json(
-        { error: "帳號 2–32 字，僅限字母、數字、底線、點、連字號或中文" },
-        { status: 400 }
-      );
+      return apiError(request, "api.account.format", 400);
     }
 
     const accountCheck = moderateAccount(account);
     if (!accountCheck.ok) {
-      return NextResponse.json({ error: accountCheck.error }, { status: 400 });
+      return apiError(request, `api.account.${accountCheck.code}`, 400);
     }
 
     if (typeof password !== "string" || password.length < 6) {
-      return NextResponse.json(
-        { error: "密碼至少 6 個字元" },
-        { status: 400 }
-      );
+      return apiError(request, "api.errors.passwordMin", 400);
     }
 
     const normalized = normalizeAccount(account);
@@ -42,7 +37,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existing) {
-      return NextResponse.json({ error: "此帳號已被使用" }, { status: 409 });
+      return apiError(request, "api.account.inUse", 409);
     }
 
     const passwordHash = await hashPassword(password);
@@ -85,6 +80,6 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (err) {
     console.error("Register failed:", err);
-    return NextResponse.json({ error: "註冊失敗" }, { status: 500 });
+    return apiError(request, "api.errors.registerFailed", 500);
   }
 }

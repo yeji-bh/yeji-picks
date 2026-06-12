@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { apiError, moderationError } from "@/lib/api-error";
 import { moderateText } from "@/lib/content-moderation";
 import { prisma } from "@/lib/db";
 
@@ -13,7 +14,7 @@ export async function POST(request: NextRequest) {
     const imageFile = formData.get("image");
 
     if (typeof messageRaw !== "string" || !messageRaw.trim()) {
-      return NextResponse.json({ error: "請輸入反饋內容" }, { status: 400 });
+      return apiError(request, "api.errors.enterFeedback", 400);
     }
 
     const category =
@@ -21,9 +22,9 @@ export async function POST(request: NextRequest) {
         ? categoryRaw
         : "suggestion";
 
-    const textCheck = moderateText(messageRaw, "反饋內容");
+    const textCheck = moderateText(messageRaw, "feedback");
     if (!textCheck.ok) {
-      return NextResponse.json({ error: textCheck.error }, { status: 400 });
+      return moderationError(request, textCheck.field, textCheck.code);
     }
 
     let imageUrl: string | null = null;
@@ -44,8 +45,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ ok: true });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "送出失敗";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch {
+    return apiError(request, "api.errors.submitFailed", 500);
   }
 }

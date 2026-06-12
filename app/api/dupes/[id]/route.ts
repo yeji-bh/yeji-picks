@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, isAdminUser } from "@/lib/auth";
+import { apiError } from "@/lib/api-error";
 import { deleteCatalogDupe, listCatalogDupes } from "@/lib/catalog-dupe";
 import { resolveVoterKey } from "@/lib/dupe-actor";
 
@@ -8,7 +9,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await isAdminUser())) {
-    return NextResponse.json({ error: "未授權" }, { status: 401 });
+    return apiError(request, "api.errors.unauthorized", 401);
   }
 
   const { id } = await params;
@@ -16,7 +17,7 @@ export async function DELETE(
   try {
     const removed = await deleteCatalogDupe(id);
     if (!removed) {
-      return NextResponse.json({ error: "找不到平替" }, { status: 404 });
+      return apiError(request, "api.errors.notFoundDupe", 404);
     }
 
     const { deleteUploadIfUnreferencedInDb } = await import(
@@ -30,6 +31,6 @@ export async function DELETE(
 
     return NextResponse.json({ ok: true, dupes });
   } catch {
-    return NextResponse.json({ error: "刪除失敗" }, { status: 500 });
+    return apiError(request, "api.errors.deleteFailed", 500);
   }
 }

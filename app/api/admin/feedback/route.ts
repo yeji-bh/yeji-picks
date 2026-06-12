@@ -1,11 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { isAdminUser } from "@/lib/auth";
+import { apiError } from "@/lib/api-error";
 import { prisma } from "@/lib/db";
 import { formatOutfitTitle } from "@/lib/outfit";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   if (!(await isAdminUser())) {
-    return NextResponse.json({ error: "未授權" }, { status: 401 });
+    return apiError(request, "api.errors.unauthorized", 401);
   }
 
   const [siteRows, reportRows] = await Promise.all([

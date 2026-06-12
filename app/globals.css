@@ -4,6 +4,11 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
+  --text-xs: 1rem;
+  --text-xs--line-height: 1.5rem;
+  --text-sm: 1rem;
+  --text-sm--line-height: 1.5rem;
+
   --color-surface: var(--theme-surface);
   --color-subtle: var(--theme-subtle);
   --color-header: var(--theme-header);
@@ -15,6 +20,7 @@
   --color-foreground: var(--theme-foreground);
   --color-foreground-secondary: var(--theme-foreground-secondary);
   --color-input: var(--theme-input);
+  --color-accent: var(--theme-accent);
   --color-favorite: var(--theme-favorite);
   --color-primary: var(--theme-primary-bg);
   --color-primary-fg: var(--theme-primary-fg);
@@ -35,7 +41,33 @@
 }
 
 .item-image-surface {
+  position: relative;
+  isolation: isolate;
   background-color: var(--color-item-image);
+  border: 1px solid var(--color-border);
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 0.04),
+    0 1px 2px rgb(0 0 0 / 0.04);
+}
+
+.item-image-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--color-item-image);
+  pointer-events: none;
+}
+
+.item-image-surface > * {
+  z-index: 1;
+}
+
+.dark .item-image-surface {
+  border-color: var(--color-border);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.07),
+    0 1px 3px rgb(0 0 0 / 0.25);
 }
 
 html {
@@ -48,10 +80,54 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
   min-height: 100dvh;
-  font-family: var(--font-inter), "Pretendard Variable", -apple-system, "system-ui",
-    system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo",
-    "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol", sans-serif;
+  font-family:
+    var(--font-inter),
+    "Pretendard Variable",
+    "Noto Sans TC",
+    "Noto Sans SC",
+    "Apple SD Gothic Neo",
+    "PingFang TC",
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+html[lang="zh-CN"] body {
+  font-family:
+    var(--font-inter),
+    "Pretendard Variable",
+    var(--font-noto-sc),
+    "Noto Sans TC",
+    "Apple SD Gothic Neo",
+    "PingFang TC",
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+html[lang="zh-TW"] body {
+  font-family:
+    var(--font-inter),
+    "Pretendard Variable",
+    var(--font-noto-tc),
+    "Noto Sans SC",
+    "Apple SD Gothic Neo",
+    "PingFang TC",
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+html[lang="ko"] body {
+  font-family:
+    var(--font-inter),
+    "Pretendard Variable",
+    "Apple SD Gothic Neo",
+    "Noto Sans SC",
+    "Noto Sans TC",
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 input[type="date"] {
@@ -86,8 +162,8 @@ input[type="date"] {
   border-radius: 0.375rem;
   background-color: var(--color-subtle);
   padding: 0.375rem 0.75rem;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
   color: var(--color-foreground);
   cursor: pointer;
 }
@@ -173,6 +249,8 @@ img.lightbox-img {
   display: block;
   width: clamp(260px, 24.74vw, 475px);
   max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
   aspect-ratio: 3 / 4;
   overflow: hidden;
 }
@@ -203,17 +281,17 @@ img.lightbox-img {
   display: flex;
   width: 100%;
   min-height: clamp(112px, 9.5vw, 190px);
-  padding-top: 0.5rem;
-  padding-bottom: 1rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
 }
 
 .detail-item-thumb-wrap {
   display: flex;
   flex-shrink: 0;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   width: clamp(88px, 11.98vw, 200px);
-  padding: 10px 0;
+  padding: 0;
 }
 
 .detail-item-thumb {
@@ -253,8 +331,8 @@ img.lightbox-img {
 }
 
 .ui-field {
+  border-radius: 0.375rem;
   width: 100%;
-  border-radius: 0.5rem;
   border: 1px solid var(--color-border);
   background-color: var(--color-input);
   color: var(--color-foreground);
@@ -270,7 +348,7 @@ img.lightbox-img {
 }
 
 .ui-btn-primary {
-  border-radius: 0.5rem;
+  border-radius: 0.375rem;
   background-color: var(--color-primary);
   color: var(--color-primary-fg);
   font-weight: 500;
@@ -281,7 +359,6 @@ img.lightbox-img {
 }
 
 .ui-btn-secondary {
-  border-radius: 0.5rem;
   border: 1px solid var(--color-border);
   background-color: var(--color-card);
   color: var(--color-foreground-secondary);

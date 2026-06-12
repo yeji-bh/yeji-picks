@@ -1,13 +1,9 @@
 "use client";
 
-import { useAssetCacheBust } from "@/components/AssetCacheBustProvider";
+import { useMemo } from "react";
 import { assetUrl } from "@/lib/asset-url";
 
+/** Stable CDN URL for a managed upload path (no cache-bust query params). */
 export function useAssetUrl(path: string | null | undefined): string {
-  const bust = useAssetCacheBust();
-  if (!path) return "";
-  const url = assetUrl(path);
-  if (!bust) return url;
-  const separator = url.includes("?") ? "&" : "?";
-  return `${url}${separator}v=${bust}`;
+  return useMemo(() => (path ? assetUrl(path) : ""), [path]);
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { apiError, moderationError } from "@/lib/api-error";
 import { moderateText } from "@/lib/content-moderation";
 import { prisma } from "@/lib/db";
 
@@ -12,12 +13,12 @@ export async function POST(request: NextRequest) {
       typeof message !== "string" ||
       !message.trim()
     ) {
-      return NextResponse.json({ error: "資料格式不正確" }, { status: 400 });
+      return apiError(request, "api.errors.invalidPayload", 400);
     }
 
-    const textCheck = moderateText(message, "回報內容");
+    const textCheck = moderateText(message, "report");
     if (!textCheck.ok) {
-      return NextResponse.json({ error: textCheck.error }, { status: 400 });
+      return moderationError(request, textCheck.field, textCheck.code);
     }
 
     const outfit = await prisma.outfit.findUnique({
@@ -25,18 +26,18 @@ export async function POST(request: NextRequest) {
     });
 
     if (!outfit) {
-      return NextResponse.json({ error: "找不到穿搭" }, { status: 404 });
+      return apiError(request, "api.errors.notFoundOutfit", 404);
     }
 
     if (itemId) {
       if (typeof itemId !== "string") {
-        return NextResponse.json({ error: "資料格式不正確" }, { status: 400 });
+        return apiError(request, "api.errors.invalidPayload", 400);
       }
       const placement = await prisma.outfitItem.findFirst({
         where: { outfitId, catalogItemId: itemId },
       });
       if (!placement) {
-        return NextResponse.json({ error: "找不到單品" }, { status: 404 });
+        return apiError(request, "api.errors.notFoundItem", 404);
       }
     }
 
@@ -51,6 +52,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ id: report.id });
   } catch {
-    return NextResponse.json({ error: "送出失敗" }, { status: 500 });
+    return apiError(request, "api.errors.submitFailed", 500);
   }
 }

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { IconHeart } from "./NavIcons";
 import { useFavorites } from "./FavoritesProvider";
 
-const FAVORITE_COLOR = "text-[#F85580]";
+const FAVORITE_COLOR = "text-favorite";
 
 export default function FavoriteButton({
   type,
@@ -47,10 +47,10 @@ export default function FavoriteButton({
       ? "rounded-full bg-subtle p-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.1)]"
       : "rounded-full bg-card p-1.5 shadow-[0_2px_10px_rgba(0,0,0,0.14)]";
   const inlineClass = `shrink-0 -mt-1 ${paddingClass} transition-colors ${
-    active ? FAVORITE_COLOR : "text-inactive hover:text-[#F85580]"
+    active ? FAVORITE_COLOR : "text-inactive hover:text-favorite"
   }`;
-  const plainClass = `shrink-0 rounded-full p-2 transition-colors ${
-    active ? FAVORITE_COLOR : "text-inactive hover:text-[#F85580]"
+  const plainClass = `shrink-0 rounded-full ${size === "sm" ? "p-1.5" : "p-2"} transition-colors ${
+    active ? FAVORITE_COLOR : "text-inactive hover:text-favorite"
   }`;
 
   const variantClass =
@@ -60,10 +60,14 @@ export default function FavoriteButton({
         ? inlineClass
         : overlayClass;
 
+  const plainIconClass =
+    size === "sm" ? "h-[18px] w-[18px]" : "h-5 w-5";
   const iconClass =
-    variant === "overlay" || variant === "plain"
+    variant === "overlay"
       ? `h-5 w-5 ${active ? FAVORITE_COLOR : "text-inactive"}`
-      : `${inlineIconClass} ${active ? FAVORITE_COLOR : ""}`;
+      : variant === "plain"
+        ? `${plainIconClass} ${active ? FAVORITE_COLOR : "text-inactive"}`
+        : `${inlineIconClass} ${active ? FAVORITE_COLOR : ""}`;
 
   return (
     <button

@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE_NAME, normalizeAccount } from "@/lib/auth";
+import { apiError } from "@/lib/api-error";
 import { syncBrowserDataToUser } from "@/lib/browser-sync";
 import { prisma } from "@/lib/db";
 import { verifyPassword } from "@/lib/password";
@@ -13,10 +14,7 @@ export async function POST(request: NextRequest) {
       await request.json();
 
     if (typeof account !== "string" || typeof password !== "string") {
-      return NextResponse.json(
-        { error: "請輸入帳號與密碼" },
-        { status: 400 }
-      );
+      return apiError(request, "api.errors.loginRequired", 400);
     }
 
     const normalized = normalizeAccount(account);
@@ -25,10 +23,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user || !(await verifyPassword(password, user.passwordHash))) {
-      return NextResponse.json(
-        { error: "帳號或密碼錯誤" },
-        { status: 401 }
-      );
+      return apiError(request, "api.errors.loginCredentials", 401);
     }
 
     const sync = await syncBrowserDataToUser(
@@ -60,6 +55,6 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch {
-    return NextResponse.json({ error: "登入失敗" }, { status: 500 });
+    return apiError(request, "api.errors.loginFailed", 500);
   }
 }

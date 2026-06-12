@@ -1,13 +1,14 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import ProgressiveImage from "./ProgressiveImage";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ImageLightbox from "./ImageLightbox";
 import OutfitItemsSection from "./OutfitItemsSection";
 import OutfitReviewsSection from "./OutfitReviewsSection";
-import { assetUrl } from "@/lib/asset-url";
+import { useAssetUrl } from "@/lib/use-asset-url";
+import { cdnImageProps } from "@/lib/remote-image";
 import { syncMainBounds } from "@/lib/main-bounds";
 import { COVER_DETAIL_CLASS } from "@/lib/image";
 import { outfitHref } from "@/lib/entity-href";
@@ -78,6 +79,7 @@ export default function OutfitDetailContent({
 }) {
   const { t } = useTranslation();
   const [zoomOpen, setZoomOpen] = useState(false);
+  const mainImageSrc = useAssetUrl(mainImage);
 
   useEffect(() => {
     syncMainBounds();
@@ -113,12 +115,14 @@ export default function OutfitDetailContent({
               className={`group relative block w-full cursor-zoom-in overflow-hidden bg-neutral-100 ${COVER_DETAIL_CLASS}`}
               aria-label={t("outfit.zoomImage")}
             >
-              <ProgressiveImage
-                src={assetUrl(mainImage)}
+              <Image
+                src={mainImageSrc}
                 alt={imageAlt}
                 fill
+                priority
                 className="object-cover transition-transform duration-200 group-hover:scale-[1.02]"
                 sizes="475px"
+                {...cdnImageProps()}
               />
             </button>
           </div>
@@ -138,7 +142,7 @@ export default function OutfitDetailContent({
       </div>
 
       <ImageLightbox
-        src={assetUrl(mainImage)}
+        src={mainImageSrc}
         alt={imageAlt}
         open={zoomOpen}
         onClose={() => setZoomOpen(false)}

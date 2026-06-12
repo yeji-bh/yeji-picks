@@ -4,11 +4,27 @@ import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ITEM_TYPES, normalizeItemType, type ItemType } from "@/lib/types";
 
+const MOBILE_MAX_BADGES = 2;
+
 const BADGE_CLASS =
-  "shrink-0 rounded-none bg-subtle px-2.5 py-1 text-xs font-medium text-neutral-600";
+  "shrink-0 rounded-none bg-subtle px-2.5 py-1 text-base font-medium text-foreground-secondary max-sm:px-2 max-sm:py-0.5 max-sm:text-[14px]";
 
 const OVERFLOW_CLASS =
-  "shrink-0 rounded-none bg-subtle px-2 py-1 text-xs font-medium text-neutral-600";
+  "shrink-0 rounded-none bg-subtle px-2 py-1 text-base font-medium text-foreground-secondary max-sm:px-1.5 max-sm:py-0.5 max-sm:text-[14px]";
+
+function useIsMobileLayout(): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useLayoutEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  return isMobile;
+}
 
 export default function ItemTypeBadges({
   types,
@@ -20,6 +36,7 @@ export default function ItemTypeBadges({
   const { t, i18n } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState<number | null>(null);
+  const isMobile = useIsMobileLayout();
 
   const stableTypesInput = [...new Set(types.map(normalizeItemType))]
     .sort()
@@ -36,6 +53,11 @@ export default function ItemTypeBadges({
   );
 
   useLayoutEffect(() => {
+    if (isMobile) {
+      setVisibleCount(Math.min(MOBILE_MAX_BADGES, sorted.length));
+      return;
+    }
+
     const el = containerRef.current;
     if (!el || sorted.length === 0) {
       setVisibleCount((prev) => (prev === sorted.length ? prev : sorted.length));
@@ -78,7 +100,7 @@ export default function ItemTypeBadges({
     const observer = new ResizeObserver(measure);
     observer.observe(el);
     return () => observer.disconnect();
-  }, [typesKey, i18n.language, sorted.length]);
+  }, [typesKey, i18n.language, sorted.length, isMobile]);
 
   if (sorted.length === 0) return null;
 

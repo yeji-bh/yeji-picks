@@ -6,6 +6,11 @@ import {
 
 export const LOCALE_MANUAL_COOKIE = "locale_manual";
 
+export function parseApiLocale(value: string | null | undefined) {
+  const normalized = value ?? undefined;
+  return isLocale(normalized) ? normalized : null;
+}
+
 export function localeFromAcceptLanguage(header: string | null): Locale {
   if (!header) return DEFAULT_LOCALE;
 
@@ -30,7 +35,7 @@ export function resolveInitialLocale(
   localeManual: string | undefined,
   acceptLanguage: string | null
 ): Locale {
-  if (localeManual === "1" && isLocale(localeCookie)) {
+  if (isLocale(localeCookie) && localeManual === "1") {
     return localeCookie;
   }
   return localeFromAcceptLanguage(acceptLanguage);

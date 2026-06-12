@@ -238,7 +238,7 @@ export default function OutfitReviewsSection({
               className="ui-field mb-3 px-3 py-2 text-sm"
             />
           ) : (
-            <p className="mb-3 text-xs text-muted">
+            <p className="mb-3 text-sm text-muted">
               {t("review.loggedInAs", { name: user.account })}
             </p>
           )}
@@ -252,7 +252,7 @@ export default function OutfitReviewsSection({
             className="ui-field w-full resize-none px-4 py-3 text-sm"
           />
           <div className="mt-2 flex items-center justify-between gap-3">
-            <span className="text-xs text-muted">
+            <span className="text-sm text-muted">
               {content.length}/{MAX_CONTENT}
             </span>
             <div className="flex items-center gap-2">
@@ -301,14 +301,14 @@ export default function OutfitReviewsSection({
                         : review.authorName}
                     </span>
                     {review.isMine ? (
-                      <span className="ml-2 text-xs text-muted">
+                      <span className="ml-2 text-sm text-muted">
                         {t("review.mine")}
                       </span>
                     ) : null}
                   </div>
                   <time
                     dateTime={review.createdAt}
-                    className="shrink-0 text-xs text-muted"
+                    className="shrink-0 text-sm text-muted"
                   >
                     {formatReviewTime(review.createdAt, t)}
                   </time>
@@ -322,7 +322,7 @@ export default function OutfitReviewsSection({
                       <button
                         type="button"
                         onClick={() => startEdit(review)}
-                        className="cursor-pointer text-xs text-muted hover:text-foreground hover:underline"
+                        className="cursor-pointer text-sm text-muted hover:text-foreground hover:underline"
                       >
                         {t("review.edit")}
                       </button>
@@ -331,7 +331,7 @@ export default function OutfitReviewsSection({
                       <button
                         type="button"
                         onClick={() => handleDelete(review.id)}
-                        className="cursor-pointer text-xs text-muted hover:text-red-600 hover:underline"
+                        className="cursor-pointer text-sm text-muted hover:text-red-600 hover:underline"
                       >
                         {t("review.delete")}
                       </button>
@@ -347,12 +347,12 @@ export default function OutfitReviewsSection({
               className="mt-6 flex flex-col items-center gap-2 py-2"
             >
               {loadingMore ? (
-                <p className="text-xs text-muted">{t("loading")}</p>
+                <p className="text-sm text-muted">{t("loading")}</p>
               ) : (
                 <button
                   type="button"
                   onClick={() => void loadMore()}
-                  className="cursor-pointer text-xs text-muted underline-offset-2 hover:text-foreground hover:underline"
+                  className="cursor-pointer text-sm text-muted underline-offset-2 hover:text-foreground hover:underline"
                 >
                   {t("review.loadMore")}
                 </button>

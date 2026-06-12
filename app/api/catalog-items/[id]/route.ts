@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { syncCatalogImages, toDisplayItem } from "@/lib/catalog-item";
 import { isAdminUser } from "@/lib/auth";
+import { apiError } from "@/lib/api-error";
 import { resolveCanonicalBrand } from "@/lib/brand-db";
 import { PUBLIC_API_CACHE } from "@/lib/cache-config";
 import { prisma } from "@/lib/db";
@@ -8,7 +9,7 @@ import { formatOutfitTitle } from "@/lib/outfit";
 import { normalizeItemType } from "@/lib/types";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -35,7 +36,7 @@ export async function GET(
     });
 
     if (!item) {
-      return NextResponse.json({ error: "找不到單品" }, { status: 404 });
+      return apiError(request, "api.errors.notFoundItem", 404);
     }
 
     const display = toDisplayItem(item);
@@ -55,7 +56,7 @@ export async function GET(
     );
   } catch (err) {
     console.error("[catalog-item GET]", err);
-    return NextResponse.json({ error: "載入失敗" }, { status: 500 });
+    return apiError(request, "api.errors.loadFailed", 500);
   }
 }
 
@@ -64,7 +65,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await isAdminUser())) {
-    return NextResponse.json({ error: "未授權" }, { status: 401 });
+    return apiError(request, "api.errors.unauthorized", 401);
   }
 
   const { id } = await params;
@@ -73,7 +74,7 @@ export async function PATCH(
     const body = await request.json();
     const existing = await prisma.catalogItem.findUnique({ where: { id } });
     if (!existing) {
-      return NextResponse.json({ error: "找不到單品" }, { status: 404 });
+      return apiError(request, "api.errors.notFoundItem", 404);
     }
 
     const type =
@@ -119,6 +120,6 @@ export async function PATCH(
 
     return NextResponse.json(toDisplayItem(updated!));
   } catch {
-    return NextResponse.json({ error: "更新失敗" }, { status: 500 });
+    return apiError(request, "api.errors.updateFailed", 500);
   }
 }
