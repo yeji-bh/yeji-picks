@@ -11,6 +11,7 @@ import {
 } from "@/lib/types";
 import type { HomeViewMode } from "@/lib/home-view-mode";
 import { OUTFIT_SORT_OPTIONS, type OutfitSort } from "@/lib/outfit-sort";
+import ViewModeTabs from "./ViewModeTabs";
 
 type HomeFiltersProps = {
   viewMode: HomeViewMode;
@@ -23,36 +24,6 @@ type HomeFiltersProps = {
   onQueryChange: (query: string) => void;
   onSortChange: (sort: OutfitSort) => void;
 };
-
-function ViewModeTab({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={active}
-      onClick={onClick}
-      className={`relative shrink-0 cursor-pointer px-1 pb-2.5 text-1rem font-medium transition-colors ${
-        active ? "text-neutral-900" : "text-neutral-400 hover:text-neutral-600"
-      }`}
-    >
-      {label}
-      {active && (
-        <span
-          className="absolute bottom-0 left-1/2 h-0.5 w-[calc(100%+8px)] -translate-x-1/2 bg-neutral-900"
-          aria-hidden
-        />
-      )}
-    </button>
-  );
-}
 
 function FilterTab({
   active,
@@ -158,22 +129,7 @@ export default function HomeFilters({
 
   return (
     <div className="mb-5 space-y-3">
-      <div
-        className="flex gap-6 border-b border-border"
-        role="tablist"
-        aria-label={t("home.viewModeLabel")}
-      >
-        <ViewModeTab
-          active={viewMode === "outfit"}
-          label={t("home.modeOutfit")}
-          onClick={() => onViewModeChange("outfit")}
-        />
-        <ViewModeTab
-          active={viewMode === "item"}
-          label={t("home.modeItem")}
-          onClick={() => onViewModeChange("item")}
-        />
-      </div>
+      <ViewModeTabs viewMode={viewMode} onViewModeChange={onViewModeChange} />
 
       <div className="relative">
         <svg

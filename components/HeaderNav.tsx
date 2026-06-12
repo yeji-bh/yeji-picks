@@ -70,12 +70,12 @@ export default function HeaderNav() {
     <>
       <header
         id="site-header"
-        className="sticky top-0 z-10 border-b border-border bg-[#FFFFFF]"
+        className="sticky top-0 z-20 border-b border-border bg-[#FFFFFF]"
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-3 py-4 sm:px-5 lg:px-6">
           <Link
             href="/"
-            className="min-w-0 shrink cursor-pointer text-lg font-bold tracking-tight text-neutral-900 sm:text-[22px]"
+            className="min-w-0 shrink cursor-pointer text-lg font-bold tracking-tight text-neutral-900 sm:text-2xl"
           >
             <span className="block truncate">{t("siteTitle")}</span>
           </Link>
@@ -96,7 +96,6 @@ export default function HeaderNav() {
               icon={<IconHeart />}
               label={t("nav.favorites")}
             />
-            <LanguageSwitcher />
             {isAdmin ? (
               <NavItem
                 href="/feedback"
@@ -110,6 +109,7 @@ export default function HeaderNav() {
                 onClick={() => setFeedbackOpen(true)}
               />
             )}
+            <LanguageSwitcher />
             {!loading &&
               (user ? (
                 <div className="flex items-center gap-1">
@@ -226,11 +226,10 @@ export default function HeaderNav() {
                         changeLanguage(loc);
                         closeMenu();
                       }}
-                      className={`cursor-pointer rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-50 ${
-                        locale === loc
+                      className={`cursor-pointer rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-50 ${locale === loc
                           ? "font-medium text-neutral-900"
                           : "text-neutral-600"
-                      }`}
+                        }`}
                     >
                       {LOCALE_LABELS[loc]}
                     </button>

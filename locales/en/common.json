@@ -216,12 +216,9 @@
   "favorites": {
     "title": "My Favorites",
     "empty": "No favorites yet",
-    "outfitsSection": "Outfits",
-    "itemsSection": "Items",
+    "totalCount": "{{count}} saved",
     "save": "Save",
-    "unsave": "Unsave",
-    "expand": "Show more",
-    "collapse": "Show less"
+    "unsave": "Unsave"
   },
   "itemTypeGroups": {
     "hat": "Hat",

@@ -45,14 +45,18 @@ export function IconClipboard({ className = "h-[18px] w-[18px]" }: IconProps) {
   );
 }
 
-export function IconHeart({ className = "h-[18px] w-[18px]" }: IconProps) {
+export function IconHeart({
+  className = "h-[18px] w-[18px]",
+  filled = false,
+  strokeWidth = 1.5,
+}: IconProps & { filled?: boolean; strokeWidth?: number }) {
   return (
     <svg
       className={className}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={filled ? "currentColor" : "none"}
       stroke="currentColor"
-      strokeWidth="1.5"
+      strokeWidth={strokeWidth}
       aria-hidden
     >
       <path

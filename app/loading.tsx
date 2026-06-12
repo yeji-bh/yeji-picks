@@ -1,9 +1,5 @@
-import LoadingSpinner from "@/components/LoadingSpinner";
+import AppLoading from "@/components/AppLoading";
 
-export default function AppLoading() {
-  return (
-    <div className="flex min-h-[40vh] items-center justify-center">
-      <LoadingSpinner label="Loading..." />
-    </div>
-  );
+export default function Loading() {
+  return <AppLoading />;
 }

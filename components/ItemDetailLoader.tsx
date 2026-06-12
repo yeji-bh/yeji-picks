@@ -113,7 +113,7 @@ export default function ItemDetailLoader({ itemId }: { itemId: string }) {
 
   return (
     <div className="min-w-0">
-      <ItemDetailInfo item={data.item} />
+      <ItemDetailInfo item={data.item} onUpdated={load} />
       <ItemDetailOutfits outfits={data.outfits} />
       <ItemDupesSection catalogItemId={itemId} />
     </div>

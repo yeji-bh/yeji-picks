@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import Modal from "./Modal";
 import ReportTarget from "./ReportTarget";
+
+const reportBtnClass =
+  "shrink-0 cursor-pointer rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900";
 
 function ReportIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -11,11 +15,15 @@ function ReportIcon({ className = "h-5 w-5" }: { className?: string }) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.5"
       aria-hidden
     >
-      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
-      <line x1="4" y1="22" x2="4" y2="15" />
+      <path
+        d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <line x1="4" y1="22" x2="4" y2="15" strokeLinecap="round" />
     </svg>
   );
 }
@@ -33,21 +41,6 @@ export default function OutfitReport({
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
-    }
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", handleKey);
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", handleKey);
-    };
-  }, [open]);
 
   function handleClose() {
     if (loading) return;
@@ -90,73 +83,51 @@ export default function OutfitReport({
         type="button"
         onClick={() => setOpen(true)}
         aria-label={t("report.button")}
-        className="shrink-0 cursor-pointer rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
+        className={reportBtnClass}
       >
         <ReportIcon />
       </button>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center"
-          onClick={handleClose}
-        >
-          <div
-            className="w-full max-w-md overflow-hidden rounded-xl border border-border bg-white shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-3 border-b border-border px-4 py-3">
-              <div>
-                <h3 className="text-sm font-semibold text-neutral-900">
-                  {t("report.modalTitle")}
-                </h3>
-                <p className="mt-0.5 text-xs text-muted">{t("report.desc")}</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleClose}
-                disabled={loading}
-                className="shrink-0 text-lg leading-none text-neutral-400 hover:text-neutral-700"
-                aria-label={t("report.close")}
-              >
-                ×
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-3 px-4 py-4">
-              <ReportTarget kind="outfit" outfitTitle={outfitTitle} />
-              <textarea
-                required
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                rows={4}
-                placeholder={t("report.placeholder")}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-neutral-400"
-              />
-              {error && <p className="text-xs text-red-600">{error}</p>}
-              {done && (
-                <p className="text-xs text-green-600">{t("report.success")}</p>
-              )}
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  disabled={loading}
-                  className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm text-neutral-700 disabled:opacity-50"
-                >
-                  {t("report.close")}
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
-                >
-                  {loading ? t("report.sending") : t("report.submit")}
-                </button>
-              </div>
-            </form>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        title={t("report.modalTitle")}
+        description={t("report.desc")}
+        closeDisabled={loading}
+      >
+        <form onSubmit={handleSubmit} className="space-y-3 px-4 py-4">
+          <ReportTarget kind="outfit" outfitTitle={outfitTitle} />
+          <textarea
+            required
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows={4}
+            placeholder={t("report.placeholder")}
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-neutral-400"
+          />
+          {error && <p className="text-xs text-red-600">{error}</p>}
+          {done && (
+            <p className="text-xs text-green-600">{t("report.success")}</p>
+          )}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleClose}
+              disabled={loading}
+              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm text-neutral-700 disabled:opacity-50"
+            >
+              {t("report.close")}
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+            >
+              {loading ? t("report.sending") : t("report.submit")}
+            </button>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
     </>
   );
 }

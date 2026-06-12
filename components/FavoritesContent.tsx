@@ -1,20 +1,17 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { assetUrl } from "@/lib/asset-url";
-import { cdnImageProps } from "@/lib/remote-image";
-import { outfitHref } from "@/lib/entity-href";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "./AuthProvider";
 import OutfitCard from "./OutfitCard";
+import ItemCard from "./ItemCard";
+import ViewModeTabs from "./ViewModeTabs";
 import {
   getFavoriteItemIds,
   getFavoriteOutfitIds,
 } from "@/lib/favorites";
+import type { HomeViewMode } from "@/lib/home-view-mode";
 import type { OutfitSummary } from "./HomeContent";
-import { normalizeItemType } from "@/lib/types";
 
 type FavoriteItem = {
   id: string;
@@ -22,11 +19,11 @@ type FavoriteItem = {
   brand: string | null;
   productName: string | null;
   image: string | null;
-  outfitId: string;
-  outfitTitle: string;
+  useCount: number;
 };
 
-const PREVIEW_LIMIT = 8;
+const GRID_CLASS =
+  "grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4";
 
 export default function FavoritesContent({
   initialOutfits = [],
@@ -37,13 +34,12 @@ export default function FavoritesContent({
 }) {
   const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
+  const [viewMode, setViewMode] = useState<HomeViewMode>("outfit");
   const [outfits, setOutfits] = useState<OutfitSummary[]>(initialOutfits);
   const [items, setItems] = useState<FavoriteItem[]>(initialItems);
   const [loading, setLoading] = useState(
     initialOutfits.length === 0 && initialItems.length === 0
   );
-  const [outfitsExpanded, setOutfitsExpanded] = useState(false);
-  const [itemsExpanded, setItemsExpanded] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -102,19 +98,29 @@ export default function FavoritesContent({
     load();
   }, [user, authLoading, initialOutfits, initialItems]);
 
-  const isEmpty = outfits.length === 0 && items.length === 0;
-  const visibleOutfits = outfitsExpanded
-    ? outfits
-    : outfits.slice(0, PREVIEW_LIMIT);
-  const visibleItems = itemsExpanded ? items : items.slice(0, PREVIEW_LIMIT);
+  const totalCount = outfits.length + items.length;
+  const isEmpty = totalCount === 0;
+  const tabEmpty =
+    viewMode === "outfit" ? outfits.length === 0 : items.length === 0;
 
   return (
     <div className="min-w-0">
-      <div className="mb-4 sm:mb-6">
+      <div className="mb-4 sm:mb-5">
         <h1 className="text-xl font-semibold text-neutral-900 sm:text-2xl">
           {t("favorites.title")}
         </h1>
+        {!loading && !authLoading && totalCount > 0 && (
+          <p className="mt-1 text-sm text-neutral-500">
+            {t("favorites.totalCount", { count: totalCount })}
+          </p>
+        )}
       </div>
+
+      {!isEmpty && (
+        <div className="mb-5">
+          <ViewModeTabs viewMode={viewMode} onViewModeChange={setViewMode} />
+        </div>
+      )}
 
       {loading || authLoading ? (
         <p className="text-sm text-muted">{t("loading")}</p>
@@ -122,96 +128,40 @@ export default function FavoritesContent({
         <div className="rounded-xl border border-dashed border-border bg-white p-8 text-center sm:p-12">
           <p className="text-sm text-muted">{t("favorites.empty")}</p>
         </div>
+      ) : tabEmpty ? (
+        <div className="rounded-xl bg-white p-8 text-center sm:p-12">
+          <p className="text-sm text-muted">
+            {viewMode === "outfit"
+              ? t("home.noOutfits")
+              : t("home.noItems")}
+          </p>
+        </div>
+      ) : viewMode === "outfit" ? (
+        <div className={GRID_CLASS}>
+          {outfits.map((outfit) => (
+            <OutfitCard
+              key={outfit.id}
+              id={outfit.id}
+              mainImage={outfit.mainImage}
+              eventName={outfit.eventName}
+              date={outfit.date}
+              itemTypes={outfit.itemTypes}
+            />
+          ))}
+        </div>
       ) : (
-        <div className="space-y-10">
-          {outfits.length > 0 && (
-            <section>
-              <h2 className="mb-3 text-sm font-medium text-neutral-700">
-                {t("favorites.outfitsSection")}
-              </h2>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4">
-                {visibleOutfits.map((outfit) => (
-                  <OutfitCard
-                    key={outfit.id}
-                    id={outfit.id}
-                    mainImage={outfit.mainImage}
-                    eventName={outfit.eventName}
-                    date={outfit.date}
-                    itemTypes={outfit.itemTypes}
-                  />
-                ))}
-              </div>
-              {outfits.length > PREVIEW_LIMIT && (
-                <button
-                  type="button"
-                  onClick={() => setOutfitsExpanded((v) => !v)}
-                  className="mt-3 cursor-pointer text-sm text-muted underline hover:text-neutral-900"
-                >
-                  {outfitsExpanded
-                    ? t("favorites.collapse")
-                    : t("favorites.expand")}
-                </button>
-              )}
-            </section>
-          )}
-
-          {items.length > 0 && (
-            <section>
-              <h2 className="mb-3 text-sm font-medium text-neutral-700">
-                {t("favorites.itemsSection")}
-              </h2>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {visibleItems.map((item) => (
-                  <Link
-                    key={item.id}
-                    href={outfitHref({ id: item.outfitId })}
-                    className="flex min-w-0 cursor-pointer gap-3 rounded-none border border-border bg-white p-3 transition-shadow hover:shadow-sm"
-                  >
-                    {item.image ? (
-                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-none bg-white">
-                        <Image
-                          src={assetUrl(item.image)}
-                          alt={item.productName ?? item.type}
-                          fill
-                          className="object-contain"
-                          sizes="64px"
-                          loading="lazy"
-                          {...cdnImageProps()}
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-none bg-neutral-100 text-xs text-muted">
-                        {t(`itemTypes.${normalizeItemType(item.type)}`)}
-                      </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      {item.brand && (
-                        <p className="mt-1 text-xs font-medium text-neutral-500">
-                          {item.brand}
-                        </p>
-                      )}
-                      {item.productName && (
-                        <p className="mt-0.5 break-words text-sm font-medium text-neutral-900">
-                          {item.productName}
-                        </p>
-                      )}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-              {items.length > PREVIEW_LIMIT && (
-                <button
-                  type="button"
-                  onClick={() => setItemsExpanded((v) => !v)}
-                  className="mt-3 cursor-pointer text-sm text-muted underline hover:text-neutral-900"
-                >
-                  {itemsExpanded
-                    ? t("favorites.collapse")
-                    : t("favorites.expand")}
-                </button>
-              )}
-            </section>
-          )}
+        <div className={GRID_CLASS}>
+          {items.map((item) => (
+            <ItemCard
+              key={item.id}
+              id={item.id}
+              image={item.image}
+              type={item.type}
+              brand={item.brand}
+              productName={item.productName}
+              useCount={item.useCount}
+            />
+          ))}
         </div>
       )}
     </div>

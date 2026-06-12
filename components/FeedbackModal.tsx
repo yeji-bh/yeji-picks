@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { prepareImageFile } from "@/lib/prepare-image-file";
 import FileInputZone from "./FileInputZone";
+import Modal from "./Modal";
 import { useToast } from "./ToastProvider";
 
 export type FeedbackCategory = "suggestion" | "same_style";
@@ -40,22 +41,8 @@ export default function FeedbackModal({
   }
 
   useEffect(() => {
-    if (!open) {
-      resetForm();
-      return;
-    }
-
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", handleKey);
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", handleKey);
-    };
-  }, [open, onClose]);
+    if (!open) resetForm();
+  }, [open]);
 
   async function handleImageSelect(file: File | null) {
     if (imagePreview) URL.revokeObjectURL(imagePreview);
@@ -115,38 +102,19 @@ export default function FeedbackModal({
     }
   }
 
-  if (!open) return null;
-
   const placeholder =
     category === "same_style"
       ? t("feedback.placeholderSameStyle")
       : t("feedback.placeholderSuggestion");
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center"
-      onClick={onClose}
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={t("feedback.title")}
+      closeDisabled={loading}
     >
-      <div
-        className="w-full max-w-md overflow-hidden rounded-xl border border-border bg-white shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between gap-3 border-b border-border px-4 py-3">
-          <h3 className="text-sm font-semibold text-neutral-900">
-            {t("feedback.title")}
-          </h3>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={loading}
-            className="shrink-0 text-lg leading-none text-neutral-400 hover:text-neutral-700"
-            aria-label={t("feedback.close")}
-          >
-            ×
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-3 px-4 py-4">
+      <form onSubmit={handleSubmit} className="space-y-3 px-4 py-4">
           <label className="block">
             <span className="text-xs text-muted">{t("feedback.categoryLabel")}</span>
             <select
@@ -219,8 +187,7 @@ export default function FeedbackModal({
               {loading ? t("feedback.sending") : t("feedback.submit")}
             </button>
           </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Modal>
   );
 }

@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { primaryImage } from "@/lib/catalog-item";
 import { prisma } from "@/lib/db";
-import { formatOutfitTitle } from "@/lib/outfit";
-
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser();
   const idsParam = request.nextUrl.searchParams.get("ids");
@@ -28,33 +26,21 @@ export async function GET(request: NextRequest) {
     where: { id: { in: ids } },
     include: {
       images: { orderBy: { sortOrder: "asc" } },
-      placements: {
-        take: 1,
-        orderBy: { outfit: { createdAt: "desc" } },
-        include: { outfit: true },
-      },
     },
   });
 
   const map = new Map(
-    rows.map((item) => {
-      const outfit = item.placements[0]?.outfit;
-      return [
-        item.id,
-        {
-          id: item.id,
-          type: item.type,
-          brand: item.brand,
-          productName: item.productName,
-          image: primaryImage(item),
-          useCount: item.useCount,
-          outfitId: outfit?.id ?? "",
-          outfitTitle: outfit
-            ? formatOutfitTitle(outfit.date, outfit.eventName)
-            : "",
-        },
-      ];
-    })
+    rows.map((item) => [
+      item.id,
+      {
+        id: item.id,
+        type: item.type,
+        brand: item.brand,
+        productName: item.productName,
+        image: primaryImage(item),
+        useCount: item.useCount,
+      },
+    ])
   );
 
   const ordered = ids

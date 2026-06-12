@@ -53,7 +53,7 @@ export default function RootLayout({
           <DocumentTitle />
           <ToastProvider>
           <HeaderNav />
-          <main className="mx-auto w-full max-w-7xl flex-1 bg-surface px-3 py-4 sm:px-5 sm:py-5">
+          <main className="mx-auto w-full max-w-7xl flex-1 bg-surface px-3 py-4 sm:px-5 sm:py-5 lg:px-6">
             {children}
           </main>
           <SiteFooter />

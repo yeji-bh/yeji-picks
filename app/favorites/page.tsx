@@ -2,7 +2,6 @@ import FavoritesContent from "@/components/FavoritesContent";
 import type { OutfitSummary } from "@/components/HomeContent";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { formatOutfitTitle } from "@/lib/outfit";
 import { toOutfitSummary } from "@/lib/outfit-summary";
 
 export const dynamic = "force-dynamic";
@@ -16,8 +15,7 @@ export default async function FavoritesPage() {
     brand: string | null;
     productName: string | null;
     image: string | null;
-    outfitId: string;
-    outfitTitle: string;
+    useCount: number;
   }[] = [];
 
   if (user) {
@@ -72,34 +70,20 @@ export default async function FavoritesPage() {
           productName: true,
           useCount: true,
           images: { orderBy: { sortOrder: "asc" }, take: 1, select: { url: true } },
-          placements: {
-            take: 1,
-            orderBy: { outfit: { createdAt: "desc" } },
-            select: {
-              outfit: { select: { id: true, date: true, eventName: true } },
-            },
-          },
         },
       });
       const map = new Map(
-        rows.map((item) => {
-          const outfit = item.placements[0]?.outfit;
-          return [
-            item.id,
-            {
-              id: item.id,
-              type: item.type,
-              brand: item.brand,
-              productName: item.productName,
-              image: item.images[0]?.url ?? null,
-              useCount: item.useCount,
-              outfitId: outfit?.id ?? "",
-              outfitTitle: outfit
-                ? formatOutfitTitle(outfit.date, outfit.eventName)
-                : "",
-            },
-          ];
-        })
+        rows.map((item) => [
+          item.id,
+          {
+            id: item.id,
+            type: item.type,
+            brand: item.brand,
+            productName: item.productName,
+            image: item.images[0]?.url ?? null,
+            useCount: item.useCount,
+          },
+        ])
       );
       initialItems = itemIds.flatMap((id) => {
         const item = map.get(id);

@@ -217,12 +217,9 @@
     "title": "我的收藏",
     "desc": "收藏存在本浏览器，无需登录",
     "empty": "尚无收藏",
-    "outfitsSection": "穿搭",
-    "itemsSection": "单品",
+    "totalCount": "共 {{count}} 项收藏",
     "save": "收藏",
-    "unsave": "取消收藏",
-    "expand": "展开",
-    "collapse": "缩小"
+    "unsave": "取消收藏"
   },
   "itemTypeGroups": {
     "hat": "帽子",

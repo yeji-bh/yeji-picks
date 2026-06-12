@@ -24,17 +24,24 @@ type Item = {
   useCount: number;
 };
 
-function ExternalLinkIcon({ className = "h-4 w-4" }: { className?: string }) {
+const actionBtnClass =
+  "shrink-0 cursor-pointer rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-900";
+
+function ExternalLinkIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
     <svg
       className={className}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.5"
       aria-hidden
     >
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3" />
+      <path
+        d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -64,16 +71,21 @@ export default function ItemList({
   }
 
   return (
-    <div className="flex flex-col gap-2 divide-y divide-border">
+    <div className="flex flex-col divide-y divide-border">
       {sortedItems.map((item) => {
         const typeKey = normalizeItemType(item.type);
         return (
           <article key={item.id} className="detail-item-row">
             <div className="detail-item-thumb-wrap">
               <Link
-                href={itemHref({ id: item.id, productName: item.productName, brand: item.brand, type: item.type })}
+                href={itemHref({
+                  id: item.id,
+                  productName: item.productName,
+                  brand: item.brand,
+                  type: item.type,
+                })}
                 prefetch={false}
-                className="detail-item-thumb block cursor-pointer transition-opacity hover:opacity-90"
+                className="detail-item-thumb item-image-surface block cursor-pointer transition-opacity hover:opacity-90"
               >
                 {item.image ? (
                   <Image
@@ -93,52 +105,64 @@ export default function ItemList({
               </Link>
             </div>
 
-            <div className="flex min-w-0 flex-1 flex-col justify-center px-4 py-2.5 sm:px-5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <span className="inline-block bg-[#F94B00] px-1.5 py-0.5 text-xs font-medium text-white">
-                    {t(`itemTypes.${typeKey}`)}
-                  </span>
-                  {item.brand && (
-                    <Link
-                      href={brandHref(item.brand)}
-                      prefetch={false}
-                      className="mt-2 block text-xs text-neutral-600 hover:text-neutral-900 hover:underline sm:text-sm"
-                    >
-                      {item.brand}
-                    </Link>
-                  )}
-                  {item.productName && (
-                    <Link
-                      href={itemHref({ id: item.id, productName: item.productName, brand: item.brand, type: item.type })}
-                      prefetch={false}
-                      className="mt-1 block break-words text-sm font-medium leading-snug text-neutral-900 hover:underline sm:text-base"
-                    >
-                      {item.productName}
-                    </Link>
-                  )}
-                </div>
-                <div className="flex shrink-0 items-center gap-1">
-                  {item.officialLink && (
-                    <a
-                      href={item.officialLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={t("outfit.openLink")}
-                      className={`rounded-full p-1.5 transition-colors ${item.linkStatus === "dead"
-                          ? "text-red-500 hover:bg-red-50"
-                          : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
-                        }`}
-                    >
-                      <ExternalLinkIcon />
-                    </a>
-                  )}
-                  <FavoriteButton
-                    type="item"
-                    targetId={item.id}
-                    variant="inline"
-                  />
-                </div>
+            <div className="flex min-w-0 flex-1 flex-col justify-center py-3 pl-4 sm:pl-5">
+              <div className="min-w-0 space-y-1">
+                {item.brand && (
+                  <Link
+                    href={brandHref(item.brand)}
+                    prefetch={false}
+                    className="w-fit max-w-full truncate text-[11px] font-medium uppercase tracking-wide text-neutral-400 hover:text-neutral-600 hover:underline"
+                  >
+                    {item.brand}
+                  </Link>
+                )}
+                {item.productName && (
+                  <Link
+                    href={itemHref({
+                      id: item.id,
+                      productName: item.productName,
+                      brand: item.brand,
+                      type: item.type,
+                    })}
+                    prefetch={false}
+                    className="block break-words text-base font-semibold leading-snug text-neutral-900 hover:underline"
+                  >
+                    {item.productName}
+                  </Link>
+                )}
+                <p className="text-sm text-neutral-500">
+                  {t(`itemTypes.${typeKey}`)}
+                </p>
+              </div>
+
+              <div className="mt-3 flex items-center gap-0.5">
+                {item.officialLink ? (
+                  <a
+                    href={item.officialLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={t("outfit.openLink")}
+                    className={`${actionBtnClass} ${
+                      item.linkStatus === "dead" ? "text-red-500 hover:bg-red-50" : ""
+                    }`}
+                  >
+                    <ExternalLinkIcon />
+                  </a>
+                ) : null}
+                <FavoriteButton
+                  type="item"
+                  targetId={item.id}
+                  variant="plain"
+                />
+                <ItemReport
+                  outfitId={outfitId}
+                  itemId={item.id}
+                  outfitTitle={outfitTitle}
+                  itemType={item.type}
+                  itemBrand={item.brand}
+                  itemProductName={item.productName}
+                  variant="icon"
+                />
               </div>
 
               {item.linkStatus === "dead" && item.officialLink && (
@@ -147,16 +171,6 @@ export default function ItemList({
               {item.notes && (
                 <p className="mt-2 break-words text-xs text-muted">{item.notes}</p>
               )}
-              <div className="mt-2">
-                <ItemReport
-                  outfitId={outfitId}
-                  itemId={item.id}
-                  outfitTitle={outfitTitle}
-                  itemType={item.type}
-                  itemBrand={item.brand}
-                  itemProductName={item.productName}
-                />
-              </div>
             </div>
           </article>
         );

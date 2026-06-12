@@ -1,32 +1,15 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
+import DupeCard from "./DupeCard";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "./AuthProvider";
 import FileInputZone from "./FileInputZone";
+import Modal from "./Modal";
 import { useToast } from "./ToastProvider";
-import { assetUrl } from "@/lib/asset-url";
-import { brandHref } from "@/lib/brand";
 import { prepareImageFile } from "@/lib/prepare-image-file";
 import type { DupeSummary, DupeVoteType } from "@/lib/catalog-dupe-types";
 import { dupeGuestHeaders } from "@/lib/dupe-guest-id";
-
-function ExternalLinkIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden
-    >
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3" />
-    </svg>
-  );
-}
 
 export default function ItemDupesSection({
   catalogItemId,
@@ -70,22 +53,8 @@ export default function ItemDupesSection({
   }, [loadDupes]);
 
   useEffect(() => {
-    if (!formOpen) return;
-
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape" && !submitting) {
-        resetForm();
-        setFormOpen(false);
-      }
-    }
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", handleKey);
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", handleKey);
-    };
-  }, [formOpen, submitting]);
+    if (!formOpen) resetForm();
+  }, [formOpen]);
 
   useEffect(() => {
     return () => {
@@ -211,193 +180,147 @@ export default function ItemDupesSection({
     <section className="mt-8 border-t border-border/60 pt-4">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <div>
-          <h2 className="text-sm font-medium text-muted">
+          <h2 className="text-base font-medium text-neutral-700">
             {t("dupe.sectionTitle")}
           </h2>
-          <p className="mt-0.5 text-[11px] text-muted/80">{t("dupe.sectionDesc")}</p>
+          <p className="mt-1 text-sm text-muted">{t("dupe.sectionDesc")}</p>
         </div>
         <button
           type="button"
           onClick={() => setFormOpen(true)}
-          className="cursor-pointer text-xs text-neutral-600 underline-offset-2 hover:text-neutral-900 hover:underline"
+          className="cursor-pointer text-sm text-neutral-600 underline-offset-2 hover:text-neutral-900 hover:underline"
         >
           {t("dupe.addDupe")}
         </button>
       </div>
 
-      {formOpen ? (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center"
-          onClick={closeForm}
+      <Modal
+        open={formOpen}
+        onClose={closeForm}
+        title={t("dupe.addDupe")}
+        description={t("dupe.sectionDesc")}
+        closeDisabled={submitting}
+      >
+        <form
+          onSubmit={handleSubmit}
+          className="max-h-[70vh] space-y-3 overflow-y-auto px-4 py-4"
         >
-          <div
-            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-border bg-white shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-3 border-b border-border px-4 py-3">
-              <div>
-                <h3 className="text-sm font-semibold text-neutral-900">
-                  {t("dupe.addDupe")}
-                </h3>
-                <p className="mt-0.5 text-xs text-muted">{t("dupe.sectionDesc")}</p>
-              </div>
-              <button
-                type="button"
-                onClick={closeForm}
-                disabled={submitting}
-                className="shrink-0 text-lg leading-none text-neutral-400 hover:text-neutral-700"
-                aria-label={t("dupe.cancelAdd")}
-              >
-                ×
-              </button>
+          <input
+            value={brand}
+            onChange={(e) => setBrand(e.target.value)}
+            placeholder={`${t("dupe.brand")} *`}
+            required
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+          />
+          <input
+            value={productName}
+            onChange={(e) => setProductName(e.target.value)}
+            placeholder={t("dupe.productName")}
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+          />
+          <input
+            value={priceRange}
+            onChange={(e) => setPriceRange(e.target.value)}
+            placeholder={t("dupe.priceRange")}
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+          />
+          <input
+            type="url"
+            value={buyLink}
+            onChange={(e) => setBuyLink(e.target.value)}
+            placeholder={`${t("dupe.buyLink")} *`}
+            required
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+          />
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={2}
+            placeholder={t("dupe.notes")}
+            className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+          />
+          <FileInputZone onChange={handleImageSelect} disabled={submitting} />
+          {imagePreview ? (
+            <div className="relative h-24 w-24 overflow-hidden rounded-lg border border-border bg-white">
+              <img
+                src={imagePreview}
+                alt=""
+                className="h-full w-full object-contain"
+              />
             </div>
-            <form onSubmit={handleSubmit} className="space-y-3 px-4 py-4">
-              <input
-                value={brand}
-                onChange={(e) => setBrand(e.target.value)}
-                placeholder={`${t("dupe.brand")} *`}
-                required
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-              />
-              <input
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
-                placeholder={t("dupe.productName")}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-              />
-              <input
-                value={priceRange}
-                onChange={(e) => setPriceRange(e.target.value)}
-                placeholder={t("dupe.priceRange")}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-              />
-              <input
-                type="url"
-                value={buyLink}
-                onChange={(e) => setBuyLink(e.target.value)}
-                placeholder={`${t("dupe.buyLink")} *`}
-                required
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-              />
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={2}
-                placeholder={t("dupe.notes")}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-              />
-              <FileInputZone onChange={handleImageSelect} disabled={submitting} />
-              {imagePreview ? (
-                <div className="relative h-24 w-24 overflow-hidden rounded-lg border border-border bg-white">
-                  <img
-                    src={imagePreview}
-                    alt=""
-                    className="h-full w-full object-contain"
-                  />
-                </div>
-              ) : null}
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={closeForm}
-                  disabled={submitting}
-                  className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm text-neutral-700 disabled:opacity-50"
-                >
-                  {t("dupe.cancelAdd")}
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="flex-1 rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
-                >
-                  {submitting ? t("submit.submitting") : t("dupe.submitBtn")}
-                </button>
-              </div>
-            </form>
+          ) : null}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={closeForm}
+              disabled={submitting}
+              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm text-neutral-700 disabled:opacity-50"
+            >
+              {t("dupe.cancelAdd")}
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex-1 rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+            >
+              {submitting ? t("submit.submitting") : t("dupe.submitBtn")}
+            </button>
           </div>
-        </div>
-      ) : null}
+        </form>
+      </Modal>
 
       {loading ? (
-        <p className="mt-3 text-xs text-muted">{t("loading")}</p>
+        <p className="mt-4 text-sm text-muted">{t("loading")}</p>
       ) : dupes.length === 0 ? (
-        <p className="mt-3 text-xs text-muted">{t("dupe.empty")}</p>
+        <p className="mt-4 text-sm text-muted">{t("dupe.empty")}</p>
       ) : (
-        <ul className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(128px,148px))] justify-start gap-3">
+        <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4">
           {dupes.map((dupe) => (
-            <li
-              key={dupe.id}
-              className="flex min-w-0 flex-col overflow-hidden rounded-lg border border-border/70 bg-white"
-            >
-              <div className="relative aspect-[4/5] w-full bg-neutral-50">
-                <Image
-                  src={assetUrl(dupe.image)}
-                  alt={dupe.productName ?? dupe.brand}
-                  fill
-                  className="object-contain p-1.5"
-                  sizes="148px"
-                />
-                <a
-                  href={dupe.buyLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={t("outfit.openLink")}
-                  className="absolute left-1 top-1 rounded-full bg-white/85 p-1 text-neutral-500 hover:bg-white hover:text-neutral-900"
+            <li key={dupe.id} className="min-w-0">
+              <DupeCard
+                dupe={dupe}
+                adminDelete={
+                  isAdmin ? (
+                    <button
+                      type="button"
+                      onClick={() => void handleDelete(dupe.id)}
+                      disabled={deletingId === dupe.id}
+                      className="cursor-pointer text-sm text-red-600 hover:underline disabled:opacity-50"
+                    >
+                      {deletingId === dupe.id ? "…" : t("dupe.delete")}
+                    </button>
+                  ) : null
+                }
+              />
+              <div className="mt-2.5 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleVote(dupe.id, "like")}
+                  className={`inline-flex cursor-pointer items-center gap-1 text-sm ${
+                    dupe.userVote === "like"
+                      ? "text-green-700"
+                      : "text-neutral-500 hover:text-neutral-800"
+                  }`}
                 >
-                  <ExternalLinkIcon className="h-3 w-3" />
-                </a>
-                {isAdmin ? (
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(dupe.id)}
-                    disabled={deletingId === dupe.id}
-                    className="absolute right-1 top-1 cursor-pointer rounded bg-white/85 px-1 py-px text-[10px] text-red-600 hover:bg-white disabled:opacity-50"
-                  >
-                    {deletingId === dupe.id ? "…" : t("dupe.delete")}
-                  </button>
-                ) : null}
-              </div>
-              <div className="flex flex-1 flex-col p-2">
-                <Link
-                  href={brandHref(dupe.brand)}
-                  className="truncate text-xs font-medium text-neutral-800 hover:underline"
+                  <span className="text-base" aria-hidden>
+                    👍
+                  </span>
+                  {dupe.likes}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleVote(dupe.id, "dislike")}
+                  className={`inline-flex cursor-pointer items-center gap-1 text-sm ${
+                    dupe.userVote === "dislike"
+                      ? "text-red-600"
+                      : "text-neutral-500 hover:text-neutral-800"
+                  }`}
                 >
-                  {dupe.brand}
-                </Link>
-                {dupe.productName ? (
-                  <p className="mt-0.5 line-clamp-2 break-words text-[11px] text-neutral-600">
-                    {dupe.productName}
-                  </p>
-                ) : null}
-                {dupe.priceRange ? (
-                  <p className="mt-0.5 text-[11px] text-muted">{dupe.priceRange}</p>
-                ) : null}
-                <div className="mt-auto flex flex-wrap items-center gap-1 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => handleVote(dupe.id, "like")}
-                    className={`inline-flex cursor-pointer items-center gap-0.5 rounded-full border px-2 py-0.5 text-[11px] ${
-                      dupe.userVote === "like"
-                        ? "border-green-200 bg-green-50 text-green-700"
-                        : "border-border/70 text-neutral-500 hover:bg-neutral-50"
-                    }`}
-                  >
-                    <span aria-hidden>👍</span>
-                    {dupe.likes}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleVote(dupe.id, "dislike")}
-                    className={`inline-flex cursor-pointer items-center gap-0.5 rounded-full border px-2 py-0.5 text-[11px] ${
-                      dupe.userVote === "dislike"
-                        ? "border-red-200 bg-red-50 text-red-700"
-                        : "border-border/70 text-neutral-500 hover:bg-neutral-50"
-                    }`}
-                  >
-                    <span aria-hidden>👎</span>
-                    {dupe.dislikes}
-                  </button>
-                </div>
+                  <span className="text-base" aria-hidden>
+                    👎
+                  </span>
+                  {dupe.dislikes}
+                </button>
               </div>
             </li>
           ))}

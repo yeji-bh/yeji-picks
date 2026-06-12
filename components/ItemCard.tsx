@@ -28,14 +28,15 @@ export default function ItemCard({
 }: ItemCardProps) {
   const { t } = useTranslation();
   const typeLabel = t(`itemTypes.${type}`);
+  const detailHref = itemHref({ id, productName, brand, type });
 
   return (
     <article className="group min-w-0">
       <Link
-        href={itemHref({ id, productName, brand, type })}
+        href={detailHref}
         prefetch={false}
         onClick={() => saveHomeScrollIfHome()}
-        className="relative block aspect-[3/4] w-full overflow-hidden bg-neutral-50"
+        className="item-image-surface relative block aspect-[3/4] w-full overflow-hidden"
       >
         {image ? (
           <Image
@@ -56,12 +57,19 @@ export default function ItemCard({
       <div className="mt-2.5 space-y-1">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1 space-y-0.5">
-            <p className="text-xs text-neutral-500">{typeLabel}</p>
+            <Link
+              href={detailHref}
+              prefetch={false}
+              onClick={() => saveHomeScrollIfHome()}
+              className="block text-xs text-neutral-500 hover:text-neutral-700 hover:underline"
+            >
+              {typeLabel}
+            </Link>
             {brand && (
               <Link
                 href={brandHref(brand)}
                 prefetch={false}
-                className="block truncate text-sm font-bold text-neutral-900 hover:underline"
+                className="w-fit max-w-full truncate text-sm font-bold text-neutral-900 hover:underline"
               >
                 {brand}
               </Link>
@@ -71,7 +79,7 @@ export default function ItemCard({
         </div>
         {productName && (
           <Link
-            href={itemHref({ id, productName, brand, type })}
+            href={detailHref}
             prefetch={false}
             onClick={() => saveHomeScrollIfHome()}
             className="block break-words text-base leading-snug text-neutral-800 line-clamp-2 hover:underline sm:text-[17px]"

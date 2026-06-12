@@ -355,6 +355,19 @@ export default function HomeContent({
   const filtered =
     viewMode === "outfit" ? filteredOutfits : filteredItems;
 
+  const resultCount = useMemo(() => {
+    if (typeFilter || query.trim()) return filtered.length;
+    const serverTotal = viewMode === "outfit" ? outfitTotal : itemTotal;
+    return serverTotal > 0 ? serverTotal : filtered.length;
+  }, [
+    filtered.length,
+    itemTotal,
+    outfitTotal,
+    query,
+    typeFilter,
+    viewMode,
+  ]);
+
   return (
     <div className="min-w-0">
       <HomeFilters
@@ -362,7 +375,7 @@ export default function HomeContent({
         typeFilter={typeFilter}
         query={query}
         sort={sort}
-        resultCount={filtered.length}
+        resultCount={resultCount}
         onViewModeChange={handleViewModeChange}
         onTypeChange={handleTypeFilterChange}
         onQueryChange={handleQueryChange}

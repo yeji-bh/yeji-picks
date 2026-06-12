@@ -216,12 +216,9 @@
   "favorites": {
     "title": "我的收藏",
     "empty": "尚無收藏",
-    "outfitsSection": "穿搭",
-    "itemsSection": "單品",
+    "totalCount": "共 {{count}} 項收藏",
     "save": "收藏",
-    "unsave": "取消收藏",
-    "expand": "展開",
-    "collapse": "縮小"
+    "unsave": "取消收藏"
   },
   "itemTypeGroups": {
     "hat": "帽子",
