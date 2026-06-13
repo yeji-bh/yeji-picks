@@ -3,6 +3,11 @@ export function brandKey(brand: string): string {
   return brand.trim().toLowerCase();
 }
 
+export function brandKeyForStore(brand: string | null | undefined): string | null {
+  const trimmed = brand?.trim();
+  return trimmed ? brandKey(trimmed) : null;
+}
+
 /** Route param value (unencoded); Next.js encodes spaces in URLs. */
 export function brandSlug(brand: string): string {
   return brandKey(brand);

@@ -11,7 +11,9 @@
     "cf:deploy": "opennextjs-cloudflare deploy",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:migrate-brand-key": "node --env-file=.env scripts/migrate-brand-key.mjs",
+    "db:backfill-brand-key": "node --env-file=.env scripts/backfill-brand-key.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.758.0",

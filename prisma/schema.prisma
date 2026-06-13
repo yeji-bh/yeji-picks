@@ -95,6 +95,7 @@ model CatalogItem {
   id            String             @id @default(cuid())
   type          String
   brand         String?
+  brandKey      String?            @map("brand_key")
   productName   String?            @map("product_name")
   officialLink  String?            @map("official_link")
   notes         String?
@@ -107,6 +108,7 @@ model CatalogItem {
   reports       Report[]
   dupes         CatalogDupe[]
 
+  @@index([brandKey])
   @@map("catalog_items")
 }
 

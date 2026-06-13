@@ -64,6 +64,7 @@ const statements = [
     "id" TEXT NOT NULL PRIMARY KEY,
     "type" TEXT NOT NULL,
     "brand" TEXT,
+    "brand_key" TEXT,
     "product_name" TEXT,
     "official_link" TEXT,
     "notes" TEXT,
@@ -426,6 +427,27 @@ if (reviewCols.includes("rating")) {
   );
   await run(`PRAGMA foreign_keys=ON`, "fk on outfit_reviews");
   console.log("Migrated outfit_reviews: removed rating");
+}
+
+await run(
+  `ALTER TABLE catalog_items ADD COLUMN brand_key TEXT`,
+  "catalog_items add brand_key"
+);
+await run(
+  `CREATE INDEX IF NOT EXISTS catalog_items_brand_key_idx ON catalog_items(brand_key)`,
+  "catalog_items brand_key index"
+);
+try {
+  const backfill = await client.execute(`
+    UPDATE catalog_items
+    SET brand_key = LOWER(TRIM(brand))
+    WHERE brand IS NOT NULL
+      AND TRIM(brand) != ''
+      AND (brand_key IS NULL OR brand_key = '')
+  `);
+  console.log("OK: backfill catalog_items.brand_key", backfill.rowsAffected ?? 0, "rows");
+} catch (err) {
+  console.error("Fail: backfill catalog_items.brand_key", err);
 }
 
 const tables = await client.execute(

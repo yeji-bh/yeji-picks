@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { syncCatalogImages, toDisplayItem } from "@/lib/catalog-item";
 import { isAdminUser } from "@/lib/auth";
 import { apiError } from "@/lib/api-error";
+import { brandKeyForStore } from "@/lib/brand";
 import { resolveCanonicalBrand } from "@/lib/brand-db";
 import { PUBLIC_API_CACHE } from "@/lib/cache-config";
 import { prisma } from "@/lib/db";
@@ -102,7 +103,14 @@ export async function PATCH(
     await prisma.$transaction(async (tx) => {
       await tx.catalogItem.update({
         where: { id },
-        data: { type, brand, productName, officialLink, notes },
+        data: {
+          type,
+          brand,
+          brandKey: brandKeyForStore(brand),
+          productName,
+          officialLink,
+          notes,
+        },
       });
 
       if (typeof body.image === "string" && body.image) {

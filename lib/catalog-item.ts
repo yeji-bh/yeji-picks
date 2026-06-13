@@ -2,6 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import type { Prisma } from "@prisma/client";
+import { brandKeyForStore } from "@/lib/brand";
 import { resolveCanonicalBrand } from "@/lib/brand-db";
 import { catalogFingerprint } from "@/lib/catalog-fingerprint";
 import { prisma } from "@/lib/db";
@@ -100,6 +101,7 @@ async function resolveCatalogItem(
     const updates: {
       type?: string;
       brand?: string | null;
+      brandKey?: string | null;
       productName?: string | null;
       officialLink?: string | null;
       notes?: string | null;
@@ -111,6 +113,7 @@ async function resolveCatalogItem(
     const brand = (await resolveCanonicalBrand(item.brand, tx)) ?? existing.brand;
     if (item.brand !== undefined && brand !== existing.brand) {
       updates.brand = brand;
+      updates.brandKey = brandKeyForStore(brand);
     }
     const productName = item.productName?.trim() || null;
     if (item.productName !== undefined && productName !== existing.productName) {
@@ -171,6 +174,7 @@ async function resolveCatalogItem(
     data: {
       type: normalizedType,
       brand: canonicalBrand,
+      brandKey: brandKeyForStore(canonicalBrand),
       productName: item.productName?.trim() || null,
       officialLink: item.officialLink?.trim() || null,
       notes: item.notes?.trim() || null,

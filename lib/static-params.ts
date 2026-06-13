@@ -1,6 +1,5 @@
 import "server-only";
 
-import { brandSlug } from "@/lib/brand";
 import { prisma } from "@/lib/db";
 import { formatOutfitTitle } from "@/lib/outfit";
 import { safeDbQuery } from "@/lib/safe-db";
@@ -41,15 +40,13 @@ export async function listItemStaticParams() {
 export async function listBrandStaticParams() {
   return safeDbQuery(async () => {
     const rows = await prisma.catalogItem.findMany({
-      where: { brand: { not: null } },
-      select: { brand: true },
-      distinct: ["brand"],
+      where: { brandKey: { not: null } },
+      select: { brandKey: true },
+      distinct: ["brandKey"],
     });
-    const slugs = new Set<string>();
-    for (const row of rows) {
-      if (!row.brand?.trim()) continue;
-      slugs.add(brandSlug(row.brand));
-    }
-    return [...slugs].map((slug) => ({ slug }));
+    return rows
+      .map((row) => row.brandKey?.trim())
+      .filter((slug): slug is string => Boolean(slug))
+      .map((slug) => ({ slug }));
   }, []);
 }

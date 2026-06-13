@@ -6,20 +6,20 @@ import { prisma } from "@/lib/db";
 
 type DbClient = Prisma.TransactionClient | typeof prisma;
 
-async function distinctBrandsForKey(
+async function brandNamesForKey(
   key: string,
   db: DbClient = prisma
 ): Promise<string[]> {
   const rows = await db.catalogItem.findMany({
-    where: { brand: { not: null } },
+    where: { brandKey: key },
     select: { brand: true },
     distinct: ["brand"],
+    take: 32,
   });
 
   return rows
     .map((row) => row.brand?.trim())
-    .filter((name): name is string => Boolean(name))
-    .filter((name) => brandKey(name) === key);
+    .filter((name): name is string => Boolean(name));
 }
 
 export async function resolveCanonicalBrand(
@@ -30,7 +30,7 @@ export async function resolveCanonicalBrand(
   if (!trimmed) return null;
 
   const key = brandKey(trimmed);
-  const matches = await distinctBrandsForKey(key, db);
+  const matches = await brandNamesForKey(key, db);
   if (matches.length > 0) {
     return pickCanonicalBrand(matches);
   }
@@ -39,11 +39,8 @@ export async function resolveCanonicalBrand(
 }
 
 export async function findCatalogItemsByBrandKey(key: string) {
-  const brandNames = await distinctBrandsForKey(key);
-  if (brandNames.length === 0) return [];
-
   return prisma.catalogItem.findMany({
-    where: { brand: { in: brandNames } },
+    where: { brandKey: key },
     include: {
       images: { orderBy: { sortOrder: "asc" }, take: 1 },
     },
@@ -52,7 +49,7 @@ export async function findCatalogItemsByBrandKey(key: string) {
 }
 
 export async function getCanonicalBrandName(key: string): Promise<string | null> {
-  const matches = await distinctBrandsForKey(key);
+  const matches = await brandNamesForKey(key);
   if (matches.length === 0) return null;
   return pickCanonicalBrand(matches);
 }
