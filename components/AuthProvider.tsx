@@ -53,7 +53,26 @@ export default function AuthProvider({
   }, []);
 
   useEffect(() => {
-    void refresh();
+    let cancelled = false;
+
+    const run = () => {
+      if (cancelled) return;
+      void refresh();
+    };
+
+    if (typeof requestIdleCallback === "function") {
+      const idleId = requestIdleCallback(run, { timeout: 2000 });
+      return () => {
+        cancelled = true;
+        cancelIdleCallback(idleId);
+      };
+    }
+
+    const timer = setTimeout(run, 50);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [refresh]);
 
   return (

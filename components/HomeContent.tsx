@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import HomeGridSkeleton from "./HomeGridSkeleton";
 import ItemCard from "./ItemCard";
 import OutfitCard from "./OutfitCard";
 import HomeFilters from "./HomeFilters";
@@ -142,8 +143,11 @@ export default function HomeContent({
 
   const reloadFromStart = useCallback(
     async (mode: HomeViewMode, nextSort: OutfitSort) => {
-      setLoading(true);
-      setPageReady(false);
+      const isFirstLoad = outfits.length === 0 && items.length === 0;
+      if (!isFirstLoad) {
+        setLoading(true);
+        setPageReady(false);
+      }
       try {
         const savedLimit = getSavedLoadedCount();
         if (mode === "outfit") {
@@ -174,10 +178,10 @@ export default function HomeContent({
         setPageReady(true);
       }
     },
-    [fetchItems, fetchOutfits]
+    [fetchItems, fetchOutfits, items.length, outfits.length]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (initDoneRef.current) return;
     initDoneRef.current = true;
 
@@ -191,24 +195,34 @@ export default function HomeContent({
       const canUseOutfitInitial =
         initialData?.outfits &&
         savedMode === "outfit" &&
-        savedSort === DEFAULT_OUTFIT_SORT &&
-        (initialData.outfits.outfits.length >= savedLimit ||
-          savedLimit === HOME_PAGE_SIZE);
+        savedSort === DEFAULT_OUTFIT_SORT;
 
       const canUseItemInitial =
         initialData?.items &&
         savedMode === "item" &&
-        savedSort === DEFAULT_OUTFIT_SORT &&
-        (initialData.items.items.length >= savedLimit ||
-          savedLimit === HOME_PAGE_SIZE);
+        savedSort === DEFAULT_OUTFIT_SORT;
 
       if (canUseOutfitInitial) {
         setOutfits(dedupeOutfits(initialData.outfits!.outfits));
         setOutfitTotal(initialData.outfits!.total);
         setOutfitHasMore(initialData.outfits!.hasMore);
-        setSavedLoadedCount(initialData.outfits!.outfits.length);
         setLoading(false);
         setPageReady(true);
+
+        if (savedLimit > initialData.outfits!.outfits.length) {
+          void fetchOutfits(0, savedLimit, savedSort)
+            .then((data) => {
+              setOutfits(dedupeOutfits(data.outfits));
+              setOutfitTotal(data.total);
+              setOutfitHasMore(data.hasMore);
+              setSavedLoadedCount(data.outfits.length);
+            })
+            .catch(() => {
+              /* keep SSR batch */
+            });
+        } else {
+          setSavedLoadedCount(initialData.outfits!.outfits.length);
+        }
         return;
       }
 
@@ -216,9 +230,23 @@ export default function HomeContent({
         setItems(dedupeItems(initialData.items!.items));
         setItemTotal(initialData.items!.total);
         setItemHasMore(initialData.items!.hasMore);
-        setSavedLoadedCount(initialData.items!.items.length);
         setLoading(false);
         setPageReady(true);
+
+        if (savedLimit > initialData.items!.items.length) {
+          void fetchItems(0, savedLimit, savedSort)
+            .then((data) => {
+              setItems(dedupeItems(data.items));
+              setItemTotal(data.total);
+              setItemHasMore(data.hasMore);
+              setSavedLoadedCount(data.items.length);
+            })
+            .catch(() => {
+              /* keep SSR batch */
+            });
+        } else {
+          setSavedLoadedCount(initialData.items!.items.length);
+        }
         return;
       }
 
@@ -414,12 +442,7 @@ export default function HomeContent({
       />
 
       {loading ? (
-        <div className="py-6 text-center">
-          <span className="inline-flex items-center gap-2 text-sm text-muted">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-700" aria-hidden />
-            {t("loading")}
-          </span>
-        </div>
+        <HomeGridSkeleton />
       ) : activeList.length === 0 ? (
         <div className="rounded-xl bg-empty p-8 text-center sm:p-12">
           <p className="text-sm text-muted">

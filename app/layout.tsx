@@ -10,7 +10,7 @@ import SiteFooter from "@/components/SiteFooter";
 import ThemeProvider from "@/components/ThemeProvider";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { getAssetBaseUrl } from "@/lib/asset-base";
-import { inter, notoSansSC, notoSansTC } from "@/lib/fonts";
+import { localeFontBodyClass } from "@/lib/locale-font-class";
 import {
   LOCALE_MANUAL_COOKIE,
   resolveInitialLocale,
@@ -49,22 +49,25 @@ export default async function RootLayout({
     cookieStore.get(LOCALE_MANUAL_COOKIE)?.value,
     headerStore.get("accept-language")
   );
+  const fontBodyClass = await localeFontBodyClass(locale);
 
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         {assetBase ? (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `window.__ASSET_BASE__=${JSON.stringify(assetBase)}`,
-            }}
-          />
+          <>
+            <link rel="preconnect" href={new URL(assetBase).origin} />
+            <link rel="dns-prefetch" href={new URL(assetBase).origin} />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `window.__ASSET_BASE__=${JSON.stringify(assetBase)}`,
+              }}
+            />
+          </>
         ) : null}
       </head>
-      <body
-        className={`${inter.variable} ${notoSansSC.variable} ${notoSansTC.variable} flex min-h-dvh flex-col`}
-      >
+      <body className={`${fontBodyClass} flex min-h-dvh flex-col`}>
         <ThemeProvider>
           <I18nProvider initialLocale={locale}>
             <AuthProvider>

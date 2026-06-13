@@ -70,7 +70,7 @@ export default function ProgressiveImage({
 
   if (!resolvedSrc) return null;
 
-  const showOverlay = showSkeleton && !loaded;
+  const showOverlay = showSkeleton && !loaded && !priority;
 
   return (
     <span ref={rootRef} className="contents">
@@ -84,8 +84,9 @@ export default function ProgressiveImage({
         {...props}
         src={resolvedSrc}
         priority={priority}
+        fetchPriority={priority ? "high" : "auto"}
         quality={quality}
-        loading={priority ? undefined : "lazy"}
+        loading={priority ? "eager" : "lazy"}
         unoptimized={unoptimized ?? cdn.unoptimized}
         onLoad={(event) => {
           loadedSrcRef.current = baseKey;
