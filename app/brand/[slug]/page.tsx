@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import BrandDetailContent from "@/components/BrandDetailContent";
 import { parseBrandSlug } from "@/lib/brand";
-import { findCatalogItemsByBrandKey, getCanonicalBrandName } from "@/lib/brand-db";
+import { getBrandPageData } from "@/lib/brand-db";
 import { primaryImage } from "@/lib/catalog-item";
 import { listBrandStaticParams } from "@/lib/static-params";
 
@@ -23,19 +23,15 @@ export default async function BrandDetailPage({
     notFound();
   }
 
-  const [rows, displayName] = await Promise.all([
-    findCatalogItemsByBrandKey(key),
-    getCanonicalBrandName(key),
-  ]);
-
-  if (rows.length === 0 || !displayName) {
+  const data = await getBrandPageData(key);
+  if (!data) {
     notFound();
   }
 
   return (
     <BrandDetailContent
-      brand={displayName}
-      items={rows.map((item) => ({
+      brand={data.displayName}
+      items={data.rows.map((item) => ({
         id: item.id,
         type: item.type,
         brand: item.brand,

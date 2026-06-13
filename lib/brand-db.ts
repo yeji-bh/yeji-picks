@@ -6,21 +6,9 @@ import { prisma } from "@/lib/db";
 
 type DbClient = Prisma.TransactionClient | typeof prisma;
 
-async function brandNamesForKey(
-  key: string,
-  db: DbClient = prisma
-): Promise<string[]> {
-  const rows = await db.catalogItem.findMany({
-    where: { brandKey: key },
-    select: { brand: true },
-    distinct: ["brand"],
-    take: 32,
-  });
-
-  return rows
-    .map((row) => row.brand?.trim())
-    .filter((name): name is string => Boolean(name));
-}
+const brandItemInclude = {
+  images: { orderBy: { sortOrder: "asc" as const }, take: 1 },
+} satisfies Prisma.CatalogItemInclude;
 
 export async function resolveCanonicalBrand(
   brand: string | null | undefined,
@@ -30,26 +18,45 @@ export async function resolveCanonicalBrand(
   if (!trimmed) return null;
 
   const key = brandKey(trimmed);
-  const matches = await brandNamesForKey(key, db);
-  if (matches.length > 0) {
-    return pickCanonicalBrand(matches);
+  const row = await db.catalogItem.findFirst({
+    where: { brandKey: key },
+    select: { brand: true },
+  });
+  if (row?.brand?.trim()) {
+    return row.brand.trim();
   }
 
   return trimmed;
 }
 
+export async function getBrandPageData(key: string) {
+  const rows = await prisma.catalogItem.findMany({
+    where: { brandKey: key },
+    include: brandItemInclude,
+    orderBy: [{ useCount: "desc" }, { createdAt: "desc" }],
+  });
+
+  if (rows.length === 0) return null;
+
+  const displayName = pickCanonicalBrand(
+    rows.map((row) => row.brand).filter((name): name is string => Boolean(name?.trim()))
+  );
+  if (!displayName) return null;
+
+  return { displayName, rows };
+}
+
+/** @deprecated Use getBrandPageData */
 export async function findCatalogItemsByBrandKey(key: string) {
   return prisma.catalogItem.findMany({
     where: { brandKey: key },
-    include: {
-      images: { orderBy: { sortOrder: "asc" }, take: 1 },
-    },
+    include: brandItemInclude,
     orderBy: [{ useCount: "desc" }, { createdAt: "desc" }],
   });
 }
 
+/** @deprecated Use getBrandPageData */
 export async function getCanonicalBrandName(key: string): Promise<string | null> {
-  const matches = await brandNamesForKey(key);
-  if (matches.length === 0) return null;
-  return pickCanonicalBrand(matches);
+  const data = await getBrandPageData(key);
+  return data?.displayName ?? null;
 }
