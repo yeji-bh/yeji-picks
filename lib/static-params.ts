@@ -36,17 +36,3 @@ export async function listItemStaticParams() {
     });
   }, []);
 }
-
-export async function listBrandStaticParams() {
-  return safeDbQuery(async () => {
-    const rows = await prisma.catalogItem.findMany({
-      where: { brandKey: { not: null } },
-      select: { brandKey: true },
-      distinct: ["brandKey"],
-    });
-    return rows
-      .map((row) => row.brandKey?.trim())
-      .filter((slug): slug is string => Boolean(slug))
-      .map((slug) => ({ slug }));
-  }, []);
-}
