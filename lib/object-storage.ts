@@ -57,7 +57,7 @@ export async function putUploadObject(
       Key: key,
       Body: buffer,
       ContentType: "image/webp",
-      CacheControl: "public, max-age=31536000",
+      CacheControl: "public, max-age=2592000, immutable",
     })
   );
 }

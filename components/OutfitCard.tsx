@@ -17,6 +17,8 @@ type OutfitCardProps = {
   eventName: string;
   date: string;
   itemTypes?: string[];
+  priority?: boolean;
+  imageQuality?: number;
 };
 
 export default function OutfitCard({
@@ -25,6 +27,8 @@ export default function OutfitCard({
   eventName,
   date,
   itemTypes = [],
+  priority = false,
+  imageQuality = 75,
 }: OutfitCardProps) {
   const { t } = useTranslation();
   const title = formatOutfitTitle(date, eventName);
@@ -45,6 +49,8 @@ export default function OutfitCard({
             uploadPath={mainImage}
             alt={displayTitle}
             fill
+            priority={priority}
+            quality={imageQuality}
             className="object-cover"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
@@ -62,7 +68,7 @@ export default function OutfitCard({
           </Link>
           <FavoriteButton type="outfit" targetId={id} variant="inline" size="md" />
         </div>
-        <ItemTypeBadges types={itemTypes} />
+        <ItemTypeBadges types={itemTypes} compact />
       </div>
     </article>
   );

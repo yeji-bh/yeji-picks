@@ -13,6 +13,7 @@ import {
 } from "@/lib/home-view-mode";
 import {
   getSavedLoadedCount,
+  HOME_INITIAL_RENDER,
   HOME_PAGE_SIZE,
   setSavedLoadedCount,
 } from "@/lib/home-pagination";
@@ -102,6 +103,8 @@ export default function HomeContent({
   const initDoneRef = useRef(false);
   const filtersRestoredRef = useRef(false);
   const [pageReady, setPageReady] = useState(hasOutfitInitial || hasItemInitial);
+  const [renderLimit, setRenderLimit] = useState(HOME_INITIAL_RENDER);
+  const renderSentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (filtersRestoredRef.current) return;
@@ -228,6 +231,10 @@ export default function HomeContent({
   useEffect(() => {
     if (!pageReady) return;
     const y = getHomeScroll();
+    if (y > 0) {
+      const listLen = viewMode === "outfit" ? outfits.length : items.length;
+      setRenderLimit(listLen);
+    }
     if (y <= 0) return;
 
     const restore = () => window.scrollTo(0, y);
@@ -242,7 +249,7 @@ export default function HomeContent({
       cancelAnimationFrame(raf);
       clearTimeout(timer);
     };
-  }, [pageReady, outfits.length, items.length, typeFilter, query]);
+  }, [pageReady, outfits.length, items.length, typeFilter, query, viewMode]);
 
   const hasMore = viewMode === "outfit" ? outfitHasMore : itemHasMore;
   const listLength = viewMode === "outfit" ? outfits.length : items.length;
@@ -352,15 +359,39 @@ export default function HomeContent({
     });
   }, [items, typeFilter, query]);
 
-  const filtered =
+  const activeList =
     viewMode === "outfit" ? filteredOutfits : filteredItems;
+  const visibleOutfits = filteredOutfits.slice(0, renderLimit);
+  const visibleItems = filteredItems.slice(0, renderLimit);
+  const canExpandRender = renderLimit < activeList.length;
+
+  useEffect(() => {
+    setRenderLimit(HOME_INITIAL_RENDER);
+  }, [viewMode, sort, typeFilter, query]);
+
+  useEffect(() => {
+    const el = renderSentinelRef.current;
+    if (!el || !canExpandRender || loading) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting) return;
+        setRenderLimit((prev) =>
+          Math.min(prev + HOME_PAGE_SIZE, activeList.length)
+        );
+      },
+      { rootMargin: "400px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [activeList.length, canExpandRender, loading, renderLimit]);
 
   const resultCount = useMemo(() => {
-    if (typeFilter || query.trim()) return filtered.length;
+    if (typeFilter || query.trim()) return activeList.length;
     const serverTotal = viewMode === "outfit" ? outfitTotal : itemTotal;
-    return serverTotal > 0 ? serverTotal : filtered.length;
+    return serverTotal > 0 ? serverTotal : activeList.length;
   }, [
-    filtered.length,
+    activeList.length,
     itemTotal,
     outfitTotal,
     query,
@@ -389,7 +420,7 @@ export default function HomeContent({
             {t("loading")}
           </span>
         </div>
-      ) : filtered.length === 0 ? (
+      ) : activeList.length === 0 ? (
         <div className="rounded-xl bg-empty p-8 text-center sm:p-12">
           <p className="text-sm text-muted">
             {viewMode === "outfit"
@@ -407,7 +438,7 @@ export default function HomeContent({
             }
           >
             {viewMode === "outfit"
-              ? filteredOutfits.map((outfit) => (
+              ? visibleOutfits.map((outfit, index) => (
                   <OutfitCard
                     key={outfit.id}
                     id={outfit.id}
@@ -415,9 +446,11 @@ export default function HomeContent({
                     eventName={outfit.eventName}
                     date={outfit.date}
                     itemTypes={outfit.itemTypes}
+                    priority={index < 2}
+                    imageQuality={72}
                   />
                 ))
-              : filteredItems.map((item) => (
+              : visibleItems.map((item, index) => (
                   <ItemCard
                     key={item.id}
                     id={item.id}
@@ -426,9 +459,18 @@ export default function HomeContent({
                     brand={item.brand}
                     productName={item.productName}
                     useCount={item.useCount}
+                    priority={index < 2}
+                    imageQuality={72}
                   />
                 ))}
           </div>
+          {canExpandRender && (
+            <div
+              ref={renderSentinelRef}
+              className="h-px"
+              aria-hidden
+            />
+          )}
           {hasMore && (
             <div ref={sentinelRef} className="py-6 text-center text-xs text-muted">
               {loadingMore ? (

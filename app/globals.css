@@ -82,7 +82,6 @@ body {
   min-height: 100dvh;
   font-family:
     var(--font-inter),
-    "Pretendard Variable",
     "Noto Sans TC",
     "Noto Sans SC",
     "Apple SD Gothic Neo",
@@ -95,7 +94,6 @@ body {
 html[lang="zh-CN"] body {
   font-family:
     var(--font-inter),
-    "Pretendard Variable",
     var(--font-noto-sc),
     "Noto Sans TC",
     "Apple SD Gothic Neo",
@@ -108,7 +106,6 @@ html[lang="zh-CN"] body {
 html[lang="zh-TW"] body {
   font-family:
     var(--font-inter),
-    "Pretendard Variable",
     var(--font-noto-tc),
     "Noto Sans SC",
     "Apple SD Gothic Neo",
@@ -121,7 +118,6 @@ html[lang="zh-TW"] body {
 html[lang="ko"] body {
   font-family:
     var(--font-inter),
-    "Pretendard Variable",
     "Apple SD Gothic Neo",
     "Noto Sans SC",
     "Noto Sans TC",

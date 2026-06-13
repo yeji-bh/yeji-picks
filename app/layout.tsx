@@ -53,10 +53,6 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
-        />
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         {assetBase ? (
           <script

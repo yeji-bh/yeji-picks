@@ -29,6 +29,7 @@ export default function ProgressiveImage({
   showSkeleton = true,
   className = "",
   priority = false,
+  quality = 75,
   unoptimized,
   onLoad,
   onError,
@@ -83,6 +84,7 @@ export default function ProgressiveImage({
         {...props}
         src={resolvedSrc}
         priority={priority}
+        quality={quality}
         loading={priority ? undefined : "lazy"}
         unoptimized={unoptimized ?? cdn.unoptimized}
         onLoad={(event) => {

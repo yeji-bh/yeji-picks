@@ -16,6 +16,8 @@ type ItemCardProps = {
   brand: string | null;
   productName: string | null;
   useCount: number;
+  priority?: boolean;
+  imageQuality?: number;
 };
 
 export default function ItemCard({
@@ -24,6 +26,8 @@ export default function ItemCard({
   type,
   brand,
   productName,
+  priority = false,
+  imageQuality = 75,
 }: ItemCardProps) {
   const { t } = useTranslation();
   const typeLabel = t(`itemTypes.${type}`);
@@ -44,6 +48,8 @@ export default function ItemCard({
             uploadPath={image}
             alt={productName ?? typeLabel}
             fill
+            priority={priority}
+            quality={imageQuality}
             className="object-contain"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />

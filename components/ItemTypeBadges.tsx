@@ -29,9 +29,12 @@ function useIsMobileLayout(): boolean {
 export default function ItemTypeBadges({
   types,
   className = "",
+  compact = false,
 }: {
   types: string[];
   className?: string;
+  /** Skip scrollWidth measurement (home grid cards). */
+  compact?: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -53,7 +56,7 @@ export default function ItemTypeBadges({
   );
 
   useLayoutEffect(() => {
-    if (isMobile) {
+    if (compact || isMobile) {
       setVisibleCount(Math.min(MOBILE_MAX_BADGES, sorted.length));
       return;
     }
@@ -100,7 +103,7 @@ export default function ItemTypeBadges({
     const observer = new ResizeObserver(measure);
     observer.observe(el);
     return () => observer.disconnect();
-  }, [typesKey, i18n.language, sorted.length, isMobile]);
+  }, [typesKey, i18n.language, sorted.length, isMobile, compact]);
 
   if (sorted.length === 0) return null;
 
