@@ -12,6 +12,7 @@ import ThemeToggle from "./ThemeToggle";
 import {
   IconClipboard,
   IconHeart,
+  IconBook,
   IconMessage,
   IconSubmit,
   IconUser,
@@ -98,6 +99,11 @@ export default function HeaderNav() {
               href="/favorites"
               icon={<IconHeart />}
               label={t("nav.favorites")}
+            />
+            <NavItem
+              href="/guide"
+              icon={<IconBook />}
+              label={t("nav.guide")}
             />
             {isAdmin ? (
               <NavItem
@@ -199,6 +205,10 @@ export default function HeaderNav() {
               >
                 <IconHeart />
                 <span>{t("nav.favorites")}</span>
+              </Link>
+              <Link href="/guide" onClick={closeMenu} className={drawerLinkClass}>
+                <IconBook />
+                <span>{t("nav.guide")}</span>
               </Link>
               {isAdmin ? (
                 <Link

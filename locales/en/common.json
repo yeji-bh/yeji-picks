@@ -10,6 +10,7 @@
     "review": "Review",
     "feedback": "Problem Report",
     "favorites": "My favorites",
+    "guide": "User guide",
     "admin": "Review",
     "language": "Language",
     "menu": "Menu",
@@ -429,5 +430,82 @@
     }
   },
   "notFound": "Page not found",
-  "loading": "Loading..."
+  "loading": "Loading...",
+  "guide": {
+    "title": "User guide",
+    "toc": "Contents",
+    "outro": "Ready to explore? Head to the home page to get started.",
+    "ctaHome": "Go to home",
+    "links": {
+      "home": "Go to home",
+      "favorites": "Go to favorites",
+      "submit": "Go to submit"
+    },
+    "sections": {
+      "home": {
+        "title": "Browsing the home page",
+        "desc": "The home page is your starting point for all approved outfits and catalog items.",
+        "tip1": "Switch between Outfits and Items at the top.",
+        "tip2": "Use category tabs (hats, tops, bottoms, etc.) to filter by item type.",
+        "tip3": "Search by event, brand, or product name; use the sort menu to change the order."
+      },
+      "outfit": {
+        "title": "Outfit details",
+        "desc": "Tap any outfit card to open its detail page.",
+        "tip1": "View the cover image (tap to zoom), event name, date, and every item in the look.",
+        "tip2": "Official purchase links open in a new tab; broken links are marked as dead.",
+        "tip3": "Use Previous / Next at the left and right to browse nearby outfits quickly."
+      },
+      "item": {
+        "title": "Items & brands",
+        "desc": "Open an item from an outfit page or from Item mode on the home page.",
+        "tip1": "See brand, name, type, and every outfit that includes this item.",
+        "tip2": "Tap the brand name to open the brand page and browse more from that label.",
+        "tip3": "Check the Dupe recommendations section for other fans' suggested alternatives and vote on helpful ones."
+      },
+      "favorites": {
+        "title": "Favorites",
+        "desc": "Save outfits and items you like and revisit them later.",
+        "tip1": "Tap the heart icon on any card to save or unsave.",
+        "tip2": "Without an account, favorites stay on your browser; sign in to sync them to My favorites."
+      },
+      "submit": {
+        "title": "Submit an outfit",
+        "desc": "Share a new look with the community. Approved submissions appear on the home page.",
+        "tip1": "Open Submit in the nav, fill in event name, date, and cover image, then add each item.",
+        "tip2": "Each item needs a type plus brand and name; purchase links are optional.",
+        "tip3": "Track status (pending, approved, rejected) under My submissions."
+      },
+      "reviews": {
+        "title": "Outfit reviews",
+        "desc": "At the bottom of an outfit page you can read and write reviews.",
+        "tip1": "Rate and write a review; no account required (nickname optional).",
+        "tip2": "When signed in, you can edit or delete your own review."
+      },
+      "dupes": {
+        "title": "Dupe recommendations",
+        "desc": "Can't find the original item? Users can suggest similar alternatives on item pages.",
+        "tip1": "Browse dupes on the item page and upvote helpful suggestions.",
+        "tip2": "Submit your own dupe with a photo, brand, buy link, and notes."
+      },
+      "feedback": {
+        "title": "Problem reports",
+        "desc": "Found wrong info, a broken link, or have a suggestion? Let us know.",
+        "tip1": "Open Problem Report in the nav and describe the issue.",
+        "tip2": "On outfit and item pages you can also report errors for that specific content."
+      },
+      "account": {
+        "title": "Account & sign-in",
+        "desc": "An account syncs favorites and submissions across devices.",
+        "tip1": "Tap Sign in in the header to log in or create an account.",
+        "tip2": "Registering merges favorites and submissions in your browser into your account."
+      },
+      "settings": {
+        "title": "Language & theme",
+        "desc": "Customize language and light/dark appearance.",
+        "tip1": "Use the language menu for 繁體中文, 简体中文, English, or 한국어.",
+        "tip2": "Toggle light/dark mode with the sun/moon icon; your choice is remembered."
+      }
+    }
+  }
 }
