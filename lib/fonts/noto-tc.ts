@@ -6,4 +6,5 @@ export const notoSansTC = Noto_Sans_TC({
   display: "swap",
   variable: "--font-noto-tc",
   preload: false,
+  adjustFontFallback: true,
 });

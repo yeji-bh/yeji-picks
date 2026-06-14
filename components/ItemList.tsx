@@ -98,6 +98,16 @@ function ItemListRow({
             <span className="mt-1 inline-block bg-subtle px-2 py-0.5 text-[12px] text-foreground-secondary sm:mt-1.5 sm:text-sm">
               {t(`itemTypes.${typeKey}`)}
             </span>
+            {item.notes && (
+              <p className="mt-1.5 break-words text-[13px] text-muted sm:mt-2 sm:text-base">
+                {item.notes}
+              </p>
+            )}
+            {item.linkStatus === "dead" && item.officialLink && (
+              <p className="mt-1.5 text-[13px] text-red-500 sm:text-base">
+                {t("outfit.linkDead")}
+              </p>
+            )}
           </div>
 
           <div className="flex items-center justify-end gap-0">
@@ -132,17 +142,6 @@ function ItemListRow({
             />
           </div>
         </div>
-
-        {item.linkStatus === "dead" && item.officialLink && (
-          <p className="mt-1.5 text-[13px] text-red-500 sm:text-base">
-            {t("outfit.linkDead")}
-          </p>
-        )}
-        {item.notes && (
-          <p className="mt-1.5 break-words text-[13px] text-muted sm:mt-2 sm:text-base">
-            {item.notes}
-          </p>
-        )}
       </div>
     </article>
   );

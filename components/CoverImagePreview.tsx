@@ -15,7 +15,7 @@ export default function CoverImagePreview({
   className?: string;
 }) {
   const resolvedSrc = src.startsWith("blob:") ? src : assetUrl(src);
-  const cdn = cdnImageProps();
+  const cdn = cdnImageProps({ unoptimized: true });
 
   return (
     <div

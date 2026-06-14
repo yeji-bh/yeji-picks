@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useAssetUrl } from "@/lib/use-asset-url";
 import { COVER_ASPECT_CLASS } from "@/lib/image";
+import { GRID_IMAGE_QUALITY, GRID_IMAGE_SIZES } from "@/lib/grid-image";
 import { outfitHref } from "@/lib/entity-href";
 import { formatOutfitTitle } from "@/lib/outfit";
 import FavoriteButton from "./FavoriteButton";
@@ -28,7 +29,7 @@ export default function OutfitCard({
   date,
   itemTypes = [],
   priority = false,
-  imageQuality = 75,
+  imageQuality = GRID_IMAGE_QUALITY,
 }: OutfitCardProps) {
   const { t } = useTranslation();
   const title = formatOutfitTitle(date, eventName);
@@ -52,7 +53,7 @@ export default function OutfitCard({
             priority={priority}
             quality={imageQuality}
             className="object-cover"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            sizes={GRID_IMAGE_SIZES}
           />
         </div>
       </Link>

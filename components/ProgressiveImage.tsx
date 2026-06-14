@@ -84,7 +84,7 @@ export default function ProgressiveImage({
         {...props}
         src={resolvedSrc}
         priority={priority}
-        fetchPriority={priority ? "high" : "auto"}
+        fetchPriority={priority ? "high" : undefined}
         quality={quality}
         loading={priority ? "eager" : "lazy"}
         unoptimized={unoptimized ?? cdn.unoptimized}

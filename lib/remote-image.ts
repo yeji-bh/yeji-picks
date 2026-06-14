@@ -6,16 +6,14 @@ export function useCdnDirectImages(): boolean {
 }
 
 type CdnImageOptions = {
-  /** Force Next.js optimizer (may be slow/unavailable on Cloudflare Workers). */
+  /** Force Next.js optimizer (not reliable on Cloudflare Workers without extra setup). */
   optimized?: boolean;
-  /** Force direct CDN bytes (fast parallel fetch from R2). */
   unoptimized?: boolean;
 };
 
 /**
- * Grid/list thumbnails default to direct CDN on R2 — avoids blocking on
- * `/_next/image` worker round-trips. Pass `{ optimized: true }` when
- * resizing via Next optimizer is confirmed working in production.
+ * R2/CDN images load directly from the public URL — required on OpenNext +
+ * Cloudflare Workers where `/_next/image` is unavailable by default.
  */
 export function cdnImageProps(
   options: CdnImageOptions = {}

@@ -8,6 +8,7 @@ import { itemHref } from "@/lib/entity-href";
 import FavoriteButton from "./FavoriteButton";
 import ProgressiveImage from "./ProgressiveImage";
 import { saveHomeScrollIfHome } from "@/lib/home-scroll";
+import { GRID_IMAGE_QUALITY, GRID_IMAGE_SIZES } from "@/lib/grid-image";
 
 type ItemCardProps = {
   id: string;
@@ -27,7 +28,7 @@ export default function ItemCard({
   brand,
   productName,
   priority = false,
-  imageQuality = 75,
+  imageQuality = GRID_IMAGE_QUALITY,
 }: ItemCardProps) {
   const { t } = useTranslation();
   const typeLabel = t(`itemTypes.${type}`);
@@ -51,7 +52,7 @@ export default function ItemCard({
             priority={priority}
             quality={imageQuality}
             className="object-contain"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            sizes={GRID_IMAGE_SIZES}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center px-3 text-center text-xs text-muted">
@@ -59,7 +60,7 @@ export default function ItemCard({
           </div>
         )}
       </Link>
-      <div className="mt-2.5 space-y-1">
+      <div className="mt-2.5">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1 space-y-0.5">
             <Link
@@ -74,24 +75,24 @@ export default function ItemCard({
               <Link
                 href={brandHref(brand)}
                 prefetch={false}
-                className="w-fit max-w-full truncate text-sm font-bold text-foreground hover:underline"
+                className="block break-words text-sm font-bold leading-snug text-foreground line-clamp-2 hover:underline"
               >
                 {brand}
+              </Link>
+            )}
+            {productName && (
+              <Link
+                href={detailHref}
+                prefetch={false}
+                onClick={() => saveHomeScrollIfHome()}
+                className="block break-words text-base leading-snug text-foreground line-clamp-2 hover:underline sm:text-[17px]"
+              >
+                {productName}
               </Link>
             )}
           </div>
           <FavoriteButton type="item" targetId={id} variant="inline" size="md" />
         </div>
-        {productName && (
-          <Link
-            href={detailHref}
-            prefetch={false}
-            onClick={() => saveHomeScrollIfHome()}
-            className="block break-words text-base leading-snug text-foreground line-clamp-2 hover:underline sm:text-[17px]"
-          >
-            {productName}
-          </Link>
-        )}
       </div>
     </article>
   );

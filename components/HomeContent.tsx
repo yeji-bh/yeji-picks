@@ -26,6 +26,7 @@ import {
   type OutfitSort,
 } from "@/lib/outfit-sort";
 import { matchesTypeFilter } from "@/lib/types";
+import { isGridLcpCandidate } from "@/lib/grid-image";
 
 export type OutfitSummary = {
   id: string;
@@ -469,7 +470,7 @@ export default function HomeContent({
                     eventName={outfit.eventName}
                     date={outfit.date}
                     itemTypes={outfit.itemTypes}
-                    priority={index < 2}
+                    priority={isGridLcpCandidate(index)}
                     imageQuality={72}
                   />
                 ))
@@ -482,7 +483,7 @@ export default function HomeContent({
                     brand={item.brand}
                     productName={item.productName}
                     useCount={item.useCount}
-                    priority={index < 2}
+                    priority={isGridLcpCandidate(index)}
                     imageQuality={72}
                   />
                 ))}

@@ -6,4 +6,5 @@ export const notoSansSC = Noto_Sans_SC({
   display: "swap",
   variable: "--font-noto-sc",
   preload: false,
+  adjustFontFallback: true,
 });
