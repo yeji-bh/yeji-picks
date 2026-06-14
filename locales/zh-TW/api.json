@@ -48,6 +48,7 @@
       "actorUnidentified": "無法識別使用者",
       "voteFailed": "投票失敗",
       "operationFailed": "操作失敗",
+      "storageNotConfigured": "圖片儲存未設定，請聯絡管理員",
       "selectImage": "請選擇圖片",
       "enterFeedback": "請輸入反饋內容",
       "enterBrand": "請輸入品牌",

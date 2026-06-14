@@ -48,6 +48,7 @@
       "actorUnidentified": "사용자를 식별할 수 없습니다",
       "voteFailed": "투표 실패",
       "operationFailed": "작업 실패",
+      "storageNotConfigured": "이미지 저장소가 설정되지 않았습니다. 관리자에게 문의하세요.",
       "selectImage": "이미지를 선택해 주세요",
       "enterFeedback": "피드백을 입력해 주세요",
       "enterBrand": "브랜드를 입력해 주세요",

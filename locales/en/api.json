@@ -48,6 +48,7 @@
       "actorUnidentified": "Could not identify user",
       "voteFailed": "Vote failed",
       "operationFailed": "Operation failed",
+      "storageNotConfigured": "Image storage is not configured. Contact the administrator.",
       "selectImage": "Please select an image",
       "enterFeedback": "Please enter feedback",
       "enterBrand": "Please enter a brand",

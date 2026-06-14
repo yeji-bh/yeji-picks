@@ -15,13 +15,7 @@ function compressOptions(kind: ImageKind): { maxEdge: number; quality: number } 
   return { maxEdge: ITEM_MAX, quality: ITEM_QUALITY };
 }
 
-/** True only on Cloudflare Workers — not local `next dev` even with a Turso URL. */
-function isCloudflareWorker(): boolean {
-  return (
-    typeof (globalThis as { WebSocketPair?: unknown }).WebSocketPair ===
-    "function"
-  );
-}
+import { isCloudflareWorker } from "@/lib/worker-runtime";
 
 function isUnsupportedImageError(err: unknown): boolean {
   const msg = err instanceof Error ? err.message.toLowerCase() : String(err);

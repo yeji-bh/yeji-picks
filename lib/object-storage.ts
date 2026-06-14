@@ -1,18 +1,12 @@
 import "server-only";
 
-import {
-  DeleteObjectCommand,
-  HeadObjectCommand,
-  ListObjectsV2Command,
-  PutObjectCommand,
-  S3Client,
-} from "@aws-sdk/client-s3";
+import { AwsClient } from "aws4fetch";
 import {
   objectKeyToUploadPath,
   uploadPathToObjectKey,
 } from "@/lib/upload-path";
 
-let client: S3Client | null = null;
+let aws: AwsClient | null = null;
 
 export function isObjectStorageConfigured(): boolean {
   return !!(
@@ -29,21 +23,33 @@ function getBucket(): string {
   return bucket;
 }
 
-function getClient(): S3Client {
+function getAws(): AwsClient {
   if (!isObjectStorageConfigured()) {
     throw new Error("Cloudflare R2 is not configured");
   }
-  if (!client) {
-    client = new S3Client({
-      region: "auto",
-      endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-      credentials: {
-        accessKeyId: process.env.R2_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
-      },
+  if (!aws) {
+    aws = new AwsClient({
+      accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
     });
   }
-  return client;
+  return aws;
+}
+
+function objectUrl(key: string): string {
+  const accountId = process.env.R2_ACCOUNT_ID!;
+  const bucket = getBucket();
+  return `https://${accountId}.r2.cloudflarestorage.com/${bucket}/${key}`;
+}
+
+async function r2Fetch(
+  key: string,
+  init: RequestInit & { method: string }
+): Promise<Response> {
+  const res = await getAws().fetch(objectUrl(key), init);
+  if (res.ok) return res;
+  const detail = (await res.text()).slice(0, 300);
+  throw new Error(`R2 ${init.method} failed (${res.status}): ${detail}`);
 }
 
 export async function putUploadObject(
@@ -51,61 +57,58 @@ export async function putUploadObject(
   filename: string
 ): Promise<void> {
   const key = uploadPathToObjectKey(objectKeyToUploadPath(filename));
-  await getClient().send(
-    new PutObjectCommand({
-      Bucket: getBucket(),
-      Key: key,
-      Body: buffer,
-      ContentType: "image/webp",
-      CacheControl: "public, max-age=2592000, immutable",
-    })
-  );
+  await r2Fetch(key, {
+    method: "PUT",
+    body: new Uint8Array(buffer),
+    headers: {
+      "Content-Type": "image/webp",
+      "Cache-Control": "public, max-age=2592000, immutable",
+    },
+  });
 }
 
 export async function deleteUploadObject(uploadPath: string): Promise<void> {
   const key = uploadPathToObjectKey(uploadPath);
-  await getClient().send(
-    new DeleteObjectCommand({
-      Bucket: getBucket(),
-      Key: key,
-    })
-  );
+  await r2Fetch(key, { method: "DELETE" });
 }
 
 export async function uploadObjectExists(key: string): Promise<boolean> {
   try {
-    await getClient().send(
-      new HeadObjectCommand({
-        Bucket: getBucket(),
-        Key: key,
-      })
-    );
+    await r2Fetch(key, { method: "HEAD" });
     return true;
   } catch (err) {
-    const status = (err as { $metadata?: { httpStatusCode?: number } })
-      .$metadata?.httpStatusCode;
-    if (status === 404) return false;
-    const code = (err as { name?: string }).name;
-    if (code === "NotFound" || code === "NoSuchKey") return false;
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("(404)")) return false;
     throw err;
   }
 }
 
 export async function listUploadObjectKeys(): Promise<string[]> {
+  const bucket = getBucket();
+  const accountId = process.env.R2_ACCOUNT_ID!;
   const keys: string[] = [];
   let token: string | undefined;
 
   do {
-    const res = await getClient().send(
-      new ListObjectsV2Command({
-        Bucket: getBucket(),
-        ContinuationToken: token,
-      })
-    );
-    for (const item of res.Contents ?? []) {
-      if (item.Key) keys.push(item.Key);
+    const query = new URLSearchParams({ "list-type": "2" });
+    if (token) query.set("continuation-token", token);
+    const url = `https://${accountId}.r2.cloudflarestorage.com/${bucket}?${query}`;
+
+    const res = await getAws().fetch(url, { method: "GET" });
+    if (!res.ok) {
+      const detail = (await res.text()).slice(0, 300);
+      throw new Error(`R2 LIST failed (${res.status}): ${detail}`);
     }
-    token = res.IsTruncated ? res.NextContinuationToken : undefined;
+
+    const xml = await res.text();
+    for (const match of xml.matchAll(/<Key>([^<]+)<\/Key>/g)) {
+      keys.push(match[1]!);
+    }
+    const truncated = xml.match(/<IsTruncated>(true|false)<\/IsTruncated>/)?.[1];
+    token =
+      truncated === "true"
+        ? xml.match(/<NextContinuationToken>([^<]+)<\/NextContinuationToken>/)?.[1]
+        : undefined;
   } while (token);
 
   return keys;
