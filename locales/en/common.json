@@ -33,6 +33,7 @@
     "allItemsLoaded": "All items loaded",
     "noOutfits": "No outfits yet",
     "filterAll": "All",
+    "filterAllCategories": "All categories",
     "filterGroupAll": "All {{group}}",
     "searchPlaceholder": "Search event, brand, item...",
     "loadMore": "Scroll to load more",
@@ -46,7 +47,8 @@
       "date_asc": "Outfit date (oldest)",
       "name_asc": "Name A–Z",
       "name_desc": "Name Z–A",
-      "category": "Category order"
+      "category": "Category order",
+      "use_count_desc": "Most worn"
     }
   },
   "brand": {

@@ -39,10 +39,14 @@ const catalogSelect = {
   },
 } satisfies Prisma.CatalogItemSelect;
 
-function prismaOrderBy(sort: ItemSort): Prisma.CatalogItemOrderByWithRelationInput {
+function prismaOrderBy(
+  sort: ItemSort
+): Prisma.CatalogItemOrderByWithRelationInput {
   switch (sort) {
     case "oldest":
       return { createdAt: "asc" };
+    case "use_count_desc":
+      return { useCount: "desc" };
     case "date_desc":
       return { placements: { _count: "desc" } };
     case "date_asc":
@@ -55,6 +59,18 @@ function prismaOrderBy(sort: ItemSort): Prisma.CatalogItemOrderByWithRelationInp
     default:
       return { createdAt: "desc" };
   }
+}
+
+function dbOrderBy(
+  sort: ItemSort
+): Prisma.CatalogItemOrderByWithRelationInput | Prisma.CatalogItemOrderByWithRelationInput[] {
+  if (sort === "use_count_desc") {
+    return [{ useCount: "desc" }, { createdAt: "desc" }];
+  }
+  if (sort === "newest" || sort === "oldest") {
+    return prismaOrderBy(sort);
+  }
+  return [{ useCount: "desc" }, prismaOrderBy(sort)];
 }
 
 function sortItemsInMemory(
@@ -104,10 +120,7 @@ async function queryItemList(
   const rows = await prisma.catalogItem.findMany({
     take: limit,
     skip: offset,
-    orderBy:
-      sort === "newest" || sort === "oldest"
-        ? prismaOrderBy(sort)
-        : [{ useCount: "desc" }, prismaOrderBy(sort)],
+    orderBy: dbOrderBy(sort),
     select: catalogSelect,
   });
 

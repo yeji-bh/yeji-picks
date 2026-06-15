@@ -33,6 +33,7 @@
     "allItemsLoaded": "已加载全部单品",
     "noOutfits": "尚无穿搭",
     "filterAll": "全部",
+    "filterAllCategories": "全部分类",
     "filterGroupAll": "全部{{group}}",
     "searchPlaceholder": "搜索活动、品牌、单品...",
     "loadMore": "向下滚动加载更多",
@@ -46,7 +47,8 @@
       "date_asc": "穿搭日期（旧→新）",
       "name_asc": "名称正序",
       "name_desc": "名称反序",
-      "category": "分类顺序"
+      "category": "分类顺序",
+      "use_count_desc": "穿戴次数（多→少）"
     }
   },
   "brand": {

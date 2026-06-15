@@ -7,8 +7,12 @@ import {
   typeCategoryRank,
 } from "@/lib/outfit-sort";
 
-export const ITEM_SORT_OPTIONS = OUTFIT_SORT_OPTIONS;
-export type ItemSort = OutfitSort;
+export const ITEM_SORT_OPTIONS = [
+  ...OUTFIT_SORT_OPTIONS,
+  "use_count_desc",
+] as const;
+
+export type ItemSort = (typeof ITEM_SORT_OPTIONS)[number];
 export const DEFAULT_ITEM_SORT: ItemSort = "date_desc";
 
 export function parseItemSort(value: string | null | undefined): ItemSort {

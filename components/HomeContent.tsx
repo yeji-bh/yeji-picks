@@ -20,10 +20,10 @@ import {
 } from "@/lib/home-pagination";
 import { getSavedFilters, setSavedFilters } from "@/lib/home-filters";
 import { clearHomeScroll, getHomeScroll } from "@/lib/home-scroll";
-import { getSavedSort, setSavedSort } from "@/lib/home-sort";
+import { getSavedSort, setSavedSort, type HomeSort } from "@/lib/home-sort";
+import { DEFAULT_ITEM_SORT } from "@/lib/item-sort";
 import {
   DEFAULT_OUTFIT_SORT,
-  type OutfitSort,
 } from "@/lib/outfit-sort";
 import { matchesTypeFilter } from "@/lib/types";
 import { isGridLcpCandidate } from "@/lib/grid-image";
@@ -79,7 +79,7 @@ export default function HomeContent({
 }) {
   const { t, i18n } = useTranslation();
   const [viewMode, setViewMode] = useState<HomeViewMode>("outfit");
-  const [sort, setSort] = useState<OutfitSort>(DEFAULT_OUTFIT_SORT);
+  const [sort, setSort] = useState<HomeSort>(DEFAULT_OUTFIT_SORT);
   const [outfits, setOutfits] = useState<OutfitSummary[]>(
     dedupeOutfits(initialData?.outfits?.outfits ?? [])
   );
@@ -117,7 +117,7 @@ export default function HomeContent({
   }, []);
 
   const fetchOutfits = useCallback(
-    async (offset: number, limit: number, nextSort: OutfitSort) => {
+    async (offset: number, limit: number, nextSort: HomeSort) => {
       const withTotal = offset === 0 ? "1" : "0";
       const res = await fetch(
         `/api/outfits/list?limit=${limit}&offset=${offset}&sort=${nextSort}&withTotal=${withTotal}&locale=${encodeURIComponent(i18n.language)}`
@@ -130,7 +130,7 @@ export default function HomeContent({
   );
 
   const fetchItems = useCallback(
-    async (offset: number, limit: number, nextSort: OutfitSort) => {
+    async (offset: number, limit: number, nextSort: HomeSort) => {
       const withTotal = offset === 0 ? "1" : "0";
       const res = await fetch(
         `/api/items/list?limit=${limit}&offset=${offset}&sort=${nextSort}&withTotal=${withTotal}&locale=${encodeURIComponent(i18n.language)}`
@@ -143,7 +143,7 @@ export default function HomeContent({
   );
 
   const reloadFromStart = useCallback(
-    async (mode: HomeViewMode, nextSort: OutfitSort) => {
+    async (mode: HomeViewMode, nextSort: HomeSort) => {
       const isFirstLoad = outfits.length === 0 && items.length === 0;
       if (!isFirstLoad) {
         setLoading(true);
@@ -187,8 +187,8 @@ export default function HomeContent({
     initDoneRef.current = true;
 
     async function init() {
-      const savedSort = getSavedSort();
       const savedMode = getSavedViewMode();
+      const savedSort = getSavedSort(savedMode);
       setSort(savedSort);
       setViewMode(savedMode);
 
@@ -201,7 +201,7 @@ export default function HomeContent({
       const canUseItemInitial =
         initialData?.items &&
         savedMode === "item" &&
-        savedSort === DEFAULT_OUTFIT_SORT;
+        savedSort === DEFAULT_ITEM_SORT;
 
       if (canUseOutfitInitial) {
         setOutfits(dedupeOutfits(initialData.outfits!.outfits));
@@ -339,10 +339,10 @@ export default function HomeContent({
     return () => observer.disconnect();
   }, [hasMore, loadMore, loading]);
 
-  function handleSortChange(nextSort: OutfitSort) {
+  function handleSortChange(nextSort: HomeSort) {
     if (nextSort === sort) return;
     setSort(nextSort);
-    setSavedSort(nextSort);
+    setSavedSort(nextSort, viewMode);
     void reloadFromStart(viewMode, nextSort);
   }
 
@@ -350,7 +350,9 @@ export default function HomeContent({
     if (nextMode === viewMode) return;
     setViewMode(nextMode);
     setSavedViewMode(nextMode);
-    void reloadFromStart(nextMode, sort);
+    const nextSort = getSavedSort(nextMode);
+    setSort(nextSort);
+    void reloadFromStart(nextMode, nextSort);
   }
 
   function handleTypeFilterChange(next: string) {

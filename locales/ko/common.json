@@ -33,6 +33,7 @@
     "allItemsLoaded": "전체 아이템 불러옴",
     "noOutfits": "의상이 없습니다",
     "filterAll": "전체",
+    "filterAllCategories": "전체 분류",
     "filterGroupAll": "전체 {{group}}",
     "searchPlaceholder": "행사, 브랜드, 아이템 검색...",
     "loadMore": "스크롤하여 더 불러오기",
@@ -46,7 +47,8 @@
       "date_asc": "코디 날짜 (오래된순)",
       "name_asc": "이름 오름차순",
       "name_desc": "이름 내림차순",
-      "category": "카테고리 순"
+      "category": "카테고리 순",
+      "use_count_desc": "착용 횟수（많은 순）"
     }
   },
   "brand": {
