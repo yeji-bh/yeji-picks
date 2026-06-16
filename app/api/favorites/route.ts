@@ -3,7 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { apiError } from "@/lib/api-error";
 import { prisma } from "@/lib/db";
 
-const VALID_TYPES = new Set(["outfit", "item"]);
+const VALID_TYPES = new Set(["outfit", "item", "nailArt", "phoneCase"]);
 
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser();
@@ -22,6 +22,12 @@ export async function GET(request: NextRequest) {
       .map((f) => f.targetId),
     itemIds: favorites
       .filter((f) => f.type === "item")
+      .map((f) => f.targetId),
+    nailArtIds: favorites
+      .filter((f) => f.type === "nailArt")
+      .map((f) => f.targetId),
+    phoneCaseIds: favorites
+      .filter((f) => f.type === "phoneCase")
       .map((f) => f.targetId),
   });
 }
@@ -62,13 +68,29 @@ export async function POST(request: NextRequest) {
     if (!exists) {
       return apiError(request, "api.errors.notFoundOutfit", 404);
     }
-  } else {
+  } else if (type === "item") {
     const exists = await prisma.catalogItem.findUnique({
       where: { id: targetId },
       select: { id: true },
     });
     if (!exists) {
       return apiError(request, "api.errors.notFoundItem", 404);
+    }
+  } else if (type === "nailArt") {
+    const exists = await prisma.nailArt.findUnique({
+      where: { id: targetId },
+      select: { id: true },
+    });
+    if (!exists) {
+      return apiError(request, "api.errors.notFound", 404);
+    }
+  } else {
+    const exists = await prisma.phoneCase.findUnique({
+      where: { id: targetId },
+      select: { id: true },
+    });
+    if (!exists) {
+      return apiError(request, "api.errors.notFound", 404);
     }
   }
 

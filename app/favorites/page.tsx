@@ -17,6 +17,14 @@ export default async function FavoritesPage() {
     image: string | null;
     useCount: number;
   }[] = [];
+  let initialNailArts: { id: string; image: string }[] = [];
+  let initialPhoneCases: {
+    id: string;
+    image: string;
+    brand: string;
+    model: string;
+    officialLink: string;
+  }[] = [];
 
   if (user) {
     const favorites = await prisma.favorite.findMany({
@@ -29,6 +37,12 @@ export default async function FavoritesPage() {
       .map((f) => f.targetId);
     const itemIds = favorites
       .filter((f) => f.type === "item")
+      .map((f) => f.targetId);
+    const nailArtIds = favorites
+      .filter((f) => f.type === "nailArt")
+      .map((f) => f.targetId);
+    const phoneCaseIds = favorites
+      .filter((f) => f.type === "phoneCase")
       .map((f) => f.targetId);
 
     if (outfitIds.length > 0) {
@@ -90,12 +104,44 @@ export default async function FavoritesPage() {
         return item ? [item] : [];
       });
     }
+
+    if (nailArtIds.length > 0) {
+      const rows = await prisma.nailArt.findMany({
+        where: { id: { in: nailArtIds } },
+        select: { id: true, image: true },
+      });
+      const map = new Map(rows.map((row) => [row.id, row]));
+      initialNailArts = nailArtIds.flatMap((id) => {
+        const row = map.get(id);
+        return row ? [row] : [];
+      });
+    }
+
+    if (phoneCaseIds.length > 0) {
+      const rows = await prisma.phoneCase.findMany({
+        where: { id: { in: phoneCaseIds } },
+        select: {
+          id: true,
+          image: true,
+          brand: true,
+          model: true,
+          officialLink: true,
+        },
+      });
+      const map = new Map(rows.map((row) => [row.id, row]));
+      initialPhoneCases = phoneCaseIds.flatMap((id) => {
+        const row = map.get(id);
+        return row ? [row] : [];
+      });
+    }
   }
 
   return (
     <FavoritesContent
       initialOutfits={initialOutfits}
       initialItems={initialItems}
+      initialNailArts={initialNailArts}
+      initialPhoneCases={initialPhoneCases}
     />
   );
 }

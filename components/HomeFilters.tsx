@@ -11,7 +11,9 @@ import {
 } from "@/lib/types";
 import { ITEM_SORT_OPTIONS } from "@/lib/item-sort";
 import type { HomeViewMode } from "@/lib/home-view-mode";
+import { isGalleryViewMode } from "@/lib/home-view-mode";
 import { OUTFIT_SORT_OPTIONS } from "@/lib/outfit-sort";
+import { GALLERY_SORT_OPTIONS } from "@/lib/gallery-sort";
 import type { HomeSort } from "@/lib/home-sort";
 import ViewModeTabs from "./ViewModeTabs";
 
@@ -143,35 +145,58 @@ export default function HomeFilters({
   }
 
   const sortOptions =
-    viewMode === "item" ? ITEM_SORT_OPTIONS : OUTFIT_SORT_OPTIONS;
+    viewMode === "item"
+      ? ITEM_SORT_OPTIONS
+      : isGalleryViewMode(viewMode)
+        ? GALLERY_SORT_OPTIONS
+        : OUTFIT_SORT_OPTIONS;
+
+  const showCatalogFilters = viewMode === "outfit" || viewMode === "item";
+  const showSearch = viewMode !== "nailArt";
+
+  const resultCountKey =
+    viewMode === "outfit"
+      ? "home.outfitResultCount"
+      : viewMode === "item"
+        ? "home.itemResultCount"
+        : viewMode === "nailArt"
+          ? "home.nailArtResultCount"
+          : "home.phoneCaseResultCount";
+
+  const searchPlaceholder =
+    viewMode === "phoneCase"
+      ? t("home.searchPhoneCasePlaceholder")
+      : t("home.searchPlaceholder");
 
   return (
     <div className="mb-5 space-y-3">
       <ViewModeTabs viewMode={viewMode} onViewModeChange={onViewModeChange} />
 
-      <div className="relative">
-        <svg
-          className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          aria-hidden
-        >
-          <circle cx="11" cy="11" r="7" />
-          <path d="M20 20l-3.5-3.5" strokeLinecap="round" />
-        </svg>
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
-          placeholder={t("home.searchPlaceholder")}
-          className={searchClass}
-        />
-      </div>
+      {showSearch && (
+        <div className="relative">
+          <svg
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            aria-hidden
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path d="M20 20l-3.5-3.5" strokeLinecap="round" />
+          </svg>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+            placeholder={searchPlaceholder}
+            className={searchClass}
+          />
+        </div>
+      )}
 
       <div>
-        {filtersOpen && (
+        {filtersOpen && showCatalogFilters && (
           <div className="pt-4">
             <div className={`${filterScrollClass} gap-6 sm:gap-7`}>
               <MainFilterTab
@@ -234,9 +259,7 @@ export default function HomeFilters({
 
       <div className="flex items-center justify-between gap-3">
         <p className="shrink-0 text-sm text-neutral-600">
-          {viewMode === "outfit"
-            ? t("home.outfitResultCount", { count: resultCount })
-            : t("home.itemResultCount", { count: resultCount })}
+          {t(resultCountKey, { count: resultCount })}
         </p>
         <select
           value={sort}

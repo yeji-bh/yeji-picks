@@ -66,15 +66,20 @@ function imagesInRawJson(rawJson: string): string[] {
 
 /** Live DB references only — submission snapshots must not block R2 cleanup. */
 export async function isUploadReferencedInDb(url: string): Promise<boolean> {
-  const [outfitCount, imageCount, feedbackCount, dupeCount] =
+  const [outfitCount, imageCount, feedbackCount, dupeCount, nailArtCount, phoneCaseCount] =
     await Promise.all([
       prisma.outfit.count({ where: { mainImage: url } }),
       prisma.catalogItemImage.count({ where: { url } }),
       prisma.siteFeedback.count({ where: { image: url } }),
       prisma.catalogDupe.count({ where: { image: url } }),
+      prisma.nailArt.count({ where: { image: url } }),
+      prisma.phoneCase.count({ where: { image: url } }),
     ]);
 
-  return outfitCount + imageCount + feedbackCount + dupeCount > 0;
+  return (
+    outfitCount + imageCount + feedbackCount + dupeCount + nailArtCount + phoneCaseCount >
+    0
+  );
 }
 
 export async function isUploadReferenced(url: string): Promise<boolean> {
@@ -127,6 +132,18 @@ export async function deleteUploadIfOrphaned(url: string): Promise<void> {
 /** Delete a managed upload from storage (entity that owned it was removed). */
 export async function deleteUpload(url: string): Promise<void> {
   await safeRemoveUpload(url);
+}
+
+/** Remove uploads when a DB write failed after storage succeeded. */
+export async function rollbackFreshUploads(
+  urls: Iterable<string>
+): Promise<void> {
+  const seen = new Set<string>();
+  for (const url of urls) {
+    if (!isManagedUpload(url) || seen.has(url)) continue;
+    seen.add(url);
+    await safeRemoveUpload(url);
+  }
 }
 
 export async function purgeUploads(urls: Iterable<string>): Promise<void> {

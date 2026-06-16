@@ -13,6 +13,7 @@ import {
   IconClipboard,
   IconHeart,
   IconBook,
+  IconGallery,
   IconMessage,
   IconSubmit,
   IconUser,
@@ -106,11 +107,18 @@ export default function HeaderNav() {
               label={t("nav.guide")}
             />
             {isAdmin ? (
-              <NavItem
-                href="/feedback"
-                icon={<IconMessage />}
-                label={t("nav.feedback")}
-              />
+              <>
+                <NavItem
+                  href="/admin/gallery"
+                  icon={<IconGallery />}
+                  label={t("nav.galleryAdmin")}
+                />
+                <NavItem
+                  href="/feedback"
+                  icon={<IconMessage />}
+                  label={t("nav.feedback")}
+                />
+              </>
             ) : (
               <NavItem
                 icon={<IconMessage />}
@@ -211,14 +219,24 @@ export default function HeaderNav() {
                 <span>{t("nav.guide")}</span>
               </Link>
               {isAdmin ? (
-                <Link
-                  href="/feedback"
-                  onClick={closeMenu}
-                  className={drawerLinkClass}
-                >
-                  <IconMessage />
-                  <span>{t("nav.feedback")}</span>
-                </Link>
+                <>
+                  <Link
+                    href="/admin/gallery"
+                    onClick={closeMenu}
+                    className={drawerLinkClass}
+                  >
+                    <IconGallery />
+                    <span>{t("nav.galleryAdmin")}</span>
+                  </Link>
+                  <Link
+                    href="/feedback"
+                    onClick={closeMenu}
+                    className={drawerLinkClass}
+                  >
+                    <IconMessage />
+                    <span>{t("nav.feedback")}</span>
+                  </Link>
+                </>
               ) : (
                 <button
                   type="button"

@@ -14,7 +14,7 @@ export default function FavoriteButton({
   overlayTone = "light",
   size = "md",
 }: {
-  type: "outfit" | "item";
+  type: "outfit" | "item" | "nailArt" | "phoneCase";
   targetId: string;
   className?: string;
   variant?: "overlay" | "inline" | "plain";
@@ -22,19 +22,33 @@ export default function FavoriteButton({
   size?: "sm" | "md" | "lg";
 }) {
   const { t } = useTranslation();
-  const { isOutfitFavorite, isItemFavorite, toggleOutfit, toggleItem } =
-    useFavorites();
+  const {
+    isOutfitFavorite,
+    isItemFavorite,
+    isNailArtFavorite,
+    isPhoneCaseFavorite,
+    toggleOutfit,
+    toggleItem,
+    toggleNailArt,
+    togglePhoneCase,
+  } = useFavorites();
 
   const active =
     type === "outfit"
       ? isOutfitFavorite(targetId)
-      : isItemFavorite(targetId);
+      : type === "item"
+        ? isItemFavorite(targetId)
+        : type === "nailArt"
+          ? isNailArtFavorite(targetId)
+          : isPhoneCaseFavorite(targetId);
 
   async function handleClick(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
     if (type === "outfit") await toggleOutfit(targetId);
-    else await toggleItem(targetId);
+    else if (type === "item") await toggleItem(targetId);
+    else if (type === "nailArt") await toggleNailArt(targetId);
+    else await togglePhoneCase(targetId);
   }
 
   const paddingClass =

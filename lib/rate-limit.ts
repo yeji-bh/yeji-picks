@@ -6,7 +6,7 @@ type Bucket = {
 const buckets = new Map<string, Bucket>();
 
 const ROUTE_LIMITS: Record<string, { max: number; windowMs: number }> = {
-  "/api/upload": { max: 30, windowMs: 60 * 60 * 1000 },
+  "/api/upload": { max: 60, windowMs: 60 * 60 * 1000 },
   "/api/auth/register": { max: 5, windowMs: 60 * 60 * 1000 },
   "/api/auth/login": { max: 30, windowMs: 60 * 60 * 1000 },
   "/api/submit": { max: 15, windowMs: 60 * 60 * 1000 },
@@ -17,6 +17,9 @@ const ROUTE_LIMITS: Record<string, { max: number; windowMs: number }> = {
 const DEFAULT_LIMIT = { max: 120, windowMs: 60 * 1000 };
 
 function getLimit(pathname: string) {
+  if (pathname.startsWith("/api/admin/")) {
+    return { max: 120, windowMs: 60 * 1000 };
+  }
   for (const [route, limit] of Object.entries(ROUTE_LIMITS)) {
     if (pathname === route || pathname.startsWith(`${route}/`)) {
       return limit;

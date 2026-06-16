@@ -11,29 +11,79 @@ import {
 import { useAuth } from "./AuthProvider";
 import {
   getFavoriteItemIds,
+  getFavoriteNailArtIds,
   getFavoriteOutfitIds,
+  getFavoritePhoneCaseIds,
   toggleFavoriteItem,
+  toggleFavoriteNailArt,
   toggleFavoriteOutfit,
+  toggleFavoritePhoneCase,
 } from "@/lib/favorites";
 
 type FavoritesContextValue = {
   ready: boolean;
   isOutfitFavorite: (id: string) => boolean;
   isItemFavorite: (id: string) => boolean;
+  isNailArtFavorite: (id: string) => boolean;
+  isPhoneCaseFavorite: (id: string) => boolean;
   toggleOutfit: (id: string) => Promise<boolean>;
   toggleItem: (id: string) => Promise<boolean>;
+  toggleNailArt: (id: string) => Promise<boolean>;
+  togglePhoneCase: (id: string) => Promise<boolean>;
 };
 
 const FavoritesContext = createContext<FavoritesContextValue>({
   ready: false,
   isOutfitFavorite: () => false,
   isItemFavorite: () => false,
+  isNailArtFavorite: () => false,
+  isPhoneCaseFavorite: () => false,
   toggleOutfit: async () => false,
   toggleItem: async () => false,
+  toggleNailArt: async () => false,
+  togglePhoneCase: async () => false,
 });
 
 export function useFavorites() {
   return useContext(FavoritesContext);
+}
+
+function createToggleHandler(
+  type: "outfit" | "item" | "nailArt" | "phoneCase",
+  user: { id: string } | null,
+  ids: Set<string>,
+  setIds: React.Dispatch<React.SetStateAction<Set<string>>>,
+  localToggle: (id: string) => boolean,
+  localRefresh: () => Set<string>
+) {
+  return async (id: string) => {
+    if (user) {
+      const active = ids.has(id);
+      const res = await fetch(
+        active
+          ? `/api/favorites?type=${type}&targetId=${id}`
+          : "/api/favorites",
+        active
+          ? { method: "DELETE" }
+          : {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ type, targetId: id }),
+            }
+      );
+      if (!res.ok) return active;
+      setIds((prev) => {
+        const next = new Set(prev);
+        if (active) next.delete(id);
+        else next.add(id);
+        return next;
+      });
+      return !active;
+    }
+    const next = localToggle(id);
+    setIds(localRefresh());
+    return next;
+  };
 }
 
 export default function FavoritesProvider({
@@ -44,6 +94,8 @@ export default function FavoritesProvider({
   const { user } = useAuth();
   const [outfitIds, setOutfitIds] = useState<Set<string>>(new Set());
   const [itemIds, setItemIds] = useState<Set<string>>(new Set());
+  const [nailArtIds, setNailArtIds] = useState<Set<string>>(new Set());
+  const [phoneCaseIds, setPhoneCaseIds] = useState<Set<string>>(new Set());
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -59,11 +111,15 @@ export default function FavoritesProvider({
           const data = await res.json();
           setOutfitIds(new Set(data.outfitIds ?? []));
           setItemIds(new Set(data.itemIds ?? []));
+          setNailArtIds(new Set(data.nailArtIds ?? []));
+          setPhoneCaseIds(new Set(data.phoneCaseIds ?? []));
         }
       } catch {
         if (!cancelled) {
           setOutfitIds(new Set());
           setItemIds(new Set());
+          setNailArtIds(new Set());
+          setPhoneCaseIds(new Set());
         }
       }
       if (!cancelled) setReady(true);
@@ -72,6 +128,8 @@ export default function FavoritesProvider({
     if (!user) {
       setOutfitIds(new Set(getFavoriteOutfitIds()));
       setItemIds(new Set(getFavoriteItemIds()));
+      setNailArtIds(new Set(getFavoriteNailArtIds()));
+      setPhoneCaseIds(new Set(getFavoritePhoneCaseIds()));
       setReady(true);
       return () => {
         cancelled = true;
@@ -100,67 +158,51 @@ export default function FavoritesProvider({
   }, [user?.id]);
 
   const toggleOutfit = useCallback(
-    async (id: string) => {
-      if (user) {
-        const active = outfitIds.has(id);
-        const res = await fetch(
-          active
-            ? `/api/favorites?type=outfit&targetId=${id}`
-            : "/api/favorites",
-          active
-            ? { method: "DELETE" }
-            : {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ type: "outfit", targetId: id }),
-              }
-        );
-        if (!res.ok) return active;
-        setOutfitIds((prev) => {
-          const next = new Set(prev);
-          if (active) next.delete(id);
-          else next.add(id);
-          return next;
-        });
-        return !active;
-      }
-      const next = toggleFavoriteOutfit(id);
-      setOutfitIds(new Set(getFavoriteOutfitIds()));
-      return next;
-    },
+    createToggleHandler(
+      "outfit",
+      user,
+      outfitIds,
+      setOutfitIds,
+      toggleFavoriteOutfit,
+      () => new Set(getFavoriteOutfitIds())
+    ),
     [user, outfitIds]
   );
 
   const toggleItem = useCallback(
-    async (id: string) => {
-      if (user) {
-        const active = itemIds.has(id);
-        const res = await fetch(
-          active
-            ? `/api/favorites?type=item&targetId=${id}`
-            : "/api/favorites",
-          active
-            ? { method: "DELETE" }
-            : {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ type: "item", targetId: id }),
-              }
-        );
-        if (!res.ok) return active;
-        setItemIds((prev) => {
-          const next = new Set(prev);
-          if (active) next.delete(id);
-          else next.add(id);
-          return next;
-        });
-        return !active;
-      }
-      const next = toggleFavoriteItem(id);
-      setItemIds(new Set(getFavoriteItemIds()));
-      return next;
-    },
+    createToggleHandler(
+      "item",
+      user,
+      itemIds,
+      setItemIds,
+      toggleFavoriteItem,
+      () => new Set(getFavoriteItemIds())
+    ),
     [user, itemIds]
+  );
+
+  const toggleNailArt = useCallback(
+    createToggleHandler(
+      "nailArt",
+      user,
+      nailArtIds,
+      setNailArtIds,
+      toggleFavoriteNailArt,
+      () => new Set(getFavoriteNailArtIds())
+    ),
+    [user, nailArtIds]
+  );
+
+  const togglePhoneCase = useCallback(
+    createToggleHandler(
+      "phoneCase",
+      user,
+      phoneCaseIds,
+      setPhoneCaseIds,
+      toggleFavoritePhoneCase,
+      () => new Set(getFavoritePhoneCaseIds())
+    ),
+    [user, phoneCaseIds]
   );
 
   const value = useMemo(
@@ -168,10 +210,24 @@ export default function FavoritesProvider({
       ready,
       isOutfitFavorite: (id: string) => outfitIds.has(id),
       isItemFavorite: (id: string) => itemIds.has(id),
+      isNailArtFavorite: (id: string) => nailArtIds.has(id),
+      isPhoneCaseFavorite: (id: string) => phoneCaseIds.has(id),
       toggleOutfit,
       toggleItem,
+      toggleNailArt,
+      togglePhoneCase,
     }),
-    [ready, outfitIds, itemIds, toggleOutfit, toggleItem]
+    [
+      ready,
+      outfitIds,
+      itemIds,
+      nailArtIds,
+      phoneCaseIds,
+      toggleOutfit,
+      toggleItem,
+      toggleNailArt,
+      togglePhoneCase,
+    ]
   );
 
   return (

@@ -23,3 +23,25 @@ export function getHomeScroll(): number {
 export function clearHomeScroll(): void {
   sessionStorage.removeItem(HOME_SCROLL_KEY);
 }
+
+/** Max scroll position for the current document height. */
+export function getMaxScrollY(): number {
+  if (typeof window === "undefined") return 0;
+  return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+}
+
+/** Scroll to `targetY`, or to top if content is not tall enough yet. */
+export function restoreHomeScroll(targetY: number): boolean {
+  if (typeof window === "undefined" || targetY <= 0) return true;
+
+  const maxY = getMaxScrollY();
+  if (maxY < targetY - 16) {
+    window.scrollTo(0, 0);
+    clearHomeScroll();
+    return false;
+  }
+
+  window.scrollTo(0, targetY);
+  clearHomeScroll();
+  return true;
+}

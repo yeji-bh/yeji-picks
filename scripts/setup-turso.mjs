@@ -175,10 +175,43 @@ const statements = [
     CONSTRAINT "outfit_reviews_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE SET NULL ON UPDATE CASCADE
   )`, "outfit_reviews"],
   [`CREATE UNIQUE INDEX IF NOT EXISTS "outfit_reviews_outfit_actor_key" ON "outfit_reviews"("outfit_id", "actor_key")`, "outfit_reviews_unique"],
+  [`CREATE TABLE IF NOT EXISTS "nail_arts" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "image" TEXT NOT NULL,
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`, "nail_arts"],
+  [`CREATE TABLE IF NOT EXISTS "phone_cases" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "image" TEXT NOT NULL,
+    "brand" TEXT NOT NULL,
+    "model" TEXT NOT NULL DEFAULT '',
+    "official_link" TEXT NOT NULL DEFAULT '',
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`, "phone_cases"],
 ];
 
 for (const [sql, label] of statements) {
   await run(sql, label);
+}
+
+const phoneCaseCols = await tableColumns("phone_cases");
+if (phoneCaseCols.includes("product_name") && !phoneCaseCols.includes("model")) {
+  await run(
+    `ALTER TABLE phone_cases RENAME COLUMN product_name TO model`,
+    "phone_cases rename product_name→model"
+  );
+  await run(
+    `UPDATE phone_cases SET model = '' WHERE model IS NULL`,
+    "phone_cases backfill empty model"
+  );
+  console.log("Migrated phone_cases: product_name → model");
+}
+if (!phoneCaseCols.includes("official_link")) {
+  await run(
+    `ALTER TABLE phone_cases ADD COLUMN official_link TEXT NOT NULL DEFAULT ''`,
+    "phone_cases add official_link"
+  );
+  console.log("Migrated phone_cases: added official_link");
 }
 
 // users: email → username → account

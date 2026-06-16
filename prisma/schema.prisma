@@ -188,3 +188,22 @@ model Submission {
 
   @@map("submissions")
 }
+
+model NailArt {
+  id        String   @id @default(cuid())
+  image     String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("nail_arts")
+}
+
+model PhoneCase {
+  id           String   @id @default(cuid())
+  image        String
+  brand        String
+  model        String
+  officialLink String   @default("") @map("official_link")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("phone_cases")
+}

@@ -1,14 +1,26 @@
-export type HomeViewMode = "outfit" | "item";
+export type HomeViewMode = "outfit" | "item" | "nailArt" | "phoneCase";
 
 const STORAGE_KEY = "home-view-mode";
+const VALID_MODES = new Set<HomeViewMode>([
+  "outfit",
+  "item",
+  "nailArt",
+  "phoneCase",
+]);
 
 export function getSavedViewMode(): HomeViewMode {
   if (typeof window === "undefined") return "outfit";
   const raw = localStorage.getItem(STORAGE_KEY);
-  return raw === "item" ? "item" : "outfit";
+  return raw && VALID_MODES.has(raw as HomeViewMode)
+    ? (raw as HomeViewMode)
+    : "outfit";
 }
 
 export function setSavedViewMode(mode: HomeViewMode): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, mode);
+}
+
+export function isGalleryViewMode(mode: HomeViewMode): boolean {
+  return mode === "nailArt" || mode === "phoneCase";
 }

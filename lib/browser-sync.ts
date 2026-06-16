@@ -4,11 +4,13 @@ import type { FavoriteStore } from "@/lib/favorites";
 function parseFavorites(
   input: FavoriteStore | string[] | undefined
 ): FavoriteStore {
-  if (!input) return { outfits: [], items: [] };
+  if (!input) return { outfits: [], items: [], nailArts: [], phoneCases: [] };
   if (Array.isArray(input)) {
     return {
       outfits: input.filter((id) => typeof id === "string" && id.length > 0),
       items: [],
+      nailArts: [],
+      phoneCases: [],
     };
   }
   return {
@@ -18,7 +20,27 @@ function parseFavorites(
     items: (input.items ?? []).filter(
       (id) => typeof id === "string" && id.length > 0
     ),
+    nailArts: (input.nailArts ?? []).filter(
+      (id) => typeof id === "string" && id.length > 0
+    ),
+    phoneCases: (input.phoneCases ?? []).filter(
+      (id) => typeof id === "string" && id.length > 0
+    ),
   };
+}
+
+async function upsertFavorite(
+  userId: string,
+  type: string,
+  targetId: string
+): Promise<void> {
+  await prisma.favorite.upsert({
+    where: {
+      userId_type_targetId: { userId, type, targetId },
+    },
+    create: { userId, type, targetId },
+    update: {},
+  });
 }
 
 export async function syncBrowserDataToUser(
@@ -52,17 +74,7 @@ export async function syncBrowserDataToUser(
     });
     if (!exists) continue;
 
-    await prisma.favorite.upsert({
-      where: {
-        userId_type_targetId: {
-          userId,
-          type: "outfit",
-          targetId: outfitId,
-        },
-      },
-      create: { userId, type: "outfit", targetId: outfitId },
-      update: {},
-    });
+    await upsertFavorite(userId, "outfit", outfitId);
     favoritesLinked += 1;
   }
 
@@ -73,17 +85,29 @@ export async function syncBrowserDataToUser(
     });
     if (!exists) continue;
 
-    await prisma.favorite.upsert({
-      where: {
-        userId_type_targetId: {
-          userId,
-          type: "item",
-          targetId: itemId,
-        },
-      },
-      create: { userId, type: "item", targetId: itemId },
-      update: {},
+    await upsertFavorite(userId, "item", itemId);
+    favoritesLinked += 1;
+  }
+
+  for (const nailArtId of favorites.nailArts) {
+    const exists = await prisma.nailArt.findUnique({
+      where: { id: nailArtId },
+      select: { id: true },
     });
+    if (!exists) continue;
+
+    await upsertFavorite(userId, "nailArt", nailArtId);
+    favoritesLinked += 1;
+  }
+
+  for (const phoneCaseId of favorites.phoneCases) {
+    const exists = await prisma.phoneCase.findUnique({
+      where: { id: phoneCaseId },
+      select: { id: true },
+    });
+    if (!exists) continue;
+
+    await upsertFavorite(userId, "phoneCase", phoneCaseId);
     favoritesLinked += 1;
   }
 

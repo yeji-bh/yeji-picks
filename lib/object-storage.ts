@@ -62,6 +62,7 @@ export async function putUploadObject(
     body: new Uint8Array(buffer),
     headers: {
       "Content-Type": "image/webp",
+      "Content-Length": String(buffer.length),
       "Cache-Control": "public, max-age=2592000, immutable",
     },
   });
