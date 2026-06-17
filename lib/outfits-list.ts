@@ -7,6 +7,7 @@ import { toOutfitSummary } from "@/lib/outfit-summary";
 import {
   compareOutfitsByCategory,
   compareOutfitsByName,
+  compareOutfitDates,
   DEFAULT_OUTFIT_SORT,
   type OutfitSort,
   parseOutfitSort,
@@ -70,11 +71,37 @@ function sortOutfitsInMemory(
       compareOutfitsByName(a, b, locale, direction)
     );
   }
+  if (sort === "date_desc" || sort === "date_asc") {
+    const direction = sort === "date_asc" ? "asc" : "desc";
+    return [...outfits].sort((a, b) => {
+      const dateDiff = compareOutfitDates(a.date, b.date, direction);
+      if (dateDiff !== 0) return dateDiff;
+      return a.id.localeCompare(b.id);
+    });
+  }
+  if (sort === "newest" || sort === "oldest") {
+    const direction = sort === "oldest" ? "asc" : "desc";
+    return [...outfits].sort((a, b) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      const diff = aTime - bTime;
+      if (diff !== 0) return direction === "asc" ? diff : -diff;
+      return a.id.localeCompare(b.id);
+    });
+  }
   return outfits;
 }
 
 function needsInMemorySort(sort: OutfitSort): boolean {
-  return sort === "category" || sort === "name_asc" || sort === "name_desc";
+  return (
+    sort === "category" ||
+    sort === "name_asc" ||
+    sort === "name_desc" ||
+    sort === "date_desc" ||
+    sort === "date_asc" ||
+    sort === "newest" ||
+    sort === "oldest"
+  );
 }
 
 async function queryOutfitList(

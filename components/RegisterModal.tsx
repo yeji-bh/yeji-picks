@@ -1,17 +1,17 @@
 "use client";
 
 import { useTranslation } from "react-i18next";
-import AuthLoginForm from "./AuthLoginForm";
+import AuthRegisterForm from "./AuthRegisterForm";
 import Modal from "./Modal";
 
-export default function LoginModal({
+export default function RegisterModal({
   open,
   onClose,
-  onRegisterClick,
+  onLoginClick,
 }: {
   open: boolean;
   onClose: () => void;
-  onRegisterClick?: () => void;
+  onLoginClick?: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -19,12 +19,12 @@ export default function LoginModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={t("auth.login")}
-      description={t("auth.loginDesc")}
+      title={t("auth.register")}
+      description={t("auth.registerDesc")}
       maxWidthClass="max-w-sm"
     >
       <div className="px-4 py-4">
-        <AuthLoginForm onSuccess={onClose} onRegisterClick={onRegisterClick} />
+        <AuthRegisterForm onSuccess={onClose} onLoginClick={onLoginClick} />
       </div>
     </Modal>
   );

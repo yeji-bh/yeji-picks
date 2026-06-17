@@ -8,6 +8,7 @@ import { useAuth } from "./AuthProvider";
 import FeedbackModal from "./FeedbackModal";
 import LanguageSwitcher from "./LanguageSwitcher";
 import LoginModal from "./LoginModal";
+import RegisterModal from "./RegisterModal";
 import ThemeToggle from "./ThemeToggle";
 import {
   IconClipboard,
@@ -43,6 +44,7 @@ export default function HeaderNav() {
   const router = useRouter();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [registerOpen, setRegisterOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   const isAdmin = user?.role === "admin";
@@ -86,16 +88,20 @@ export default function HeaderNav() {
           </Link>
 
           <nav className="hidden items-center gap-1 text-muted lg:flex">
-            <NavItem
-              href="/submit"
-              icon={<IconSubmit />}
-              label={t("nav.submit")}
-            />
-            <NavItem
-              href="/my-submissions"
-              icon={<IconClipboard />}
-              label={isAdmin ? t("nav.review") : t("nav.mySubmissions")}
-            />
+            {isAdmin ? (
+              <>
+                <NavItem
+                  href="/submit"
+                  icon={<IconSubmit />}
+                  label={t("nav.submit")}
+                />
+                <NavItem
+                  href="/my-submissions"
+                  icon={<IconClipboard />}
+                  label={t("nav.review")}
+                />
+              </>
+            ) : null}
             <NavItem
               href="/favorites"
               icon={<IconHeart />}
@@ -194,18 +200,22 @@ export default function HeaderNav() {
             </div>
 
             <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
-              <Link href="/submit" onClick={closeMenu} className={drawerLinkClass}>
-                <IconSubmit />
-                <span>{t("nav.submit")}</span>
-              </Link>
-              <Link
-                href="/my-submissions"
-                onClick={closeMenu}
-                className={drawerLinkClass}
-              >
-                <IconClipboard />
-                <span>{isAdmin ? t("nav.review") : t("nav.mySubmissions")}</span>
-              </Link>
+              {isAdmin ? (
+                <>
+                  <Link href="/submit" onClick={closeMenu} className={drawerLinkClass}>
+                    <IconSubmit />
+                    <span>{t("nav.submit")}</span>
+                  </Link>
+                  <Link
+                    href="/my-submissions"
+                    onClick={closeMenu}
+                    className={drawerLinkClass}
+                  >
+                    <IconClipboard />
+                    <span>{t("nav.review")}</span>
+                  </Link>
+                </>
+              ) : null}
               <Link
                 href="/favorites"
                 onClick={closeMenu}
@@ -309,7 +319,22 @@ export default function HeaderNav() {
         </div>
       )}
 
-      <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
+      <LoginModal
+        open={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        onRegisterClick={() => {
+          setLoginOpen(false);
+          setRegisterOpen(true);
+        }}
+      />
+      <RegisterModal
+        open={registerOpen}
+        onClose={() => setRegisterOpen(false)}
+        onLoginClick={() => {
+          setRegisterOpen(false);
+          setLoginOpen(true);
+        }}
+      />
 
       {!isAdmin && (
         <FeedbackModal

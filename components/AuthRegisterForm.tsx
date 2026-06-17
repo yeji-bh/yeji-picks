@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/components/AuthProvider";
@@ -8,17 +7,14 @@ import { clearBrowserDataAfterSync } from "@/lib/clear-browser-data";
 import { getFavoriteStore } from "@/lib/favorites";
 import { getSubmissionIds } from "@/lib/submissions";
 
-export default function AuthLoginForm({
+export default function AuthRegisterForm({
   onSuccess,
-  onRegisterClick,
-  showRegisterLink = true,
+  onLoginClick,
 }: {
   onSuccess?: () => void;
-  onRegisterClick?: () => void;
-  showRegisterLink?: boolean;
+  onLoginClick?: () => void;
 }) {
   const { t } = useTranslation();
-  const router = useRouter();
   const { refresh } = useAuth();
   const [account, setAccount] = useState("");
   const [password, setPassword] = useState("");
@@ -31,7 +27,7 @@ export default function AuthLoginForm({
     setError(null);
 
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -43,15 +39,13 @@ export default function AuthLoginForm({
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? t("auth.loginFail"));
+      if (!res.ok) throw new Error(data.error ?? t("auth.registerFail"));
 
       clearBrowserDataAfterSync();
       await refresh();
       onSuccess?.();
-      router.push("/my-submissions");
-      router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("auth.loginFail"));
+      setError(err instanceof Error ? err.message : t("auth.registerFail"));
     } finally {
       setLoading(false);
     }
@@ -76,7 +70,8 @@ export default function AuthLoginForm({
         <input
           type="password"
           required
-          autoComplete="current-password"
+          minLength={6}
+          autoComplete="new-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="ui-field mt-1 px-3 py-2.5 text-sm"
@@ -87,29 +82,20 @@ export default function AuthLoginForm({
         disabled={loading}
         className="ui-btn-primary w-full px-4 py-2.5 text-sm"
       >
-        {loading ? t("loading") : t("auth.login")}
+        {loading ? t("loading") : t("auth.register")}
       </button>
-      {showRegisterLink && (
+      {onLoginClick ? (
         <p className="text-center text-sm text-muted">
-          {t("auth.noAccount")}{" "}
-          {onRegisterClick ? (
-            <button
-              type="button"
-              onClick={onRegisterClick}
-              className="cursor-pointer text-foreground underline hover:text-foreground-secondary"
-            >
-              {t("auth.register")}
-            </button>
-          ) : (
-            <a
-              href="/register"
-              className="text-foreground underline hover:text-foreground-secondary"
-            >
-              {t("auth.register")}
-            </a>
-          )}
+          {t("auth.hasAccount")}{" "}
+          <button
+            type="button"
+            onClick={onLoginClick}
+            className="cursor-pointer text-foreground underline hover:text-foreground-secondary"
+          >
+            {t("auth.login")}
+          </button>
         </p>
-      )}
+      ) : null}
     </form>
   );
 }

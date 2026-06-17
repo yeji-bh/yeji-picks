@@ -1,5 +1,18 @@
 import { formatOutfitTitle } from "@/lib/outfit";
+import { compareOutfitDates, normalizeOutfitDate } from "@/lib/outfit-sort";
 import { normalizeItemType } from "@/lib/types";
+
+function latestPlacementDate(
+  placements: { outfit: { date: string } }[]
+): string {
+  let latest = "";
+  for (const placement of placements) {
+    const normalized = normalizeOutfitDate(placement.outfit.date);
+    if (!normalized) continue;
+    if (!latest || normalized > latest) latest = normalized;
+  }
+  return latest;
+}
 
 type CatalogRow = {
   id: string;
@@ -21,7 +34,9 @@ type CatalogRow = {
 };
 
 export function toItemSummary(item: CatalogRow) {
-  const primaryOutfit = item.placements[0]?.outfit;
+  const primaryOutfit = [...item.placements]
+    .sort((a, b) => compareOutfitDates(a.outfit.date, b.outfit.date, "desc"))[0]
+    ?.outfit;
   const outfitTitle = primaryOutfit
     ? formatOutfitTitle(primaryOutfit.date, primaryOutfit.eventName)
     : "";
@@ -33,9 +48,11 @@ export function toItemSummary(item: CatalogRow) {
     brand: item.brand,
     productName: item.productName,
     useCount: item.useCount,
+    createdAt: item.createdAt.toISOString(),
     outfitId: primaryOutfit?.id ?? "",
     outfitTitle,
     outfitDate: primaryOutfit?.date ?? "",
+    latestOutfitDate: latestPlacementDate(item.placements),
     outfitCreatedAt: primaryOutfit?.createdAt ?? item.createdAt,
     searchText: [
       item.brand,

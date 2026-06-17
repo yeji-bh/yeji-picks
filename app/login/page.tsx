@@ -18,7 +18,10 @@ export default function LoginPage() {
       maxWidthClass="max-w-sm"
     >
       <div className="px-4 py-4">
-        <AuthLoginForm onSuccess={() => router.push("/")} />
+        <AuthLoginForm
+          onSuccess={() => router.push("/")}
+          onRegisterClick={() => router.push("/register")}
+        />
       </div>
     </Modal>
   );

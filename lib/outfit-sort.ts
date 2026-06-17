@@ -29,6 +29,20 @@ export function parseOutfitSort(value: string | null | undefined): OutfitSort {
   return DEFAULT_OUTFIT_SORT;
 }
 
+export function normalizeOutfitDate(date: string): string {
+  const digits = date.replace(/\D/g, "");
+  return digits.length >= 8 ? digits.slice(0, 8) : digits;
+}
+
+export function compareOutfitDates(
+  a: string,
+  b: string,
+  direction: "asc" | "desc"
+): number {
+  const diff = normalizeOutfitDate(a).localeCompare(normalizeOutfitDate(b));
+  return direction === "asc" ? diff : -diff;
+}
+
 /** Rank by group order (hat → top → bottom → …) then subtype within group. */
 export function typeCategoryRank(type: string): number {
   const normalized = normalizeItemType(type);

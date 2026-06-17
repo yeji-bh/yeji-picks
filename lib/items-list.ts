@@ -12,6 +12,9 @@ import {
   type ItemSort,
   parseItemSort,
 } from "@/lib/item-sort";
+import {
+  compareOutfitDates,
+} from "@/lib/outfit-sort";
 
 export type ItemListResult = {
   items: ReturnType<typeof toItemSummary>[];
@@ -29,8 +32,6 @@ const catalogSelect = {
   createdAt: true,
   images: { orderBy: { sortOrder: "asc" as const } },
   placements: {
-    take: 1,
-    orderBy: { outfit: { createdAt: "desc" as const } },
     select: {
       outfit: {
         select: { id: true, eventName: true, date: true, createdAt: true },
@@ -87,11 +88,41 @@ function sortItemsInMemory(
       compareItemsByName(a, b, locale, direction)
     );
   }
+  if (sort === "date_desc" || sort === "date_asc") {
+    const direction = sort === "date_asc" ? "asc" : "desc";
+    return [...items].sort((a, b) => {
+      const dateDiff = compareOutfitDates(
+        a.latestOutfitDate,
+        b.latestOutfitDate,
+        direction
+      );
+      if (dateDiff !== 0) return dateDiff;
+      return b.useCount - a.useCount;
+    });
+  }
+  if (sort === "newest" || sort === "oldest") {
+    const direction = sort === "oldest" ? "asc" : "desc";
+    return [...items].sort((a, b) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      const diff = aTime - bTime;
+      if (diff !== 0) return direction === "asc" ? diff : -diff;
+      return a.id.localeCompare(b.id);
+    });
+  }
   return items;
 }
 
 function needsInMemorySort(sort: ItemSort): boolean {
-  return sort === "category" || sort === "name_asc" || sort === "name_desc";
+  return (
+    sort === "category" ||
+    sort === "name_asc" ||
+    sort === "name_desc" ||
+    sort === "date_desc" ||
+    sort === "date_asc" ||
+    sort === "newest" ||
+    sort === "oldest"
+  );
 }
 
 async function queryItemList(

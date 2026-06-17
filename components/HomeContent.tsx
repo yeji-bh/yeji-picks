@@ -178,6 +178,7 @@ export default function HomeContent({
   const initDoneRef = useRef(false);
   const filtersRestoredRef = useRef(false);
   const loadedModesRef = useRef<Set<HomeViewMode>>(new Set());
+  const loadedModeSortRef = useRef<Partial<Record<HomeViewMode, HomeSort>>>({});
   const pendingScrollYRef = useRef(0);
   const filterLoadAttemptsRef = useRef(0);
   const prevPathRef = useRef<string | null>(null);
@@ -199,7 +200,8 @@ export default function HomeContent({
     async (offset: number, limit: number, nextSort: HomeSort) => {
       const withTotal = offset === 0 ? "1" : "0";
       const res = await fetch(
-        `/api/outfits/list?limit=${limit}&offset=${offset}&sort=${nextSort}&withTotal=${withTotal}&locale=${encodeURIComponent(i18n.language)}`
+        `/api/outfits/list?limit=${limit}&offset=${offset}&sort=${nextSort}&withTotal=${withTotal}&locale=${encodeURIComponent(i18n.language)}`,
+        { cache: "no-store" }
       );
       const data = await res.json();
       if (!res.ok) throw new Error();
@@ -212,7 +214,8 @@ export default function HomeContent({
     async (offset: number, limit: number, nextSort: HomeSort) => {
       const withTotal = offset === 0 ? "1" : "0";
       const res = await fetch(
-        `/api/items/list?limit=${limit}&offset=${offset}&sort=${nextSort}&withTotal=${withTotal}&locale=${encodeURIComponent(i18n.language)}`
+        `/api/items/list?limit=${limit}&offset=${offset}&sort=${nextSort}&withTotal=${withTotal}&locale=${encodeURIComponent(i18n.language)}`,
+        { cache: "no-store" }
       );
       const data = await res.json();
       if (!res.ok) throw new Error();
@@ -225,7 +228,8 @@ export default function HomeContent({
     async (offset: number, limit: number, nextSort: HomeSort) => {
       const withTotal = offset === 0 ? "1" : "0";
       const res = await fetch(
-        `/api/nail-arts/list?limit=${limit}&offset=${offset}&sort=${nextSort}&withTotal=${withTotal}`
+        `/api/nail-arts/list?limit=${limit}&offset=${offset}&sort=${nextSort}&withTotal=${withTotal}`,
+        { cache: "no-store" }
       );
       const data = await res.json();
       if (!res.ok) throw new Error();
@@ -238,7 +242,8 @@ export default function HomeContent({
     async (offset: number, limit: number, nextSort: HomeSort) => {
       const withTotal = offset === 0 ? "1" : "0";
       const res = await fetch(
-        `/api/phone-cases/list?limit=${limit}&offset=${offset}&sort=${nextSort}&withTotal=${withTotal}`
+        `/api/phone-cases/list?limit=${limit}&offset=${offset}&sort=${nextSort}&withTotal=${withTotal}`,
+        { cache: "no-store" }
       );
       const data = await res.json();
       if (!res.ok) throw new Error();
@@ -256,13 +261,15 @@ export default function HomeContent({
       const lists = { outfits, items, nailArts, phoneCases };
       const rawCount = getModeRawCount(mode, lists);
       const alreadyLoaded = loadedModesRef.current.has(mode);
+      const loadedSort = loadedModeSortRef.current[mode];
       if (alreadyLoaded && !options?.force) {
-        if (rawCount > 0) {
+        if (rawCount > 0 && loadedSort === nextSort) {
           setLoading(false);
           setPageReady(true);
           return;
         }
         loadedModesRef.current.delete(mode);
+        delete loadedModeSortRef.current[mode];
       }
 
       setLoading(true);
@@ -302,6 +309,7 @@ export default function HomeContent({
           }
 
           loadedModesRef.current.add(mode);
+          loadedModeSortRef.current[mode] = nextSort;
           setLoading(false);
           setPageReady(true);
           return;
@@ -328,6 +336,7 @@ export default function HomeContent({
             setPhoneCaseHasMore(false);
           }
           loadedModesRef.current.delete(mode);
+          delete loadedModeSortRef.current[mode];
         }
       }
 
@@ -358,6 +367,7 @@ export default function HomeContent({
 
       if (initialData?.outfits?.outfits?.length) {
         loadedModesRef.current.add("outfit");
+        loadedModeSortRef.current.outfit = DEFAULT_OUTFIT_SORT;
       }
 
       const canUseOutfitInitial =
@@ -454,7 +464,6 @@ export default function HomeContent({
           setSavedLoadedCount(next.length);
           return next;
         });
-        if (data.total > 0) setOutfitTotal(data.total);
         setOutfitHasMore(data.hasMore);
       } else if (viewMode === "item") {
         const data = await fetchItems(items.length, HOME_PAGE_SIZE, sort);
@@ -463,7 +472,6 @@ export default function HomeContent({
           setSavedLoadedCount(next.length);
           return next;
         });
-        if (data.total > 0) setItemTotal(data.total);
         setItemHasMore(data.hasMore);
       } else if (viewMode === "nailArt") {
         const data = await fetchNailArts(nailArts.length, HOME_PAGE_SIZE, sort);
@@ -472,7 +480,6 @@ export default function HomeContent({
           setSavedLoadedCount(next.length);
           return next;
         });
-        if (data.total > 0) setNailArtTotal(data.total);
         setNailArtHasMore(data.hasMore);
       } else {
         const data = await fetchPhoneCases(phoneCases.length, HOME_PAGE_SIZE, sort);
@@ -481,7 +488,6 @@ export default function HomeContent({
           setSavedLoadedCount(next.length);
           return next;
         });
-        if (data.total > 0) setPhoneCaseTotal(data.total);
         setPhoneCaseHasMore(data.hasMore);
       }
     } catch {
@@ -521,6 +527,8 @@ export default function HomeContent({
 
   function handleSortChange(nextSort: HomeSort) {
     if (nextSort === sort) return;
+    filterLoadAttemptsRef.current = 0;
+    setFilterSearchExhausted(false);
     setSort(nextSort);
     setSavedSort(nextSort, viewMode);
     void ensureModeLoaded(viewMode, nextSort, { force: true });
@@ -540,13 +548,18 @@ export default function HomeContent({
       nailArts,
       phoneCases,
     });
-    if (loadedModesRef.current.has(nextMode) && rawCount > 0) {
+    if (
+      loadedModesRef.current.has(nextMode) &&
+      rawCount > 0 &&
+      loadedModeSortRef.current[nextMode] === nextSort
+    ) {
       setLoading(false);
       setPageReady(true);
       return;
     }
     if (loadedModesRef.current.has(nextMode)) {
       loadedModesRef.current.delete(nextMode);
+      delete loadedModeSortRef.current[nextMode];
     }
     void ensureModeLoaded(nextMode, nextSort);
   }
