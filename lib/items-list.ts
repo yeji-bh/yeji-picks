@@ -40,58 +40,38 @@ const catalogSelect = {
   },
 } satisfies Prisma.CatalogItemSelect;
 
-const itemSortSelect = {
-  id: true,
-  type: true,
-  brand: true,
-  productName: true,
-  useCount: true,
-  createdAt: true,
-  placements: {
-    select: {
-      outfit: { select: { date: true } },
-    },
-  },
-} satisfies Prisma.CatalogItemSelect;
+function prismaOrderBy(
+  sort: ItemSort
+): Prisma.CatalogItemOrderByWithRelationInput {
+  switch (sort) {
+    case "oldest":
+      return { createdAt: "asc" };
+    case "use_count_desc":
+      return { useCount: "desc" };
+    case "date_desc":
+      return { placements: { _count: "desc" } };
+    case "date_asc":
+      return { placements: { _count: "asc" } };
+    case "name_asc":
+      return { productName: "asc" };
+    case "name_desc":
+      return { productName: "desc" };
+    case "newest":
+    default:
+      return { createdAt: "desc" };
+  }
+}
 
 function dbOrderBy(
   sort: ItemSort
 ): Prisma.CatalogItemOrderByWithRelationInput | Prisma.CatalogItemOrderByWithRelationInput[] {
-  switch (sort) {
-    case "oldest":
-      return [{ createdAt: "asc" }, { id: "asc" }];
-    case "use_count_desc":
-      return [{ useCount: "desc" }, { createdAt: "desc" }, { id: "asc" }];
-    case "newest":
-      return [{ createdAt: "desc" }, { id: "asc" }];
-    default:
-      return [{ createdAt: "desc" }, { id: "asc" }];
+  if (sort === "use_count_desc") {
+    return [{ useCount: "desc" }, { createdAt: "desc" }];
   }
-}
-
-function toItemSortSummary(
-  row: Prisma.CatalogItemGetPayload<{ select: typeof itemSortSelect }>
-): ItemSummary {
-  return toItemSummary({
-    ...row,
-    notes: null,
-    images: [],
-    placements: row.placements.map((placement) => ({
-      outfit: {
-        id: "",
-        eventName: "",
-        date: placement.outfit.date,
-        createdAt: row.createdAt,
-      },
-    })),
-  });
-}
-
-function orderRowsByIds<T extends { id: string }>(rows: T[], ids: string[]): T[] {
-  const byId = new Map(rows.map((row) => [row.id, row]));
-  return ids
-    .map((id) => byId.get(id))
-    .filter((row): row is T => row != null);
+  if (sort === "newest" || sort === "oldest") {
+    return prismaOrderBy(sort);
+  }
+  return [{ useCount: "desc" }, prismaOrderBy(sort)];
 }
 
 function sortItemsInMemory(
@@ -139,20 +119,35 @@ function needsInMemorySort(sort: ItemSort): boolean {
     sort === "name_asc" ||
     sort === "name_desc" ||
     sort === "date_desc" ||
-    sort === "date_asc"
+    sort === "date_asc" ||
+    sort === "newest" ||
+    sort === "oldest"
   );
 }
 
-function canUseDbPagination(sort: ItemSort): boolean {
-  return sort === "newest" || sort === "oldest" || sort === "use_count_desc";
-}
-
-async function queryItemListFromDb(
+async function queryItemList(
   limit: number,
   offset: number,
-  sort: ItemSort,
-  includeTotal: boolean
+  sort: ItemSort = DEFAULT_ITEM_SORT,
+  includeTotal = true,
+  locale: Locale = DEFAULT_LOCALE
 ): Promise<ItemListResult> {
+  if (needsInMemorySort(sort)) {
+    const rows = await prisma.catalogItem.findMany({ select: catalogSelect });
+    const sorted = sortItemsInMemory(rows.map(toItemSummary), sort, locale);
+    const items = sorted.slice(offset, offset + limit);
+    const total = includeTotal
+      ? sorted.length
+      : offset + items.length + (items.length === limit ? 1 : 0);
+    return {
+      items,
+      total,
+      hasMore:
+        offset + items.length <
+        (includeTotal ? total : offset + items.length + (items.length === limit ? 1 : 0)),
+    };
+  }
+
   const rows = await prisma.catalogItem.findMany({
     take: limit,
     skip: offset,
@@ -175,58 +170,6 @@ async function queryItemListFromDb(
     total,
     hasMore: offset + items.length < total,
   };
-}
-
-async function queryItemListInMemory(
-  limit: number,
-  offset: number,
-  sort: ItemSort,
-  includeTotal: boolean,
-  locale: Locale
-): Promise<ItemListResult> {
-  const rows = await prisma.catalogItem.findMany({ select: itemSortSelect });
-  const sorted = sortItemsInMemory(rows.map(toItemSortSummary), sort, locale);
-  const pageIds = sorted.slice(offset, offset + limit).map((item) => item.id);
-
-  if (pageIds.length === 0) {
-    const total = includeTotal ? sorted.length : 0;
-    return { items: [], total, hasMore: false };
-  }
-
-  const pageRows = await prisma.catalogItem.findMany({
-    where: { id: { in: pageIds } },
-    select: catalogSelect,
-  });
-  const items = orderRowsByIds(pageRows, pageIds).map(toItemSummary);
-  const total = includeTotal
-    ? sorted.length
-    : offset + items.length + (items.length === limit ? 1 : 0);
-
-  return {
-    items,
-    total,
-    hasMore:
-      offset + items.length <
-      (includeTotal ? total : offset + items.length + (items.length === limit ? 1 : 0)),
-  };
-}
-
-async function queryItemList(
-  limit: number,
-  offset: number,
-  sort: ItemSort = DEFAULT_ITEM_SORT,
-  includeTotal = true,
-  locale: Locale = DEFAULT_LOCALE
-): Promise<ItemListResult> {
-  if (canUseDbPagination(sort)) {
-    return queryItemListFromDb(limit, offset, sort, includeTotal);
-  }
-
-  if (needsInMemorySort(sort)) {
-    return queryItemListInMemory(limit, offset, sort, includeTotal, locale);
-  }
-
-  return queryItemListFromDb(limit, offset, "newest", includeTotal);
 }
 
 export async function getItemList(

@@ -39,59 +39,22 @@ const outfitSelect = {
   },
 } satisfies Prisma.OutfitSelect;
 
-const outfitSortSelect = {
-  id: true,
-  eventName: true,
-  date: true,
-  createdAt: true,
-  outfitItems: {
-    select: {
-      catalogItem: {
-        select: { type: true },
-      },
-    },
-  },
-} satisfies Prisma.OutfitSelect;
-
-function dbOrderBy(
-  sort: OutfitSort
-): Prisma.OutfitOrderByWithRelationInput[] {
+function prismaOrderBy(sort: OutfitSort): Prisma.OutfitOrderByWithRelationInput {
   switch (sort) {
     case "oldest":
-      return [{ createdAt: "asc" }, { id: "asc" }];
+      return { createdAt: "asc" };
     case "date_desc":
-      return [{ date: "desc" }, { id: "asc" }];
+      return { date: "desc" };
     case "date_asc":
-      return [{ date: "asc" }, { id: "desc" }];
+      return { date: "asc" };
+    case "name_asc":
+      return { eventName: "asc" };
+    case "name_desc":
+      return { eventName: "desc" };
     case "newest":
-      return [{ createdAt: "desc" }, { id: "asc" }];
     default:
-      return [{ createdAt: "desc" }, { id: "asc" }];
+      return { createdAt: "desc" };
   }
-}
-
-function toOutfitSortSummary(
-  row: Prisma.OutfitGetPayload<{ select: typeof outfitSortSelect }>
-): ReturnType<typeof toOutfitSummary> {
-  return toOutfitSummary({
-    ...row,
-    mainImage: "",
-    outfitItems: row.outfitItems.map(({ catalogItem }) => ({
-      catalogItem: {
-        type: catalogItem.type,
-        brand: null,
-        productName: null,
-        notes: null,
-      },
-    })),
-  });
-}
-
-function orderRowsByIds<T extends { id: string }>(rows: T[], ids: string[]): T[] {
-  const byId = new Map(rows.map((row) => [row.id, row]));
-  return ids
-    .map((id) => byId.get(id))
-    .filter((row): row is T => row != null);
 }
 
 function sortOutfitsInMemory(
@@ -130,11 +93,10 @@ function sortOutfitsInMemory(
 }
 
 function needsInMemorySort(sort: OutfitSort): boolean {
-  return sort === "category" || sort === "name_asc" || sort === "name_desc";
-}
-
-function canUseDbPagination(sort: OutfitSort): boolean {
   return (
+    sort === "category" ||
+    sort === "name_asc" ||
+    sort === "name_desc" ||
     sort === "date_desc" ||
     sort === "date_asc" ||
     sort === "newest" ||
@@ -142,16 +104,33 @@ function canUseDbPagination(sort: OutfitSort): boolean {
   );
 }
 
-async function queryOutfitListFromDb(
+async function queryOutfitList(
   limit: number,
   offset: number,
-  sort: OutfitSort,
-  includeTotal: boolean
+  sort: OutfitSort = DEFAULT_OUTFIT_SORT,
+  includeTotal = true,
+  locale: Locale = DEFAULT_LOCALE
 ): Promise<OutfitListResult> {
+  if (needsInMemorySort(sort)) {
+    const rows = await prisma.outfit.findMany({ select: outfitSelect });
+    const sorted = sortOutfitsInMemory(rows.map(toOutfitSummary), sort, locale);
+    const outfits = sorted.slice(offset, offset + limit);
+    const total = includeTotal
+      ? sorted.length
+      : offset + outfits.length + (outfits.length === limit ? 1 : 0);
+    return {
+      outfits,
+      total,
+      hasMore:
+        offset + outfits.length <
+        (includeTotal ? total : offset + outfits.length + (outfits.length === limit ? 1 : 0)),
+    };
+  }
+
   const rows = await prisma.outfit.findMany({
     take: limit,
     skip: offset,
-    orderBy: dbOrderBy(sort),
+    orderBy: prismaOrderBy(sort),
     select: outfitSelect,
   });
 
@@ -170,58 +149,6 @@ async function queryOutfitListFromDb(
     total,
     hasMore: offset + outfits.length < total,
   };
-}
-
-async function queryOutfitListInMemory(
-  limit: number,
-  offset: number,
-  sort: OutfitSort,
-  includeTotal: boolean,
-  locale: Locale
-): Promise<OutfitListResult> {
-  const rows = await prisma.outfit.findMany({ select: outfitSortSelect });
-  const sorted = sortOutfitsInMemory(rows.map(toOutfitSortSummary), sort, locale);
-  const pageIds = sorted.slice(offset, offset + limit).map((outfit) => outfit.id);
-
-  if (pageIds.length === 0) {
-    const total = includeTotal ? sorted.length : 0;
-    return { outfits: [], total, hasMore: false };
-  }
-
-  const pageRows = await prisma.outfit.findMany({
-    where: { id: { in: pageIds } },
-    select: outfitSelect,
-  });
-  const outfits = orderRowsByIds(pageRows, pageIds).map(toOutfitSummary);
-  const total = includeTotal
-    ? sorted.length
-    : offset + outfits.length + (outfits.length === limit ? 1 : 0);
-
-  return {
-    outfits,
-    total,
-    hasMore:
-      offset + outfits.length <
-      (includeTotal ? total : offset + outfits.length + (outfits.length === limit ? 1 : 0)),
-  };
-}
-
-async function queryOutfitList(
-  limit: number,
-  offset: number,
-  sort: OutfitSort = DEFAULT_OUTFIT_SORT,
-  includeTotal = true,
-  locale: Locale = DEFAULT_LOCALE
-): Promise<OutfitListResult> {
-  if (canUseDbPagination(sort)) {
-    return queryOutfitListFromDb(limit, offset, sort, includeTotal);
-  }
-
-  if (needsInMemorySort(sort)) {
-    return queryOutfitListInMemory(limit, offset, sort, includeTotal, locale);
-  }
-
-  return queryOutfitListFromDb(limit, offset, "newest", includeTotal);
 }
 
 export async function getOutfitList(
