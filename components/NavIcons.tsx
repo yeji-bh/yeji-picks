@@ -113,6 +113,24 @@ export function IconGlobe({ className = "h-[18px] w-[18px]" }: IconProps) {
   );
 }
 
+export function IconRankings({ className = "h-[18px] w-[18px]" }: IconProps) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden
+    >
+      <path d="M4 20V10" strokeLinecap="round" />
+      <path d="M10 20V4" strokeLinecap="round" />
+      <path d="M16 20v-7" strokeLinecap="round" />
+      <path d="M22 20H2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function IconGallery({ className = "h-[18px] w-[18px]" }: IconProps) {
   return (
     <svg

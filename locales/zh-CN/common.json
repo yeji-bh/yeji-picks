@@ -11,6 +11,7 @@
     "feedback": "问题反馈",
     "favorites": "我的收藏",
     "guide": "使用手册",
+    "rankings": "排行榜",
     "admin": "审核",
     "galleryAdmin": "美甲／手机壳",
     "language": "语言",
@@ -63,6 +64,17 @@
   "brand": {
     "label": "品牌",
     "itemCount": "共 {{count}} 件单品",
+    "noItems": "尚无单品资料"
+  },
+  "rankings": {
+    "title": "排行榜",
+    "desc": "统计本站收录的穿搭单品，看看哪些品牌与单品最受欢迎。",
+    "topBrandsTitle": "单品最多的品牌 TOP 10",
+    "topBrandsDesc": "按品牌收录的单品数量排序。",
+    "topItemsTitle": "最常被穿搭使用的单品 TOP 10",
+    "topItemsDesc": "按单品出现在穿搭中的次数排序。",
+    "brandStats": "{{itemCount}} 件单品 · 共 {{useCount}} 次穿搭",
+    "noBrands": "尚无品牌资料",
     "noItems": "尚无单品资料"
   },
   "item": {

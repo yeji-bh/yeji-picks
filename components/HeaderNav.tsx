@@ -14,6 +14,7 @@ import {
   IconClipboard,
   IconHeart,
   IconBook,
+  IconRankings,
   IconGallery,
   IconMessage,
   IconSubmit,
@@ -106,6 +107,11 @@ export default function HeaderNav() {
               href="/favorites"
               icon={<IconHeart />}
               label={t("nav.favorites")}
+            />
+            <NavItem
+              href="/rankings"
+              icon={<IconRankings />}
+              label={t("nav.rankings")}
             />
             <NavItem
               href="/guide"
@@ -223,6 +229,14 @@ export default function HeaderNav() {
               >
                 <IconHeart />
                 <span>{t("nav.favorites")}</span>
+              </Link>
+              <Link
+                href="/rankings"
+                onClick={closeMenu}
+                className={drawerLinkClass}
+              >
+                <IconRankings />
+                <span>{t("nav.rankings")}</span>
               </Link>
               <Link href="/guide" onClick={closeMenu} className={drawerLinkClass}>
                 <IconBook />

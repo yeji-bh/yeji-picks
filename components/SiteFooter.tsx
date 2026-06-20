@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
 export default function SiteFooter() {
@@ -9,14 +8,6 @@ export default function SiteFooter() {
   return (
     <footer id="site-footer" className="mt-auto border-t border-border bg-header">
       <div className="mx-auto max-w-7xl space-y-2 px-3 py-4 text-center text-xs text-muted sm:px-5">
-        <p>
-          <Link
-            href="/guide"
-            className="text-foreground-secondary underline-offset-2 hover:text-foreground hover:underline"
-          >
-            {t("nav.guide")}
-          </Link>
-        </p>
         <p>© {t("siteTitle")} 2026</p>
       </div>
     </footer>

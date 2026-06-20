@@ -11,6 +11,7 @@
     "feedback": "문제 신고",
     "favorites": "내 즐겨찾기",
     "guide": "사용 안내",
+    "rankings": "랭킹",
     "admin": "심사",
     "galleryAdmin": "네일아트／폰케이스",
     "language": "언어",
@@ -63,6 +64,17 @@
   "brand": {
     "label": "브랜드",
     "itemCount": "아이템 {{count}}개",
+    "noItems": "아이템이 없습니다"
+  },
+  "rankings": {
+    "title": "랭킹",
+    "desc": "이 사이트에 등록된 코디 아이템을 기준으로 인기 브랜드와 아이템을 확인하세요.",
+    "topBrandsTitle": "아이템이 가장 많은 브랜드 TOP 10",
+    "topBrandsDesc": "브랜드별 등록 아이템 수 기준으로 정렬합니다.",
+    "topItemsTitle": "코디에 가장 많이 등장한 아이템 TOP 10",
+    "topItemsDesc": "아이템이 코디에 등장한 횟수 기준으로 정렬합니다.",
+    "brandStats": "아이템 {{itemCount}}개 · 코디 {{useCount}}회",
+    "noBrands": "브랜드 데이터가 없습니다",
     "noItems": "아이템이 없습니다"
   },
   "item": {

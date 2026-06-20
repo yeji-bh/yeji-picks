@@ -11,6 +11,7 @@
     "feedback": "Problem Report",
     "favorites": "My favorites",
     "guide": "User guide",
+    "rankings": "Rankings",
     "admin": "Review",
     "galleryAdmin": "Nail art / Cases",
     "language": "Language",
@@ -63,6 +64,17 @@
   "brand": {
     "label": "Brand",
     "itemCount": "{{count}} items",
+    "noItems": "No items yet"
+  },
+  "rankings": {
+    "title": "Rankings",
+    "desc": "See which brands and items appear most across outfits on this site.",
+    "topBrandsTitle": "Top 10 brands by item count",
+    "topBrandsDesc": "Ranked by how many catalog items each brand has.",
+    "topItemsTitle": "Top 10 most used items",
+    "topItemsDesc": "Ranked by how many outfits each item appears in.",
+    "brandStats": "{{itemCount}} items · {{useCount}} outfit appearances",
+    "noBrands": "No brand data yet",
     "noItems": "No items yet"
   },
   "item": {
