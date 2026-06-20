@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
 export default function ImageLightbox({
@@ -33,11 +34,12 @@ export default function ImageLightbox({
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 cursor-pointer bg-black/80"
+      className="fixed inset-0 z-50 min-h-dvh w-full cursor-pointer bg-black/80"
+      style={{ minHeight: "-webkit-fill-available" }}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -60,7 +62,7 @@ export default function ImageLightbox({
           <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
         </svg>
       </button>
-      <div className="pointer-events-none flex h-full w-full items-center justify-center p-4 sm:p-6">
+      <div className="pointer-events-none flex h-full min-h-dvh w-full items-center justify-center p-4 sm:p-6">
         <img
           src={src}
           alt={alt}
@@ -68,6 +70,7 @@ export default function ImageLightbox({
           onClick={(e) => e.stopPropagation()}
         />
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

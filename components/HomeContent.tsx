@@ -179,6 +179,20 @@ export default function HomeContent({
   const filtersRestoredRef = useRef(false);
   const loadedModesRef = useRef<Set<HomeViewMode>>(new Set());
   const loadedModeSortRef = useRef<Partial<Record<HomeViewMode, HomeSort>>>({});
+  const modeLoadInflightRef = useRef<Map<string, Promise<void>>>(new Map());
+  /** Block sentinel load-more until user scrolls (avoids auto-fetch on tab switch). */
+  const suppressLoadMoreUntilScrollRef = useRef(false);
+  const loadMoreInflightRef = useRef<Promise<void> | null>(null);
+  const loadMoreArmedRef = useRef(true);
+  const maybeLoadMoreRef = useRef<() => void>(() => {});
+  const LOAD_MORE_ROOT_MARGIN_PX = 0;
+  const listsRef = useRef({
+    outfits,
+    items,
+    nailArts,
+    phoneCases,
+  });
+  listsRef.current = { outfits, items, nailArts, phoneCases };
   const pendingScrollYRef = useRef(0);
   const filterLoadAttemptsRef = useRef(0);
   const prevPathRef = useRef<string | null>(null);
@@ -258,7 +272,7 @@ export default function HomeContent({
       nextSort: HomeSort,
       options?: { force?: boolean }
     ) => {
-      const lists = { outfits, items, nailArts, phoneCases };
+      const lists = listsRef.current;
       const rawCount = getModeRawCount(mode, lists);
       const alreadyLoaded = loadedModesRef.current.has(mode);
       const loadedSort = loadedModeSortRef.current[mode];
@@ -272,87 +286,92 @@ export default function HomeContent({
         delete loadedModeSortRef.current[mode];
       }
 
-      setLoading(true);
-      setPageReady(false);
-
       const limit =
         alreadyLoaded && options?.force
           ? getSavedLoadedCount()
           : HOME_PAGE_SIZE;
+      const loadKey = `${mode}:${nextSort}:${limit}`;
+      const inflight = modeLoadInflightRef.current.get(loadKey);
+      if (inflight) return inflight;
 
-      for (let attempt = 0; attempt < 2; attempt++) {
-        try {
-          if (mode === "outfit") {
-            const data = await fetchOutfits(0, limit, nextSort);
-            setOutfits(dedupeOutfits(data.outfits));
-            setOutfitTotal(data.total);
-            setOutfitHasMore(data.hasMore);
-            setSavedLoadedCount(data.outfits.length);
-          } else if (mode === "item") {
-            const data = await fetchItems(0, limit, nextSort);
-            setItems(dedupeItems(data.items));
-            setItemTotal(data.total);
-            setItemHasMore(data.hasMore);
-            setSavedLoadedCount(data.items.length);
-          } else if (mode === "nailArt") {
-            const data = await fetchNailArts(0, limit, nextSort);
-            setNailArts(dedupeNailArts(data.nailArts));
-            setNailArtTotal(data.total);
-            setNailArtHasMore(data.hasMore);
-            setSavedLoadedCount(data.nailArts.length);
-          } else {
-            const data = await fetchPhoneCases(0, limit, nextSort);
-            setPhoneCases(dedupePhoneCases(data.phoneCases));
-            setPhoneCaseTotal(data.total);
-            setPhoneCaseHasMore(data.hasMore);
-            setSavedLoadedCount(data.phoneCases.length);
-          }
+      const promise = (async () => {
+        setLoading(true);
+        setPageReady(false);
 
-          loadedModesRef.current.add(mode);
-          loadedModeSortRef.current[mode] = nextSort;
-          setLoading(false);
-          setPageReady(true);
-          return;
-        } catch {
-          if (attempt === 0) {
-            await new Promise((resolve) => setTimeout(resolve, 400));
-            continue;
+        for (let attempt = 0; attempt < 2; attempt++) {
+          try {
+            if (mode === "outfit") {
+              const data = await fetchOutfits(0, limit, nextSort);
+              setOutfits(dedupeOutfits(data.outfits));
+              setOutfitTotal(data.total);
+              setOutfitHasMore(data.hasMore);
+              setSavedLoadedCount(data.outfits.length);
+            } else if (mode === "item") {
+              const data = await fetchItems(0, limit, nextSort);
+              setItems(dedupeItems(data.items));
+              setItemTotal(data.total);
+              setItemHasMore(data.hasMore);
+              setSavedLoadedCount(data.items.length);
+            } else if (mode === "nailArt") {
+              const data = await fetchNailArts(0, limit, nextSort);
+              setNailArts(dedupeNailArts(data.nailArts));
+              setNailArtTotal(data.total);
+              setNailArtHasMore(data.hasMore);
+              setSavedLoadedCount(data.nailArts.length);
+            } else {
+              const data = await fetchPhoneCases(0, limit, nextSort);
+              setPhoneCases(dedupePhoneCases(data.phoneCases));
+              setPhoneCaseTotal(data.total);
+              setPhoneCaseHasMore(data.hasMore);
+              setSavedLoadedCount(data.phoneCases.length);
+            }
+
+            loadedModesRef.current.add(mode);
+            loadedModeSortRef.current[mode] = nextSort;
+            setLoading(false);
+            setPageReady(true);
+            return;
+          } catch {
+            if (attempt === 0) {
+              await new Promise((resolve) => setTimeout(resolve, 400));
+              continue;
+            }
+            if (mode === "outfit") {
+              setOutfits([]);
+              setOutfitTotal(0);
+              setOutfitHasMore(false);
+            } else if (mode === "item") {
+              setItems([]);
+              setItemTotal(0);
+              setItemHasMore(false);
+            } else if (mode === "nailArt") {
+              setNailArts([]);
+              setNailArtTotal(0);
+              setNailArtHasMore(false);
+            } else {
+              setPhoneCases([]);
+              setPhoneCaseTotal(0);
+              setPhoneCaseHasMore(false);
+            }
+            loadedModesRef.current.delete(mode);
+            delete loadedModeSortRef.current[mode];
           }
-          if (mode === "outfit") {
-            setOutfits([]);
-            setOutfitTotal(0);
-            setOutfitHasMore(false);
-          } else if (mode === "item") {
-            setItems([]);
-            setItemTotal(0);
-            setItemHasMore(false);
-          } else if (mode === "nailArt") {
-            setNailArts([]);
-            setNailArtTotal(0);
-            setNailArtHasMore(false);
-          } else {
-            setPhoneCases([]);
-            setPhoneCaseTotal(0);
-            setPhoneCaseHasMore(false);
-          }
-          loadedModesRef.current.delete(mode);
-          delete loadedModeSortRef.current[mode];
+        }
+
+        setLoading(false);
+        setPageReady(true);
+      })();
+
+      modeLoadInflightRef.current.set(loadKey, promise);
+      try {
+        await promise;
+      } finally {
+        if (modeLoadInflightRef.current.get(loadKey) === promise) {
+          modeLoadInflightRef.current.delete(loadKey);
         }
       }
-
-      setLoading(false);
-      setPageReady(true);
     },
-    [
-      fetchItems,
-      fetchNailArts,
-      fetchOutfits,
-      fetchPhoneCases,
-      outfits,
-      items,
-      nailArts,
-      phoneCases,
-    ]
+    [fetchItems, fetchNailArts, fetchOutfits, fetchPhoneCases]
   );
 
   useLayoutEffect(() => {
@@ -423,17 +442,12 @@ export default function HomeContent({
 
     const mode = getSavedViewMode();
     const savedSort = getSavedSort(mode);
-    const rawCount = getModeRawCount(mode, {
-      outfits,
-      items,
-      nailArts,
-      phoneCases,
-    });
+    const rawCount = getModeRawCount(mode, listsRef.current);
     if (rawCount === 0) {
       loadedModesRef.current.delete(mode);
       void ensureModeLoaded(mode, savedSort, { force: true });
     }
-  }, [pathname, ensureModeLoaded, outfits, items, nailArts, phoneCases]);
+  }, [pathname, ensureModeLoaded]);
 
   const hasMore =
     viewMode === "outfit"
@@ -454,47 +468,72 @@ export default function HomeContent({
 
   const loadMore = useCallback(async () => {
     if (loading || loadingMoreRef.current || !hasMore) return;
-    loadingMoreRef.current = true;
-    setLoadingMore(true);
-    try {
-      if (viewMode === "outfit") {
-        const data = await fetchOutfits(outfits.length, HOME_PAGE_SIZE, sort);
-        setOutfits((prev) => {
-          const next = dedupeOutfits([...prev, ...data.outfits]);
+    if (!loadedModesRef.current.has(viewMode)) return;
+    if (loadMoreInflightRef.current) return loadMoreInflightRef.current;
+
+    const promise = (async () => {
+      loadingMoreRef.current = true;
+      setLoadingMore(true);
+      loadMoreArmedRef.current = false;
+      try {
+        const offset = getModeRawCount(viewMode, listsRef.current);
+        if (viewMode === "outfit") {
+          const data = await fetchOutfits(offset, HOME_PAGE_SIZE, sort);
+          const next = dedupeOutfits([
+            ...listsRef.current.outfits,
+            ...data.outfits,
+          ]);
+          listsRef.current = { ...listsRef.current, outfits: next };
+          setOutfits(next);
           setSavedLoadedCount(next.length);
-          return next;
-        });
-        setOutfitHasMore(data.hasMore);
-      } else if (viewMode === "item") {
-        const data = await fetchItems(items.length, HOME_PAGE_SIZE, sort);
-        setItems((prev) => {
-          const next = dedupeItems([...prev, ...data.items]);
+          setOutfitHasMore(data.hasMore);
+        } else if (viewMode === "item") {
+          const data = await fetchItems(offset, HOME_PAGE_SIZE, sort);
+          const next = dedupeItems([
+            ...listsRef.current.items,
+            ...data.items,
+          ]);
+          listsRef.current = { ...listsRef.current, items: next };
+          setItems(next);
           setSavedLoadedCount(next.length);
-          return next;
-        });
-        setItemHasMore(data.hasMore);
-      } else if (viewMode === "nailArt") {
-        const data = await fetchNailArts(nailArts.length, HOME_PAGE_SIZE, sort);
-        setNailArts((prev) => {
-          const next = dedupeNailArts([...prev, ...data.nailArts]);
+          setItemHasMore(data.hasMore);
+        } else if (viewMode === "nailArt") {
+          const data = await fetchNailArts(offset, HOME_PAGE_SIZE, sort);
+          const next = dedupeNailArts([
+            ...listsRef.current.nailArts,
+            ...data.nailArts,
+          ]);
+          listsRef.current = { ...listsRef.current, nailArts: next };
+          setNailArts(next);
           setSavedLoadedCount(next.length);
-          return next;
-        });
-        setNailArtHasMore(data.hasMore);
-      } else {
-        const data = await fetchPhoneCases(phoneCases.length, HOME_PAGE_SIZE, sort);
-        setPhoneCases((prev) => {
-          const next = dedupePhoneCases([...prev, ...data.phoneCases]);
+          setNailArtHasMore(data.hasMore);
+        } else {
+          const data = await fetchPhoneCases(offset, HOME_PAGE_SIZE, sort);
+          const next = dedupePhoneCases([
+            ...listsRef.current.phoneCases,
+            ...data.phoneCases,
+          ]);
+          listsRef.current = { ...listsRef.current, phoneCases: next };
+          setPhoneCases(next);
           setSavedLoadedCount(next.length);
-          return next;
-        });
-        setPhoneCaseHasMore(data.hasMore);
+          setPhoneCaseHasMore(data.hasMore);
+        }
+      } catch {
+        loadMoreArmedRef.current = true;
+        /* ignore */
+      } finally {
+        loadingMoreRef.current = false;
+        setLoadingMore(false);
       }
-    } catch {
-      /* ignore */
+    })();
+
+    loadMoreInflightRef.current = promise;
+    try {
+      await promise;
     } finally {
-      loadingMoreRef.current = false;
-      setLoadingMore(false);
+      if (loadMoreInflightRef.current === promise) {
+        loadMoreInflightRef.current = null;
+      }
     }
   }, [
     fetchItems,
@@ -502,33 +541,72 @@ export default function HomeContent({
     fetchOutfits,
     fetchPhoneCases,
     hasMore,
-    items.length,
     loading,
-    nailArts.length,
-    outfits.length,
-    phoneCases.length,
     sort,
     viewMode,
   ]);
+
+  const maybeLoadMoreFromSentinel = useCallback(() => {
+    if (loading || loadingMoreRef.current || !hasMore) return;
+    if (!loadedModesRef.current.has(viewMode)) return;
+    if (suppressLoadMoreUntilScrollRef.current) return;
+    if (!loadMoreArmedRef.current) return;
+    void loadMore();
+  }, [hasMore, loadMore, loading, viewMode]);
+
+  maybeLoadMoreRef.current = maybeLoadMoreFromSentinel;
+
+  useEffect(() => {
+    suppressLoadMoreUntilScrollRef.current = true;
+    loadMoreArmedRef.current = true;
+  }, [viewMode, sort]);
+
+  useEffect(() => {
+    function onScroll() {
+      if (suppressLoadMoreUntilScrollRef.current && window.scrollY > 0) {
+        suppressLoadMoreUntilScrollRef.current = false;
+      }
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || !hasMore || loading) return;
 
+    let wasIntersecting = false;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting) loadMore();
+        const isIntersecting = entries[0]?.isIntersecting ?? false;
+        if (!isIntersecting) {
+          wasIntersecting = false;
+          loadMoreArmedRef.current = true;
+          return;
+        }
+        if (wasIntersecting) return;
+        wasIntersecting = true;
+        if (window.scrollY === 0 && suppressLoadMoreUntilScrollRef.current) {
+          return;
+        }
+        maybeLoadMoreRef.current();
       },
-      { rootMargin: "200px" }
+      { rootMargin: `${LOAD_MORE_ROOT_MARGIN_PX}px` }
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [hasMore, loadMore, loading]);
+  }, [hasMore, loading, viewMode]);
 
   function handleSortChange(nextSort: HomeSort) {
     if (nextSort === sort) return;
     filterLoadAttemptsRef.current = 0;
     setFilterSearchExhausted(false);
+    suppressLoadMoreUntilScrollRef.current = true;
+    loadMoreArmedRef.current = true;
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+    }
     setSort(nextSort);
     setSavedSort(nextSort, viewMode);
     void ensureModeLoaded(viewMode, nextSort, { force: true });
@@ -538,16 +616,16 @@ export default function HomeContent({
     if (nextMode === viewMode) return;
     pendingScrollYRef.current = 0;
     clearHomeScroll();
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+    }
+    suppressLoadMoreUntilScrollRef.current = true;
+    loadMoreArmedRef.current = true;
     setViewMode(nextMode);
     setSavedViewMode(nextMode);
     const nextSort = getSavedSort(nextMode);
     setSort(nextSort);
-    const rawCount = getModeRawCount(nextMode, {
-      outfits,
-      items,
-      nailArts,
-      phoneCases,
-    });
+    const rawCount = getModeRawCount(nextMode, listsRef.current);
     if (
       loadedModesRef.current.has(nextMode) &&
       rawCount > 0 &&
