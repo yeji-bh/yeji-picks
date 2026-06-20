@@ -10,7 +10,7 @@ type PhoneCaseCardProps = {
   image: string;
   brand: string;
   model: string;
-  officialLink: string;
+  officialLink?: string | null;
   priority?: boolean;
   imageQuality?: number;
 };
@@ -25,7 +25,7 @@ export default function PhoneCaseCard({
   imageQuality = GRID_IMAGE_QUALITY,
 }: PhoneCaseCardProps) {
   const imageSrc = useAssetUrl(image);
-  const link = officialLink.trim();
+  const link = (officialLink ?? "").trim();
 
   const imageBlock = (
     <div className="item-image-surface relative aspect-[3/4] w-full overflow-hidden">

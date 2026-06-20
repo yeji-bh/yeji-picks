@@ -14,7 +14,8 @@ export async function GET(request: NextRequest) {
 
   const sort = request.nextUrl.searchParams.get("sort");
   const withTotal = request.nextUrl.searchParams.get("withTotal") !== "0";
-  const data = await getPhoneCaseList(limit, offset, sort, withTotal);
+  const query = request.nextUrl.searchParams.get("q");
+  const data = await getPhoneCaseList(limit, offset, sort, withTotal, query ?? "");
 
   return NextResponse.json(data, {
     headers: {

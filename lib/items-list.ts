@@ -15,6 +15,7 @@ import {
 import {
   compareOutfitDates,
 } from "@/lib/outfit-sort";
+import { matchesItemFilters } from "@/lib/list-filters";
 
 export type ItemListResult = {
   items: ReturnType<typeof toItemSummary>[];
@@ -130,21 +131,33 @@ async function queryItemList(
   offset: number,
   sort: ItemSort = DEFAULT_ITEM_SORT,
   includeTotal = true,
-  locale: Locale = DEFAULT_LOCALE
+  locale: Locale = DEFAULT_LOCALE,
+  typeFilter = "",
+  query = ""
 ): Promise<ItemListResult> {
-  if (needsInMemorySort(sort)) {
+  const hasFilters = Boolean(typeFilter || query.trim());
+
+  if (needsInMemorySort(sort) || hasFilters) {
     const rows = await prisma.catalogItem.findMany({ select: catalogSelect });
-    const sorted = sortItemsInMemory(rows.map(toItemSummary), sort, locale);
+    let sorted = sortItemsInMemory(rows.map(toItemSummary), sort, locale);
+    if (hasFilters) {
+      sorted = sorted.filter((item) =>
+        matchesItemFilters(item, typeFilter, query)
+      );
+    }
     const items = sorted.slice(offset, offset + limit);
+    const filteredTotal = sorted.length;
     const total = includeTotal
-      ? sorted.length
+      ? filteredTotal
       : offset + items.length + (items.length === limit ? 1 : 0);
     return {
       items,
       total,
       hasMore:
         offset + items.length <
-        (includeTotal ? total : offset + items.length + (items.length === limit ? 1 : 0)),
+        (includeTotal
+          ? filteredTotal
+          : offset + items.length + (items.length === limit ? 1 : 0)),
     };
   }
 
@@ -177,9 +190,19 @@ export async function getItemList(
   offset: number,
   sort?: string | null,
   includeTotal = true,
-  locale?: string | null
+  locale?: string | null,
+  typeFilter?: string | null,
+  query?: string | null
 ): Promise<ItemListResult> {
   const parsedSort = parseItemSort(sort);
   const parsedLocale = locale && isLocale(locale) ? locale : DEFAULT_LOCALE;
-  return queryItemList(limit, offset, parsedSort, includeTotal, parsedLocale);
+  return queryItemList(
+    limit,
+    offset,
+    parsedSort,
+    includeTotal,
+    parsedLocale,
+    typeFilter?.trim() ?? "",
+    query?.trim() ?? ""
+  );
 }

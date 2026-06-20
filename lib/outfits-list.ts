@@ -12,6 +12,7 @@ import {
   type OutfitSort,
   parseOutfitSort,
 } from "@/lib/outfit-sort";
+import { matchesOutfitFilters } from "@/lib/list-filters";
 
 export type OutfitListResult = {
   outfits: ReturnType<typeof toOutfitSummary>[];
@@ -109,21 +110,33 @@ async function queryOutfitList(
   offset: number,
   sort: OutfitSort = DEFAULT_OUTFIT_SORT,
   includeTotal = true,
-  locale: Locale = DEFAULT_LOCALE
+  locale: Locale = DEFAULT_LOCALE,
+  typeFilter = "",
+  query = ""
 ): Promise<OutfitListResult> {
-  if (needsInMemorySort(sort)) {
+  const hasFilters = Boolean(typeFilter || query.trim());
+
+  if (needsInMemorySort(sort) || hasFilters) {
     const rows = await prisma.outfit.findMany({ select: outfitSelect });
-    const sorted = sortOutfitsInMemory(rows.map(toOutfitSummary), sort, locale);
+    let sorted = sortOutfitsInMemory(rows.map(toOutfitSummary), sort, locale);
+    if (hasFilters) {
+      sorted = sorted.filter((outfit) =>
+        matchesOutfitFilters(outfit, typeFilter, query)
+      );
+    }
     const outfits = sorted.slice(offset, offset + limit);
+    const filteredTotal = sorted.length;
     const total = includeTotal
-      ? sorted.length
+      ? filteredTotal
       : offset + outfits.length + (outfits.length === limit ? 1 : 0);
     return {
       outfits,
       total,
       hasMore:
         offset + outfits.length <
-        (includeTotal ? total : offset + outfits.length + (outfits.length === limit ? 1 : 0)),
+        (includeTotal
+          ? filteredTotal
+          : offset + outfits.length + (outfits.length === limit ? 1 : 0)),
     };
   }
 
@@ -156,9 +169,19 @@ export async function getOutfitList(
   offset: number,
   sort?: string | null,
   includeTotal = true,
-  locale?: string | null
+  locale?: string | null,
+  typeFilter?: string | null,
+  query?: string | null
 ): Promise<OutfitListResult> {
   const parsedSort = parseOutfitSort(sort);
   const parsedLocale = locale && isLocale(locale) ? locale : DEFAULT_LOCALE;
-  return queryOutfitList(limit, offset, parsedSort, includeTotal, parsedLocale);
+  return queryOutfitList(
+    limit,
+    offset,
+    parsedSort,
+    includeTotal,
+    parsedLocale,
+    typeFilter?.trim() ?? "",
+    query?.trim() ?? ""
+  );
 }

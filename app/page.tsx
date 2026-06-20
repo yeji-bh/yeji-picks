@@ -41,5 +41,15 @@ export default async function HomePage() {
   const lcpImage = outfits.outfits[0]?.mainImage;
   if (lcpImage) preloadHomeLcpImage(lcpImage);
 
-  return <HomeContent initialData={{ outfits }} />;
+  return (
+    <HomeContent
+      initialData={{
+        outfits: {
+          items: outfits.outfits,
+          total: outfits.total,
+          hasMore: outfits.hasMore,
+        },
+      }}
+    />
+  );
 }

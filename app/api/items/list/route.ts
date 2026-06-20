@@ -15,7 +15,17 @@ export async function GET(request: NextRequest) {
   const sort = request.nextUrl.searchParams.get("sort");
   const locale = request.nextUrl.searchParams.get("locale");
   const withTotal = request.nextUrl.searchParams.get("withTotal") !== "0";
-  const data = await getItemList(limit, offset, sort, withTotal, locale);
+  const typeFilter = request.nextUrl.searchParams.get("typeFilter");
+  const query = request.nextUrl.searchParams.get("q");
+  const data = await getItemList(
+    limit,
+    offset,
+    sort,
+    withTotal,
+    locale,
+    typeFilter,
+    query
+  );
 
   return NextResponse.json(data, {
     headers: {
