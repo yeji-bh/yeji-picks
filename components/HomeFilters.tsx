@@ -15,6 +15,7 @@ import { isGalleryViewMode } from "@/lib/home-view-mode";
 import { OUTFIT_SORT_OPTIONS } from "@/lib/outfit-sort";
 import { GALLERY_SORT_OPTIONS } from "@/lib/gallery-sort";
 import type { HomeSort } from "@/lib/home-sort";
+import SelectMenu from "./SelectMenu";
 import ViewModeTabs from "./ViewModeTabs";
 
 type HomeFiltersProps = {
@@ -79,9 +80,6 @@ function SubFilterTab({
 
 const searchClass =
   "box-border min-h-11 w-full min-w-0 rounded-sm border border-border bg-input py-3 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-inactive focus:border-neutral-400";
-
-const sortClass =
-  "filter-select box-border h-9 min-w-[11rem] cursor-pointer rounded-sm border border-border bg-input px-2 pr-7 text-sm text-foreground-secondary outline-none focus:border-neutral-400";
 
 const filterScrollClass =
   "flex flex-nowrap gap-7 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
@@ -261,18 +259,17 @@ export default function HomeFilters({
         <p className="shrink-0 text-sm text-neutral-600">
           {t(resultCountKey, { count: resultCount })}
         </p>
-        <select
+        <SelectMenu
+          variant="icon"
+          align="right"
           value={sort}
-          onChange={(e) => onSortChange(e.target.value as HomeSort)}
-          className={sortClass}
-          aria-label={t("home.sortLabel")}
-        >
-          {sortOptions.map((option) => (
-            <option key={option} value={option}>
-              {t(`home.sort.${option}`)}
-            </option>
-          ))}
-        </select>
+          onChange={(value) => onSortChange(value as HomeSort)}
+          ariaLabel={t("home.sortLabel")}
+          options={sortOptions.map((option) => ({
+            value: option,
+            label: t(`home.sort.${option}`),
+          }))}
+        />
       </div>
     </div>
   );

@@ -69,7 +69,7 @@ export default function OutfitCard({
           </Link>
           <FavoriteButton type="outfit" targetId={id} variant="inline" size="md" />
         </div>
-        <ItemTypeBadges types={itemTypes} compact />
+        <ItemTypeBadges types={itemTypes} />
       </div>
     </article>
   );

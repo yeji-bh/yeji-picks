@@ -6,6 +6,7 @@ import { compressImageForUpload } from "@/lib/compress-image-client";
 import { prepareImageFile } from "@/lib/prepare-image-file";
 import FileInputZone from "./FileInputZone";
 import Modal from "./Modal";
+import SelectMenu from "./SelectMenu";
 import { useToast } from "./ToastProvider";
 
 export type FeedbackCategory = "suggestion" | "same_style";
@@ -123,17 +124,17 @@ export default function FeedbackModal({
       <form onSubmit={handleSubmit} className="space-y-3 px-4 py-4">
           <label className="block">
             <span className="text-xs text-muted">{t("feedback.categoryLabel")}</span>
-            <select
+            <SelectMenu
+              variant="field"
               value={category}
-              onChange={(e) => setCategory(e.target.value as FeedbackCategory)}
-              className="filter-select ui-field mt-1 box-border h-10 w-full cursor-pointer px-3 pr-8 text-sm"
-            >
-              {CATEGORY_OPTIONS.map((value) => (
-                <option key={value} value={value}>
-                  {t(`feedback.category.${value}`)}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => setCategory(value as FeedbackCategory)}
+              ariaLabel={t("feedback.categoryLabel")}
+              className="mt-1"
+              options={CATEGORY_OPTIONS.map((value) => ({
+                value,
+                label: t(`feedback.category.${value}`),
+              }))}
+            />
           </label>
 
           <textarea

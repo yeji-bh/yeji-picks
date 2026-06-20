@@ -4,42 +4,55 @@ import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ITEM_TYPES, normalizeItemType, type ItemType } from "@/lib/types";
 
-const MOBILE_MAX_BADGES = 2;
-
 const BADGE_CLASS =
   "shrink-0 rounded-none bg-subtle px-2.5 py-1 text-base font-medium text-foreground-secondary max-sm:px-2 max-sm:py-0.5 max-sm:text-[14px]";
 
 const OVERFLOW_CLASS =
   "shrink-0 rounded-none bg-subtle px-2 py-1 text-base font-medium text-foreground-secondary max-sm:px-1.5 max-sm:py-0.5 max-sm:text-[14px]";
 
-function useIsMobileLayout(): boolean {
-  const [isMobile, setIsMobile] = useState(false);
+type BadgeLayout = {
+  visibleCount: number;
+  showOverflow: boolean;
+};
 
-  useLayoutEffect(() => {
-    const mq = window.matchMedia("(max-width: 639px)");
-    const update = () => setIsMobile(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
+function calcUsedWidth(
+  widths: number[],
+  count: number,
+  hidden: number,
+  gap: number,
+  overflowSizer: HTMLElement
+): number {
+  let used = 0;
 
-  return isMobile;
+  for (let index = 0; index < count; index++) {
+    if (index > 0) used += gap;
+    used += widths[index] ?? 0;
+  }
+
+  if (hidden > 0) {
+    if (count > 0) used += gap;
+    overflowSizer.textContent = `${hidden}+`;
+    used += overflowSizer.offsetWidth;
+  }
+
+  return used;
 }
 
 export default function ItemTypeBadges({
   types,
   className = "",
-  compact = false,
 }: {
   types: string[];
   className?: string;
-  /** Skip scrollWidth measurement (home grid cards). */
-  compact?: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [visibleCount, setVisibleCount] = useState<number | null>(null);
-  const isMobile = useIsMobileLayout();
+  const sizerRef = useRef<HTMLDivElement>(null);
+  const overflowSizerRef = useRef<HTMLSpanElement>(null);
+  const [layout, setLayout] = useState<BadgeLayout>({
+    visibleCount: 1,
+    showOverflow: false,
+  });
 
   const stableTypesInput = [...new Set(types.map(normalizeItemType))]
     .sort()
@@ -55,81 +68,119 @@ export default function ItemTypeBadges({
     [typesKey]
   );
 
+  const labels = useMemo(
+    () => sorted.map((type) => t(`itemTypes.${type}`)),
+    [sorted, t, i18n.language]
+  );
+
   useLayoutEffect(() => {
-    if (compact || isMobile) {
-      setVisibleCount(Math.min(MOBILE_MAX_BADGES, sorted.length));
+    const container = containerRef.current;
+    const sizer = sizerRef.current;
+    const overflowSizer = overflowSizerRef.current;
+    if (!container || !sizer || !overflowSizer || sorted.length === 0) {
+      setLayout({ visibleCount: sorted.length, showOverflow: false });
       return;
     }
 
-    const el = containerRef.current;
-    if (!el || sorted.length === 0) {
-      setVisibleCount((prev) => (prev === sorted.length ? prev : sorted.length));
-      return;
-    }
+    const gap = Number.parseFloat(getComputedStyle(container).gap || "0") || 0;
 
     const measure = () => {
-      const badges = el.querySelectorAll<HTMLElement>("[data-type-badge]");
-      const overflow = el.querySelector<HTMLElement>("[data-type-overflow]");
-      if (!overflow || badges.length === 0) return;
+      const badgeEls = sizer.querySelectorAll<HTMLElement>("[data-sizer-badge]");
+      if (badgeEls.length === 0) return;
 
-      let fit = 0;
-      for (let count = sorted.length; count >= 0; count--) {
-        badges.forEach((badge, index) => {
-          badge.style.display = index < count ? "" : "none";
-        });
+      const widths = Array.from(badgeEls, (badge) => badge.offsetWidth);
+      const available = container.clientWidth;
+      let next: BadgeLayout = { visibleCount: 1, showOverflow: false };
 
+      for (let count = sorted.length; count >= 1; count--) {
         const hidden = sorted.length - count;
+
         if (hidden > 0) {
-          overflow.textContent = `${hidden}+`;
-          overflow.style.display = "";
-        } else {
-          overflow.style.display = "none";
+          const usedWithOverflow = calcUsedWidth(
+            widths,
+            count,
+            hidden,
+            gap,
+            overflowSizer
+          );
+          if (usedWithOverflow <= available + 1) {
+            next = { visibleCount: count, showOverflow: true };
+            break;
+          }
         }
 
-        if (el.scrollWidth <= el.clientWidth + 1) {
-          fit = count;
+        const used = calcUsedWidth(widths, count, 0, gap, overflowSizer);
+        if (used <= available + 1) {
+          next = { visibleCount: count, showOverflow: false };
           break;
         }
       }
 
-      badges.forEach((badge) => {
-        badge.style.display = "";
-      });
-
-      setVisibleCount((prev) => (prev === fit ? prev : fit));
+      setLayout((prev) =>
+        prev.visibleCount === next.visibleCount &&
+        prev.showOverflow === next.showOverflow
+          ? prev
+          : next
+      );
     };
 
     measure();
+
     const observer = new ResizeObserver(measure);
-    observer.observe(el);
+    observer.observe(container);
+    sizer.querySelectorAll<HTMLElement>("[data-sizer-badge]").forEach((badge) => {
+      observer.observe(badge);
+    });
+
+    if (document.fonts?.ready) {
+      void document.fonts.ready.then(measure);
+    }
+
     return () => observer.disconnect();
-  }, [typesKey, i18n.language, sorted.length, isMobile, compact]);
+  }, [typesKey, i18n.language, sorted.length, labels.join("|")]);
 
   if (sorted.length === 0) return null;
 
-  const shown = visibleCount ?? 0;
-  const overflow = Math.max(0, sorted.length - shown);
+  const shown = Math.min(layout.visibleCount, sorted.length);
+  const hiddenCount = sorted.length - shown;
+  const showOverflow = layout.showOverflow && hiddenCount > 0;
+  const truncateSingle =
+    shown === 1 && hiddenCount > 0 && !showOverflow;
 
   return (
-    <div
-      ref={containerRef}
-      className={`flex min-w-0 flex-nowrap items-center gap-1.5 overflow-hidden ${className}`}
-    >
-      {sorted.map((type, index) => (
-        <span
-          key={type}
-          data-type-badge
-          className={`${BADGE_CLASS} ${index >= shown ? "hidden" : ""}`}
-        >
-          {t(`itemTypes.${type}`)}
-        </span>
-      ))}
-      <span
-        data-type-overflow
-        className={`${OVERFLOW_CLASS} ${overflow > 0 ? "" : "hidden"}`}
+    <div className={`relative min-w-0 ${className}`}>
+      <div
+        ref={sizerRef}
+        aria-hidden
+        className="pointer-events-none absolute -left-[9999px] top-0 flex flex-nowrap items-center gap-1.5 opacity-0"
       >
-        {overflow > 0 ? `${overflow}+` : ""}
-      </span>
+        {labels.map((label, index) => (
+          <span key={`${label}-${index}`} data-sizer-badge className={BADGE_CLASS}>
+            {label}
+          </span>
+        ))}
+        <span ref={overflowSizerRef} className={OVERFLOW_CLASS}>
+          99+
+        </span>
+      </div>
+
+      <div
+        ref={containerRef}
+        className="flex min-w-0 flex-nowrap items-center gap-1.5 overflow-hidden"
+      >
+        {sorted.map((type, index) => (
+          <span
+            key={type}
+            className={`${BADGE_CLASS} ${truncateSingle && index === 0 ? "min-w-0 max-w-full truncate" : ""}`}
+            style={{ display: index < shown ? undefined : "none" }}
+          >
+            {t(`itemTypes.${type}`)}
+          </span>
+        ))}
+        {showOverflow && (
+          <span className={OVERFLOW_CLASS}>{hiddenCount}+</span>
+        )}
+      </div>
     </div>
   );
 }
