@@ -188,10 +188,28 @@ const statements = [
     "official_link" TEXT NOT NULL DEFAULT '',
     "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`, "phone_cases"],
+  [`CREATE TABLE IF NOT EXISTS "perfumes" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "image" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "brand" TEXT NOT NULL,
+    "description" TEXT NOT NULL DEFAULT '',
+    "official_link" TEXT NOT NULL DEFAULT '',
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`, "perfumes"],
 ];
 
 for (const [sql, label] of statements) {
   await run(sql, label);
+}
+
+const perfumeCols = await tableColumns("perfumes");
+if (perfumeCols.length > 0 && !perfumeCols.includes("description")) {
+  await run(
+    `ALTER TABLE perfumes ADD COLUMN description TEXT NOT NULL DEFAULT ''`,
+    "perfumes add description"
+  );
+  console.log("Migrated perfumes: added description");
 }
 
 const phoneCaseCols = await tableColumns("phone_cases");

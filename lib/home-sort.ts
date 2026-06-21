@@ -20,20 +20,20 @@ export type HomeSort = OutfitSort | ItemSort | GallerySort;
 export function getSavedSort(mode: HomeViewMode): HomeSort {
   if (typeof window === "undefined") {
     if (mode === "item") return DEFAULT_ITEM_SORT;
-    if (mode === "nailArt" || mode === "phoneCase") return DEFAULT_GALLERY_SORT;
+    if (mode === "nailArt" || mode === "phoneCase" || mode === "perfume") return DEFAULT_GALLERY_SORT;
     return DEFAULT_OUTFIT_SORT;
   }
   try {
     if (mode === "item") {
       return parseItemSort(localStorage.getItem(HOME_ITEM_SORT_KEY));
     }
-    if (mode === "nailArt" || mode === "phoneCase") {
+    if (mode === "nailArt" || mode === "phoneCase" || mode === "perfume") {
       return parseGallerySort(localStorage.getItem(HOME_GALLERY_SORT_KEY));
     }
     return parseOutfitSort(localStorage.getItem(HOME_SORT_KEY));
   } catch {
     if (mode === "item") return DEFAULT_ITEM_SORT;
-    if (mode === "nailArt" || mode === "phoneCase") return DEFAULT_GALLERY_SORT;
+    if (mode === "nailArt" || mode === "phoneCase" || mode === "perfume") return DEFAULT_GALLERY_SORT;
     return DEFAULT_OUTFIT_SORT;
   }
 }
@@ -43,7 +43,7 @@ export function setSavedSort(sort: HomeSort, mode: HomeViewMode): void {
     localStorage.setItem(HOME_ITEM_SORT_KEY, sort);
     return;
   }
-  if (mode === "nailArt" || mode === "phoneCase") {
+  if (mode === "nailArt" || mode === "phoneCase" || mode === "perfume") {
     localStorage.setItem(HOME_GALLERY_SORT_KEY, sort);
     return;
   }

@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import FileInputZone, { IMAGE_FILE_ACCEPT } from "./FileInputZone";
 import ProgressiveImage from "./ProgressiveImage";
+import SubmitForm from "./SubmitForm";
 import { useAssetUrl } from "@/lib/use-asset-url";
 import { compressImageForUpload } from "@/lib/compress-image-client";
 import { prepareImageFile } from "@/lib/prepare-image-file";
 
-type GalleryTab = "nailArt" | "phoneCase";
+type SubmitTab = "outfit" | "nailArt" | "phoneCase" | "perfume";
 
 type NailArtRow = {
   id: string;
@@ -21,6 +23,16 @@ type PhoneCaseRow = {
   image: string;
   brand: string;
   model: string;
+  officialLink: string;
+  createdAt: string;
+};
+
+type PerfumeRow = {
+  id: string;
+  image: string;
+  name: string;
+  brand: string;
+  description: string;
   officialLink: string;
   createdAt: string;
 };
@@ -54,11 +66,12 @@ function AdminGalleryThumb({
   );
 }
 
-export default function AdminGalleryPanel() {
+export default function AdminSubmitPanel() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<GalleryTab>("nailArt");
+  const [tab, setTab] = useState<SubmitTab>("outfit");
   const [nailArts, setNailArts] = useState<NailArtRow[]>([]);
   const [phoneCases, setPhoneCases] = useState<PhoneCaseRow[]>([]);
+  const [perfumes, setPerfumes] = useState<PerfumeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -70,6 +83,13 @@ export default function AdminGalleryPanel() {
   const [phoneModel, setPhoneModel] = useState("");
   const [phoneOfficialLink, setPhoneOfficialLink] = useState("");
   const [phoneSubmitting, setPhoneSubmitting] = useState(false);
+  const [perfumeImageFile, setPerfumeImageFile] = useState<File | null>(null);
+  const [perfumeImagePreview, setPerfumeImagePreview] = useState<string | null>(null);
+  const [perfumeName, setPerfumeName] = useState("");
+  const [perfumeBrand, setPerfumeBrand] = useState("");
+  const [perfumeDescription, setPerfumeDescription] = useState("");
+  const [perfumeOfficialLink, setPerfumeOfficialLink] = useState("");
+  const [perfumeSubmitting, setPerfumeSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const batchInputRef = useRef<HTMLInputElement>(null);
@@ -77,9 +97,10 @@ export default function AdminGalleryPanel() {
   async function loadData() {
     setLoading(true);
     try {
-      const [nailRes, phoneRes] = await Promise.all([
+      const [nailRes, phoneRes, perfumeRes] = await Promise.all([
         fetch("/api/admin/nail-arts"),
         fetch("/api/admin/phone-cases"),
+        fetch("/api/admin/perfumes"),
       ]);
       if (nailRes.ok) {
         const data = await nailRes.json();
@@ -88,6 +109,10 @@ export default function AdminGalleryPanel() {
       if (phoneRes.ok) {
         const data = await phoneRes.json();
         setPhoneCases(data.phoneCases ?? []);
+      }
+      if (perfumeRes.ok) {
+        const data = await perfumeRes.json();
+        setPerfumes(data.perfumes ?? []);
       }
     } finally {
       setLoading(false);
@@ -117,6 +142,18 @@ export default function AdminGalleryPanel() {
       URL.revokeObjectURL(previewUrl);
     };
   }, [phoneImageFile]);
+
+  useEffect(() => {
+    if (!perfumeImageFile) {
+      setPerfumeImagePreview(null);
+      return;
+    }
+    const previewUrl = URL.createObjectURL(perfumeImageFile);
+    setPerfumeImagePreview(previewUrl);
+    return () => {
+      URL.revokeObjectURL(previewUrl);
+    };
+  }, [perfumeImageFile]);
 
   function handlePhoneImageChange(file: File | null) {
     setPhoneImageFile(file);
@@ -295,6 +332,81 @@ export default function AdminGalleryPanel() {
     }
   }
 
+  function handlePerfumeImageChange(file: File | null) {
+    setPerfumeImageFile(file);
+  }
+
+  async function handlePerfumeSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (
+      !perfumeImageFile ||
+      !perfumeName.trim() ||
+      !perfumeBrand.trim() ||
+      !perfumeOfficialLink.trim() ||
+      perfumeSubmitting
+    ) {
+      return;
+    }
+
+    setPerfumeSubmitting(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const { file: prepared } = await prepareImageFile(perfumeImageFile);
+      const compressed = await compressImageForUpload(prepared, "item");
+      const formData = new FormData();
+      formData.append(
+        "file",
+        compressed,
+        perfumeImageFile.name.replace(/\.\w+$/, ".webp")
+      );
+      formData.append("name", perfumeName.trim());
+      formData.append("brand", perfumeBrand.trim());
+      formData.append("description", perfumeDescription.trim());
+      formData.append("officialLink", perfumeOfficialLink.trim());
+
+      const res = await fetch("/api/admin/perfumes/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? t("admin.gallery.uploadFail"));
+
+      setPerfumes((prev) => [data as PerfumeRow, ...prev]);
+      setPerfumeImageFile(null);
+      setPerfumeName("");
+      setPerfumeBrand("");
+      setPerfumeDescription("");
+      setPerfumeOfficialLink("");
+      setMessage(t("admin.gallery.perfumeUploadSuccess"));
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : t("admin.gallery.uploadFail")
+      );
+    } finally {
+      setPerfumeSubmitting(false);
+    }
+  }
+
+  async function handleDeletePerfume(id: string) {
+    if (deletingId) return;
+    setDeletingId(id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/perfumes?id=${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error(t("admin.gallery.deleteFail"));
+      setPerfumes((prev) => prev.filter((row) => row.id !== id));
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : t("admin.gallery.deleteFail")
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   const tabClass = (active: boolean) =>
     `shrink-0 rounded-full px-3 py-1.5 text-xs font-medium ${
       active
@@ -304,12 +416,27 @@ export default function AdminGalleryPanel() {
 
   return (
     <div className="min-w-0">
-      <h1 className="text-xl font-semibold text-neutral-900 sm:text-2xl">
-        {t("admin.gallery.title")}
-      </h1>
-      <p className="mt-1 text-sm text-muted">{t("admin.gallery.desc")}</p>
+      <div className="mb-5">
+        <h1 className="text-xl font-semibold text-neutral-900 sm:text-2xl">
+          {t("submit.adminTitle")}
+        </h1>
+        <p className="mt-1 text-sm text-muted">{t("submit.adminDesc")}</p>
+        <Link
+          href="/my-submissions"
+          className="mt-2 inline-block text-sm text-foreground-secondary underline hover:text-foreground"
+        >
+          {t("mySubmissions.viewHistory")}
+        </Link>
+      </div>
 
-      <div className="-mx-1 mt-5 flex gap-2 overflow-x-auto px-1 pb-1">
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+        <button
+          type="button"
+          onClick={() => setTab("outfit")}
+          className={tabClass(tab === "outfit")}
+        >
+          {t("home.modeOutfit")}
+        </button>
         <button
           type="button"
           onClick={() => setTab("nailArt")}
@@ -324,6 +451,13 @@ export default function AdminGalleryPanel() {
         >
           {t("home.modePhoneCase")}
         </button>
+        <button
+          type="button"
+          onClick={() => setTab("perfume")}
+          className={tabClass(tab === "perfume")}
+        >
+          {t("home.modePerfume")}
+        </button>
       </div>
 
       {message && (
@@ -331,7 +465,13 @@ export default function AdminGalleryPanel() {
       )}
       {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
-      {tab === "nailArt" ? (
+      {tab === "outfit" ? (
+        <section className="mt-6">
+          <Suspense fallback={<p className="text-sm text-muted">{t("loading")}</p>}>
+            <SubmitForm />
+          </Suspense>
+        </section>
+      ) : tab === "nailArt" ? (
         <section className="mt-6 space-y-6">
           <div className="rounded-xl border border-border bg-card p-4 sm:p-5">
             <h2 className="text-base font-semibold text-foreground">
@@ -446,7 +586,7 @@ export default function AdminGalleryPanel() {
             )}
           </div>
         </section>
-      ) : (
+      ) : tab === "phoneCase" ? (
         <section className="mt-6 space-y-6">
           <form
             onSubmit={(e) => void handlePhoneSubmit(e)}
@@ -586,6 +726,176 @@ export default function AdminGalleryPanel() {
                       type="button"
                       disabled={deletingId === row.id}
                       onClick={() => void handleDeletePhoneCase(row.id)}
+                      className="shrink-0 rounded-md border border-border px-3 py-1.5 text-xs text-red-600 hover:bg-subtle disabled:opacity-50"
+                    >
+                      {deletingId === row.id
+                        ? t("admin.processing")
+                        : t("admin.gallery.delete")}
+                    </button>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      ) : (
+        <section className="mt-6 space-y-6">
+          <form
+            onSubmit={(e) => void handlePerfumeSubmit(e)}
+            className="rounded-xl border border-border bg-card p-4 sm:p-5"
+          >
+            <h2 className="text-base font-semibold text-foreground">
+              {t("admin.gallery.perfumeUploadTitle")}
+            </h2>
+            <p className="mt-1 text-sm text-muted">
+              {t("admin.gallery.perfumeUploadDesc")}
+            </p>
+
+            <div className="mt-4 space-y-4">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">
+                  {t("admin.gallery.imageLabel")}
+                </label>
+                <FileInputZone
+                  disabled={perfumeSubmitting}
+                  onChange={handlePerfumeImageChange}
+                />
+                {perfumeImagePreview && (
+                  <div className="relative mt-3 aspect-[3/4] w-full max-w-[12rem] overflow-hidden rounded-md bg-subtle">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={perfumeImagePreview}
+                      alt=""
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">
+                  {t("brand.label")}
+                </label>
+                <input
+                  type="text"
+                  value={perfumeBrand}
+                  onChange={(e) => setPerfumeBrand(e.target.value)}
+                  disabled={perfumeSubmitting}
+                  className="box-border w-full rounded-sm border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none focus:border-neutral-400"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">
+                  {t("admin.gallery.nameLabel")}
+                </label>
+                <input
+                  type="text"
+                  value={perfumeName}
+                  onChange={(e) => setPerfumeName(e.target.value)}
+                  disabled={perfumeSubmitting}
+                  className="box-border w-full rounded-sm border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none focus:border-neutral-400"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">
+                  {t("admin.gallery.descriptionLabel")}
+                </label>
+                <textarea
+                  value={perfumeDescription}
+                  onChange={(e) => setPerfumeDescription(e.target.value)}
+                  disabled={perfumeSubmitting}
+                  rows={3}
+                  className="box-border w-full resize-y rounded-sm border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none focus:border-neutral-400"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">
+                  {t("outfit.officialLink")}
+                </label>
+                <input
+                  type="url"
+                  value={perfumeOfficialLink}
+                  onChange={(e) => setPerfumeOfficialLink(e.target.value)}
+                  disabled={perfumeSubmitting}
+                  placeholder="https://"
+                  className="box-border w-full rounded-sm border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none focus:border-neutral-400"
+                  required
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={
+                perfumeSubmitting ||
+                !perfumeImageFile ||
+                !perfumeName.trim() ||
+                !perfumeBrand.trim() ||
+                !perfumeOfficialLink.trim()
+              }
+              className="mt-5 rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            >
+              {perfumeSubmitting
+                ? t("admin.processing")
+                : t("admin.gallery.uploadPerfume")}
+            </button>
+          </form>
+
+          <div>
+            <h2 className="text-base font-semibold text-foreground">
+              {t("admin.gallery.existingPerfumes", {
+                count: perfumes.length,
+              })}
+            </h2>
+            {loading ? (
+              <p className="mt-4 text-sm text-muted">{t("loading")}</p>
+            ) : perfumes.length === 0 ? (
+              <p className="mt-4 text-sm text-muted">
+                {t("home.noPerfumes")}
+              </p>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {perfumes.map((row) => (
+                  <article
+                    key={row.id}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-card p-3"
+                  >
+                    <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-md bg-subtle">
+                      <AdminGalleryThumb
+                        image={row.image}
+                        alt={`${row.brand} ${row.name}`}
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-foreground">
+                        {row.brand}
+                      </p>
+                      <p className="truncate text-sm text-muted">{row.name}</p>
+                      {row.description ? (
+                        <p className="mt-0.5 line-clamp-2 text-xs text-muted">
+                          {row.description}
+                        </p>
+                      ) : null}
+                      {row.officialLink ? (
+                        <a
+                          href={row.officialLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-0.5 block truncate text-xs text-muted hover:underline"
+                        >
+                          {row.officialLink}
+                        </a>
+                      ) : null}
+                    </div>
+                    <button
+                      type="button"
+                      disabled={deletingId === row.id}
+                      onClick={() => void handleDeletePerfume(row.id)}
                       className="shrink-0 rounded-md border border-border px-3 py-1.5 text-xs text-red-600 hover:bg-subtle disabled:opacity-50"
                     >
                       {deletingId === row.id

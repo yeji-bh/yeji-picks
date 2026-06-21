@@ -1,4 +1,4 @@
-export type HomeViewMode = "outfit" | "item" | "nailArt" | "phoneCase";
+export type HomeViewMode = "outfit" | "item" | "nailArt" | "phoneCase" | "perfume";
 
 const STORAGE_KEY = "home-view-mode";
 const VALID_MODES = new Set<HomeViewMode>([
@@ -6,6 +6,7 @@ const VALID_MODES = new Set<HomeViewMode>([
   "item",
   "nailArt",
   "phoneCase",
+  "perfume",
 ]);
 
 export function getSavedViewMode(): HomeViewMode {
@@ -22,5 +23,5 @@ export function setSavedViewMode(mode: HomeViewMode): void {
 }
 
 export function isGalleryViewMode(mode: HomeViewMode): boolean {
-  return mode === "nailArt" || mode === "phoneCase";
+  return mode === "nailArt" || mode === "phoneCase" || mode === "perfume";
 }

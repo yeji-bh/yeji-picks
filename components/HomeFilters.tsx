@@ -159,12 +159,16 @@ export default function HomeFilters({
         ? "home.itemResultCount"
         : viewMode === "nailArt"
           ? "home.nailArtResultCount"
-          : "home.phoneCaseResultCount";
+          : viewMode === "phoneCase"
+            ? "home.phoneCaseResultCount"
+            : "home.perfumeResultCount";
 
   const searchPlaceholder =
     viewMode === "phoneCase"
       ? t("home.searchPhoneCasePlaceholder")
-      : t("home.searchPlaceholder");
+      : viewMode === "perfume"
+        ? t("home.searchPerfumePlaceholder")
+        : t("home.searchPlaceholder");
 
   return (
     <div className="mb-5 space-y-3">

@@ -8,10 +8,12 @@ import NailArtCard from "./NailArtCard";
 import NailArtMasonry from "./NailArtMasonry";
 import OutfitCard from "./OutfitCard";
 import PhoneCaseCard from "./PhoneCaseCard";
+import PerfumeListItem from "./PerfumeListItem";
 import HomeFilters from "./HomeFilters";
 import type { ItemSummary } from "@/lib/item-summary";
 import type { NailArtSummary } from "@/lib/nail-arts-list";
 import type { PhoneCaseSummary } from "@/lib/phone-cases-list";
+import type { PerfumeSummary } from "@/lib/perfumes-list";
 import {
   getSavedViewMode,
   setSavedViewMode,
@@ -116,7 +118,7 @@ export default function HomeContent({
   );
 
   const feed = useHomeFeed<
-    OutfitSummary | ItemSummary | NailArtSummary | PhoneCaseSummary
+    OutfitSummary | ItemSummary | NailArtSummary | PhoneCaseSummary | PerfumeSummary
   >({
     mode: viewMode,
     sort,
@@ -199,7 +201,9 @@ export default function HomeContent({
           ? "home.noItems"
           : viewMode === "nailArt"
             ? "home.noNailArts"
-            : "home.noPhoneCases";
+            : viewMode === "phoneCase"
+              ? "home.noPhoneCases"
+              : "home.noPerfumes";
 
   const gridClass =
     "grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4";
@@ -240,6 +244,22 @@ export default function HomeContent({
                 />
               ))}
             </NailArtMasonry>
+          ) : viewMode === "perfume" ? (
+            <div className="divide-y divide-border">
+              {(items as PerfumeSummary[]).map((perfume, index) => (
+                <PerfumeListItem
+                  key={perfume.id}
+                  id={perfume.id}
+                  image={perfume.image}
+                  name={perfume.name}
+                  brand={perfume.brand}
+                  description={perfume.description}
+                  officialLink={perfume.officialLink}
+                  priority={isGridLcpCandidate(index)}
+                  imageQuality={72}
+                />
+              ))}
+            </div>
           ) : (
             <div className={gridClass}>
               {viewMode === "outfit"
@@ -269,18 +289,20 @@ export default function HomeContent({
                         imageQuality={72}
                       />
                     ))
-                  : (items as PhoneCaseSummary[]).map((phoneCase, index) => (
-                      <PhoneCaseCard
-                        key={phoneCase.id}
-                        id={phoneCase.id}
-                        image={phoneCase.image}
-                        brand={phoneCase.brand}
-                        model={phoneCase.model}
-                        officialLink={phoneCase.officialLink}
-                        priority={isGridLcpCandidate(index)}
-                        imageQuality={72}
-                      />
-                    ))}
+                  : viewMode === "phoneCase"
+                    ? (items as PhoneCaseSummary[]).map((phoneCase, index) => (
+                        <PhoneCaseCard
+                          key={phoneCase.id}
+                          id={phoneCase.id}
+                          image={phoneCase.image}
+                          brand={phoneCase.brand}
+                          model={phoneCase.model}
+                          officialLink={phoneCase.officialLink}
+                          priority={isGridLcpCandidate(index)}
+                          imageQuality={72}
+                        />
+                      ))
+                    : null}
             </div>
           )}
           {hasMore && (

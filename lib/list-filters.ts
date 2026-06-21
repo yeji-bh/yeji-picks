@@ -37,3 +37,10 @@ export function matchesPhoneCaseQuery(
 ): boolean {
   return matchesListQuery(phoneCase.searchText, query);
 }
+
+export function matchesPerfumeQuery(
+  perfume: { searchText: string },
+  query: string
+): boolean {
+  return matchesListQuery(perfume.searchText, query);
+}

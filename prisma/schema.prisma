@@ -207,3 +207,15 @@ model PhoneCase {
 
   @@map("phone_cases")
 }
+
+model Perfume {
+  id           String   @id @default(cuid())
+  image        String
+  name         String
+  brand        String
+  description  String   @default("")
+  officialLink String   @default("") @map("official_link")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("perfumes")
+}

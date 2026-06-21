@@ -15,7 +15,6 @@ import {
   IconHeart,
   IconBook,
   IconRankings,
-  IconGallery,
   IconMessage,
   IconSubmit,
   IconUser,
@@ -120,11 +119,6 @@ export default function HeaderNav() {
             />
             {isAdmin ? (
               <>
-                <NavItem
-                  href="/admin/gallery"
-                  icon={<IconGallery />}
-                  label={t("nav.galleryAdmin")}
-                />
                 <NavItem
                   href="/feedback"
                   icon={<IconMessage />}
@@ -244,14 +238,6 @@ export default function HeaderNav() {
               </Link>
               {isAdmin ? (
                 <>
-                  <Link
-                    href="/admin/gallery"
-                    onClick={closeMenu}
-                    className={drawerLinkClass}
-                  >
-                    <IconGallery />
-                    <span>{t("nav.galleryAdmin")}</span>
-                  </Link>
                   <Link
                     href="/feedback"
                     onClick={closeMenu}
