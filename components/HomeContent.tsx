@@ -99,12 +99,24 @@ export default function HomeContent({
 }) {
   const { t, i18n } = useTranslation();
   const pendingScrollYRef = useRef(0);
+  const prefsRestoredRef = useRef(false);
 
-  const [viewMode, setViewMode] = useState<HomeViewMode>(() => getSavedViewMode());
-  const [sort, setSort] = useState<HomeSort>(() => getSavedSort(getSavedViewMode()));
-  const [typeFilter, setTypeFilter] = useState(() => getSavedFilters().typeFilter);
-  const [query, setQuery] = useState(() => getSavedFilters().query);
+  const [viewMode, setViewMode] = useState<HomeViewMode>("outfit");
+  const [sort, setSort] = useState<HomeSort>(DEFAULT_OUTFIT_SORT);
+  const [typeFilter, setTypeFilter] = useState("");
+  const [query, setQuery] = useState("");
   const [pageReady] = useState(true);
+
+  useEffect(() => {
+    if (prefsRestoredRef.current) return;
+    prefsRestoredRef.current = true;
+    const savedMode = getSavedViewMode();
+    setViewMode(savedMode);
+    setSort(getSavedSort(savedMode));
+    const saved = getSavedFilters();
+    setTypeFilter(saved.typeFilter);
+    setQuery(saved.query);
+  }, []);
 
   const feedTypeFilter = feedTypeFilterForMode(viewMode, typeFilter);
   const feedQuery = feedQueryForMode(viewMode, query);
