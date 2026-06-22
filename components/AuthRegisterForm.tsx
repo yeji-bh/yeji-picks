@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/components/AuthProvider";
@@ -9,12 +11,11 @@ import { getSubmissionIds } from "@/lib/submissions";
 
 export default function AuthRegisterForm({
   onSuccess,
-  onLoginClick,
 }: {
   onSuccess?: () => void;
-  onLoginClick?: () => void;
 }) {
   const { t } = useTranslation();
+  const router = useRouter();
   const { refresh } = useAuth();
   const [account, setAccount] = useState("");
   const [password, setPassword] = useState("");
@@ -43,7 +44,12 @@ export default function AuthRegisterForm({
 
       clearBrowserDataAfterSync();
       await refresh();
-      onSuccess?.();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push("/my-submissions");
+        router.refresh();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : t("auth.registerFail"));
     } finally {
@@ -84,18 +90,15 @@ export default function AuthRegisterForm({
       >
         {loading ? t("loading") : t("auth.register")}
       </button>
-      {onLoginClick ? (
-        <p className="text-center text-sm text-muted">
-          {t("auth.hasAccount")}{" "}
-          <button
-            type="button"
-            onClick={onLoginClick}
-            className="cursor-pointer text-foreground underline hover:text-foreground-secondary"
-          >
-            {t("auth.login")}
-          </button>
-        </p>
-      ) : null}
+      <p className="text-center text-sm text-muted">
+        {t("auth.hasAccount")}{" "}
+        <Link
+          href="/login"
+          className="text-foreground underline hover:text-foreground-secondary"
+        >
+          {t("auth.login")}
+        </Link>
+      </p>
     </form>
   );
 }

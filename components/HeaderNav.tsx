@@ -20,8 +20,6 @@ import {
   NavItem,
 } from "./NavIcons";
 
-const LoginModal = dynamic(() => import("./LoginModal"), { ssr: false });
-const RegisterModal = dynamic(() => import("./RegisterModal"), { ssr: false });
 const FeedbackModal = dynamic(() => import("./FeedbackModal"), { ssr: false });
 
 function IconMenu({ className = "h-5 w-5" }: { className?: string }) {
@@ -43,8 +41,6 @@ export default function HeaderNav() {
   const { t } = useTranslation();
   const { user, loading, refresh } = useAuth();
   const router = useRouter();
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [registerOpen, setRegisterOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
@@ -136,15 +132,14 @@ export default function HeaderNav() {
                   </button>
                 </div>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => setLoginOpen(true)}
+                <Link
+                  href="/login"
                   className="flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-md bg-subtle px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-neutral-200/60 dark:hover:bg-neutral-200/10"
                   title={t("auth.login")}
                 >
                   <IconUser />
                   <span>{t("auth.login")}</span>
-                </button>
+                </Link>
               ))}
             <ThemeToggle />
             <LanguageSwitcher />
@@ -269,43 +264,19 @@ export default function HeaderNav() {
                     </button>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      closeMenu();
-                      setLoginOpen(true);
-                    }}
-                    className={`${drawerLinkClass} w-full text-left`}
+                  <Link
+                    href="/login"
+                    onClick={closeMenu}
+                    className={drawerLinkClass}
                   >
                     <IconUser />
                     <span>{t("auth.login")}</span>
-                  </button>
+                  </Link>
                 ))}
             </div>
           </aside>
         </div>
       )}
-
-      {loginOpen ? (
-        <LoginModal
-          open={loginOpen}
-          onClose={() => setLoginOpen(false)}
-          onRegisterClick={() => {
-            setLoginOpen(false);
-            setRegisterOpen(true);
-          }}
-        />
-      ) : null}
-      {registerOpen ? (
-        <RegisterModal
-          open={registerOpen}
-          onClose={() => setRegisterOpen(false)}
-          onLoginClick={() => {
-            setRegisterOpen(false);
-            setLoginOpen(true);
-          }}
-        />
-      ) : null}
 
       {!isAdmin && feedbackOpen ? (
         <FeedbackModal

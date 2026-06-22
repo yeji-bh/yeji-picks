@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,11 +11,9 @@ import { getSubmissionIds } from "@/lib/submissions";
 
 export default function AuthLoginForm({
   onSuccess,
-  onRegisterClick,
   showRegisterLink = true,
 }: {
   onSuccess?: () => void;
-  onRegisterClick?: () => void;
   showRegisterLink?: boolean;
 }) {
   const { t } = useTranslation();
@@ -92,22 +91,12 @@ export default function AuthLoginForm({
       {showRegisterLink && (
         <p className="text-center text-sm text-muted">
           {t("auth.noAccount")}{" "}
-          {onRegisterClick ? (
-            <button
-              type="button"
-              onClick={onRegisterClick}
-              className="cursor-pointer text-foreground underline hover:text-foreground-secondary"
-            >
-              {t("auth.register")}
-            </button>
-          ) : (
-            <a
-              href="/register"
-              className="text-foreground underline hover:text-foreground-secondary"
-            >
-              {t("auth.register")}
-            </a>
-          )}
+          <Link
+            href="/register"
+            className="text-foreground underline hover:text-foreground-secondary"
+          >
+            {t("auth.register")}
+          </Link>
         </p>
       )}
     </form>
