@@ -1,8 +1,16 @@
 import "server-only";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+
+import bundledUpdates from "@/content/info-updates.md";
 
 export async function getInfoUpdatesMarkdown(): Promise<string> {
-  const filePath = path.join(process.cwd(), "content", "info-updates.md");
-  return readFile(filePath, "utf8");
+  if (process.env.NODE_ENV === "development") {
+    try {
+      const { readFile } = await import("node:fs/promises");
+      const path = await import("node:path");
+      return readFile(path.join(process.cwd(), "content", "info-updates.md"), "utf8");
+    } catch {
+      /* use bundled copy */
+    }
+  }
+  return bundledUpdates;
 }

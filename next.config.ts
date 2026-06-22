@@ -31,6 +31,15 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 2592000,
   },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.module.rules.push({
+        test: /\.md$/,
+        type: "asset/source",
+      });
+    }
+    return config;
+  },
   env: {
     NEXT_PUBLIC_ASSET_BASE_URL: "https://img.yejipicks.top",
   },

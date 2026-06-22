@@ -45,15 +45,17 @@ export default function SiteFooter() {
             </button>
           )}
         </nav>
-        <div className="flex items-center justify-center gap-2">
-          <span>© {t("siteTitle")} 2026</span>
-          <span>|</span>
-          <span>{t("info.credits.matchingLabel")}</span>
+        <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-0.5 text-[10px] leading-snug sm:gap-2 sm:text-xs">
+          <span className="whitespace-nowrap">© {t("siteTitle")} 2026</span>
+          <span className="text-inactive" aria-hidden>
+            |
+          </span>
+          <span className="text-center">{t("info.credits.matchingLabel")}</span>
           <Link
             href="https://x.com/yejiwears_"
             target="_blank"
             rel="noreferrer"
-            className="text-accent underline-offset-2 hover:underline"
+            className="whitespace-nowrap text-accent underline-offset-2 hover:underline"
           >
             @yejiwears_
           </Link>
