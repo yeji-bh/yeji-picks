@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useAssetUrl } from "@/lib/use-asset-url";
 import { COVER_ASPECT_CLASS } from "@/lib/image";
-import { GRID_IMAGE_QUALITY, GRID_IMAGE_SIZES } from "@/lib/grid-image";
+import { GRID_IMAGE_QUALITY, GRID_IMAGE_SIZES, GRID_IMAGE_WIDTH } from "@/lib/grid-image";
 import { outfitHref } from "@/lib/entity-href";
 import { formatOutfitTitle } from "@/lib/outfit";
 import FavoriteButton from "./FavoriteButton";
@@ -54,6 +54,7 @@ export default function OutfitCard({
             quality={imageQuality}
             className="object-cover"
             sizes={GRID_IMAGE_SIZES}
+            cdnWidth={GRID_IMAGE_WIDTH}
           />
         </div>
       </Link>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useAssetUrl } from "@/lib/use-asset-url";
-import { GRID_IMAGE_QUALITY } from "@/lib/grid-image";
+import { GRID_IMAGE_QUALITY, LIST_THUMB_WIDTH } from "@/lib/grid-image";
 import ProgressiveImage from "./ProgressiveImage";
 
 type PerfumeListItemProps = {
@@ -55,6 +55,7 @@ export default function PerfumeListItem({
           quality={imageQuality}
           className="object-contain"
           sizes="100px"
+          cdnWidth={LIST_THUMB_WIDTH}
         />
       </div>
       <div className="min-w-0 flex-1">

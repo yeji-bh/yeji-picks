@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import AuthProvider from "@/components/AuthProvider";
-import FavoritesProvider from "@/components/FavoritesProvider";
-import DocumentTitle from "@/components/DocumentTitle";
-import ToastProvider from "@/components/ToastProvider";
-import HeaderNav from "@/components/HeaderNav";
 import I18nProvider from "@/components/I18nProvider";
-import SiteFooter from "@/components/SiteFooter";
 import ThemeProvider from "@/components/ThemeProvider";
-import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { getAssetBaseUrl } from "@/lib/asset-base";
 import { localeFontBodyClass } from "@/lib/locale-font-class";
 import {
@@ -20,6 +14,7 @@ import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 const SITE_TITLE = "YEJI Picks";
+const IMAGE_CDN_ORIGIN = "https://img.yejipicks.top";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -50,39 +45,27 @@ export default async function RootLayout({
     headerStore.get("accept-language")
   );
   const fontBodyClass = await localeFontBodyClass(locale);
+  const imageCdnOrigin = assetBase
+    ? new URL(assetBase).origin
+    : IMAGE_CDN_ORIGIN;
 
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <link rel="preconnect" href={imageCdnOrigin} crossOrigin="" />
         {assetBase ? (
-          <>
-            <link rel="preconnect" href={new URL(assetBase).origin} />
-            <link rel="dns-prefetch" href={new URL(assetBase).origin} />
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `window.__ASSET_BASE__=${JSON.stringify(assetBase)}`,
-              }}
-            />
-          </>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.__ASSET_BASE__=${JSON.stringify(assetBase)}`,
+            }}
+          />
         ) : null}
       </head>
       <body className={`${fontBodyClass} flex min-h-dvh flex-col`}>
         <ThemeProvider>
           <I18nProvider initialLocale={locale}>
-            <AuthProvider>
-              <FavoritesProvider>
-                <DocumentTitle />
-                <ToastProvider>
-                  <HeaderNav />
-                  <main className="mx-auto w-full max-w-7xl flex-1 bg-surface px-3 py-4 sm:px-5 sm:py-5 lg:px-6">
-                    {children}
-                  </main>
-                  <SiteFooter />
-                  <ScrollToTopButton />
-                </ToastProvider>
-              </FavoritesProvider>
-            </AuthProvider>
+            <AuthProvider>{children}</AuthProvider>
           </I18nProvider>
         </ThemeProvider>
       </body>

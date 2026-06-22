@@ -493,6 +493,13 @@
     }
   },
   "notFound": "找不到页面",
+  "detailError": {
+    "title": "加载失败",
+    "itemDesc": "单品页面暂时无法显示，请稍后再试。",
+    "outfitDesc": "穿搭页面暂时无法显示，请稍后再试。",
+    "retry": "重试",
+    "backHome": "回首页"
+  },
   "loading": "加载中...",
   "guide": {
     "title": "使用手册",

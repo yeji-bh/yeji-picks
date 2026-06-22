@@ -492,6 +492,13 @@
     }
   },
   "notFound": "找不到頁面",
+  "detailError": {
+    "title": "載入失敗",
+    "itemDesc": "單品頁面暫時無法顯示，請稍後再試。",
+    "outfitDesc": "穿搭頁面暫時無法顯示，請稍後再試。",
+    "retry": "重試",
+    "backHome": "回首頁"
+  },
   "loading": "載入中...",
   "guide": {
     "title": "使用手冊",

@@ -8,6 +8,7 @@ import {
 } from "@/lib/object-storage";
 import type { SubmissionPayload } from "@/lib/types";
 import { isManagedUpload, UPLOAD_PREFIX } from "@/lib/upload-path";
+import { thumbUploadPath } from "@/lib/grid-image-url";
 
 export { isManagedUpload as isLocalUpload };
 
@@ -111,6 +112,18 @@ async function safeRemoveUpload(url: string): Promise<void> {
       .$metadata?.httpStatusCode;
     if (code === "ENOENT" || status === 404) return;
     console.error("[delete-upload] failed:", url, err);
+  }
+
+  if (url.endsWith(".webp") && !url.endsWith("_t.webp")) {
+    try {
+      await removeUploadFile(thumbUploadPath(url));
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      const status = (err as { $metadata?: { httpStatusCode?: number } })
+        .$metadata?.httpStatusCode;
+      if (code === "ENOENT" || status === 404) return;
+      console.error("[delete-upload] thumb failed:", url, err);
+    }
   }
 }
 

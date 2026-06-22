@@ -1,12 +1,18 @@
 "use client";
 
+import {
+  GRID_IMAGE_QUALITY,
+  GRID_IMAGE_WIDTH,
+  LIST_THUMB_WIDTH,
+} from "@/lib/grid-image";
+
 export type ClientImageKind = "cover" | "item" | "feedback";
 
 const OPTIONS: Record<ClientImageKind, { maxEdge: number; quality: number }> =
   {
-    cover: { maxEdge: 1200, quality: 0.82 },
-    item: { maxEdge: 800, quality: 0.78 },
-    feedback: { maxEdge: 640, quality: 0.72 },
+    cover: { maxEdge: 1200, quality: 0.75 },
+    item: { maxEdge: 800, quality: 0.72 },
+    feedback: { maxEdge: 640, quality: 0.7 },
   };
 
 function fitInside(
@@ -24,13 +30,11 @@ function fitInside(
   };
 }
 
-/** Resize and encode as WebP in the browser before upload (keeps Worker bundle small). */
-export async function compressImageForUpload(
+async function encodeWebp(
   file: File,
-  kind: ClientImageKind = "item"
+  maxEdge: number,
+  quality: number
 ): Promise<File> {
-  const { maxEdge, quality } = OPTIONS[kind];
-
   const bitmap = await createImageBitmap(file);
   try {
     if (bitmap.width < 40 || bitmap.height < 40) {
@@ -60,4 +64,27 @@ export async function compressImageForUpload(
   } finally {
     bitmap.close();
   }
+}
+
+/** Resize and encode as WebP in the browser before upload (keeps Worker bundle small). */
+export async function compressImageForUpload(
+  file: File,
+  kind: ClientImageKind = "item"
+): Promise<File> {
+  const { maxEdge, quality } = OPTIONS[kind];
+  return encodeWebp(file, maxEdge, quality);
+}
+
+/** Grid thumbnail for list / card views (~400px wide). */
+export async function compressThumbForUpload(file: File): Promise<File> {
+  return encodeWebp(file, GRID_IMAGE_WIDTH, GRID_IMAGE_QUALITY / 100);
+}
+
+/** Small list-row thumbnail (perfume, etc.). */
+export async function compressListThumbForUpload(file: File): Promise<File> {
+  return encodeWebp(file, LIST_THUMB_WIDTH, GRID_IMAGE_QUALITY / 100);
+}
+
+export function shouldUploadThumb(kind: ClientImageKind): boolean {
+  return kind === "cover" || kind === "item";
 }

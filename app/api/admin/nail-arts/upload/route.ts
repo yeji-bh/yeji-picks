@@ -6,16 +6,6 @@ import { prisma } from "@/lib/db";
 
 const MAX_FILES = 50;
 
-function collectFiles(formData: FormData): File[] {
-  const files: File[] = [];
-  for (const value of formData.values()) {
-    if (value instanceof File && value.size > 0) {
-      files.push(value);
-    }
-  }
-  return files;
-}
-
 export async function POST(request: NextRequest) {
   if (!(await isAdminUser())) {
     return apiError(request, "api.errors.unauthorized", 401);
@@ -25,7 +15,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const formData = await request.formData();
-    const files = collectFiles(formData);
+    const { saveUploadedFile } = await import("@/lib/upload");
+    const files = formData.getAll("files").filter((value): value is File => value instanceof File && value.size > 0);
+    const thumbs = formData
+      .getAll("thumbs")
+      .filter((value): value is File => value instanceof File && value.size > 0);
 
     if (files.length === 0) {
       return apiError(request, "api.errors.selectImage", 400);
@@ -34,9 +28,12 @@ export async function POST(request: NextRequest) {
       return apiError(request, "api.errors.invalidParams", 400);
     }
 
-    const { saveUploadedFile } = await import("@/lib/upload");
-    for (const file of files) {
-      uploadedUrls.push(await saveUploadedFile(file, "item"));
+    for (let index = 0; index < files.length; index += 1) {
+      uploadedUrls.push(
+        await saveUploadedFile(files[index], "item", {
+          thumbFile: thumbs[index],
+        })
+      );
     }
 
     const nailArts = await prisma.$transaction(

@@ -37,9 +37,12 @@ export async function POST(request: NextRequest) {
 
     const kind: ImageKind =
       kindRaw === "cover" ? "cover" : kindRaw === "feedback" ? "feedback" : "item";
+    const thumbRaw = formData.get("thumb");
+    const thumbFile =
+      thumbRaw instanceof File && thumbRaw.size > 0 ? thumbRaw : undefined;
 
     const { saveUploadedFile } = await import("@/lib/upload");
-    const url = await saveUploadedFile(file, kind);
+    const url = await saveUploadedFile(file, kind, { thumbFile });
     return NextResponse.json({ url });
   } catch (err) {
     return uploadErrorResponse(request, err);

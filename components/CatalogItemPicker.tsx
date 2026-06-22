@@ -30,25 +30,43 @@ export default function CatalogItemPicker({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (query.trim().length < 2) {
+    const trimmed = query.trim();
+    if (trimmed.length < 2) {
       setResults([]);
+      setLoading(false);
       return;
     }
 
-    const timer = setTimeout(async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(
-          `/api/catalog-items/search?q=${encodeURIComponent(query.trim())}`
-        );
-        const data = await res.json();
-        if (res.ok) setResults(data.items ?? []);
-      } finally {
-        setLoading(false);
-      }
+    const controller = new AbortController();
+
+    const timer = setTimeout(() => {
+      void (async () => {
+        setLoading(true);
+        try {
+          const res = await fetch(
+            `/api/catalog-items/search?q=${encodeURIComponent(trimmed)}`,
+            { signal: controller.signal }
+          );
+          if (!res.ok) {
+            if (!controller.signal.aborted) setResults([]);
+            return;
+          }
+          const data = await res.json();
+          if (!controller.signal.aborted) {
+            setResults(data.items ?? []);
+          }
+        } catch {
+          if (!controller.signal.aborted) setResults([]);
+        } finally {
+          if (!controller.signal.aborted) setLoading(false);
+        }
+      })();
     }, 300);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [query]);
 
   if (selected) {

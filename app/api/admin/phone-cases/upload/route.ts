@@ -33,7 +33,10 @@ export async function POST(request: NextRequest) {
     }
 
     const { saveUploadedFile } = await import("@/lib/upload");
-    imageUrl = await saveUploadedFile(file, "item");
+    const thumbRaw = formData.get("thumb");
+    const thumbFile =
+      thumbRaw instanceof File && thumbRaw.size > 0 ? thumbRaw : undefined;
+    imageUrl = await saveUploadedFile(file, "item", { thumbFile });
 
     const row = await prisma.phoneCase.create({
       data: { image: imageUrl, brand, model, officialLink },

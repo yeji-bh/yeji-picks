@@ -8,7 +8,7 @@ import { itemHref } from "@/lib/entity-href";
 import FavoriteButton from "./FavoriteButton";
 import ProgressiveImage from "./ProgressiveImage";
 import { saveHomeScrollIfHome } from "@/lib/home-scroll";
-import { GRID_IMAGE_QUALITY, GRID_IMAGE_SIZES } from "@/lib/grid-image";
+import { GRID_IMAGE_QUALITY, GRID_IMAGE_SIZES, GRID_IMAGE_WIDTH } from "@/lib/grid-image";
 
 type ItemCardProps = {
   id: string;
@@ -53,6 +53,7 @@ export default function ItemCard({
             quality={imageQuality}
             className="object-contain"
             sizes={GRID_IMAGE_SIZES}
+            cdnWidth={GRID_IMAGE_WIDTH}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center px-3 text-center text-xs text-muted">

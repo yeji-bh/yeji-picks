@@ -32,8 +32,8 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 2592000,
   },
   env: {
-    NEXT_PUBLIC_ASSET_BASE_URL: "https://pub-fc029cff34fc46ae89e5263ee0ea8417.r2.dev",
-  }
+    NEXT_PUBLIC_ASSET_BASE_URL: "https://img.yejipicks.top",
+  },
 };
 
 export default nextConfig;

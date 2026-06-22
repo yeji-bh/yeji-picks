@@ -492,6 +492,13 @@
     }
   },
   "notFound": "Page not found",
+  "detailError": {
+    "title": "Failed to load",
+    "itemDesc": "This item page is temporarily unavailable. Please try again later.",
+    "outfitDesc": "This outfit page is temporarily unavailable. Please try again later.",
+    "retry": "Retry",
+    "backHome": "Back to home"
+  },
   "loading": "Loading...",
   "guide": {
     "title": "User guide",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useAssetUrl } from "@/lib/use-asset-url";
-import { GRID_IMAGE_QUALITY, GRID_IMAGE_SIZES } from "@/lib/grid-image";
+import { GRID_IMAGE_QUALITY, GRID_IMAGE_SIZES, GRID_IMAGE_WIDTH } from "@/lib/grid-image";
 import FavoriteButton from "./FavoriteButton";
 import ProgressiveImage from "./ProgressiveImage";
 
@@ -38,6 +38,7 @@ export default function PhoneCaseCard({
         quality={imageQuality}
         className="object-contain"
         sizes={GRID_IMAGE_SIZES}
+        cdnWidth={GRID_IMAGE_WIDTH}
       />
     </div>
   );

@@ -1,12 +1,17 @@
 import "server-only";
 
 import { randomUUID } from "crypto";
-import { compressImageBuffer, type ImageKind } from "@/lib/image-compress";
+import {
+  compressImageBuffer,
+  compressThumbBuffer,
+  type ImageKind,
+} from "@/lib/image-compress";
 import { isAllowedUploadMime, resolveUploadMime } from "@/lib/image-mime";
 import {
   isObjectStorageConfigured,
   putUploadObject,
 } from "@/lib/object-storage";
+import { thumbObjectKey } from "@/lib/grid-image-url";
 import { objectKeyToUploadPath } from "@/lib/upload-path";
 import { isCloudflareWorker } from "@/lib/worker-runtime";
 
@@ -18,9 +23,46 @@ async function writeLocalUpload(filename: string, data: Buffer): Promise<void> {
   await writeFile(path.join(uploadDir, filename), data);
 }
 
+function shouldStoreThumb(kind: ImageKind): boolean {
+  return kind === "cover" || kind === "item";
+}
+
+async function storeUploadObject(data: Buffer, filename: string): Promise<void> {
+  if (isCloudflareWorker()) {
+    if (!isObjectStorageConfigured()) {
+      throw new Error("R2 storage is not configured on Worker");
+    }
+    await putUploadObject(data, filename);
+  } else if (isObjectStorageConfigured()) {
+    await putUploadObject(data, filename);
+  } else {
+    await writeLocalUpload(filename, data);
+  }
+}
+
+async function storeThumb(
+  kind: ImageKind,
+  raw: Buffer,
+  filename: string,
+  thumbFile?: File | null
+): Promise<void> {
+  if (!shouldStoreThumb(kind)) return;
+
+  let thumbBuf: Buffer | null = null;
+  if (thumbFile && thumbFile.size > 0) {
+    thumbBuf = Buffer.from(await thumbFile.arrayBuffer());
+  } else if (!isCloudflareWorker()) {
+    thumbBuf = await compressThumbBuffer(raw);
+  }
+
+  if (!thumbBuf) return;
+  await storeUploadObject(thumbBuf, thumbObjectKey(filename));
+}
+
 export async function saveUploadedFile(
   file: File,
-  kind: ImageKind = "item"
+  kind: ImageKind = "item",
+  options?: { thumbFile?: File | null }
 ): Promise<string> {
   const raw = Buffer.from(await file.arrayBuffer());
   const mime = resolveUploadMime(file.type, raw);
@@ -40,16 +82,8 @@ export async function saveUploadedFile(
   const compressed = await compressImageBuffer(raw, kind);
   const filename = `${randomUUID()}.webp`;
 
-  if (isCloudflareWorker()) {
-    if (!isObjectStorageConfigured()) {
-      throw new Error("R2 storage is not configured on Worker");
-    }
-    await putUploadObject(compressed, filename);
-  } else if (isObjectStorageConfigured()) {
-    await putUploadObject(compressed, filename);
-  } else {
-    await writeLocalUpload(filename, compressed);
-  }
+  await storeUploadObject(compressed, filename);
+  await storeThumb(kind, raw, filename, options?.thumbFile);
 
   return objectKeyToUploadPath(filename);
 }

@@ -46,6 +46,8 @@ export default function SiteFooter() {
           )}
         </nav>
         <div className="flex items-center justify-center gap-2">
+          <span>© {t("siteTitle")} 2026</span>
+          <span>|</span>
           <span>{t("info.credits.matchingLabel")}</span>
           <Link
             href="https://x.com/yejiwears_"
@@ -56,7 +58,6 @@ export default function SiteFooter() {
             @yejiwears_
           </Link>
         </div>
-        <p>© {t("siteTitle")} 2026</p>
       </div>
 
       {!isAdmin && (

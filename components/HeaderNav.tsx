@@ -1,14 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "./AuthProvider";
-import FeedbackModal from "./FeedbackModal";
 import LanguageSwitcher from "./LanguageSwitcher";
-import LoginModal from "./LoginModal";
-import RegisterModal from "./RegisterModal";
 import ThemeToggle from "./ThemeToggle";
 import {
   IconBook,
@@ -21,6 +19,10 @@ import {
   IconUser,
   NavItem,
 } from "./NavIcons";
+
+const LoginModal = dynamic(() => import("./LoginModal"), { ssr: false });
+const RegisterModal = dynamic(() => import("./RegisterModal"), { ssr: false });
+const FeedbackModal = dynamic(() => import("./FeedbackModal"), { ssr: false });
 
 function IconMenu({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -284,29 +286,33 @@ export default function HeaderNav() {
         </div>
       )}
 
-      <LoginModal
-        open={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        onRegisterClick={() => {
-          setLoginOpen(false);
-          setRegisterOpen(true);
-        }}
-      />
-      <RegisterModal
-        open={registerOpen}
-        onClose={() => setRegisterOpen(false)}
-        onLoginClick={() => {
-          setRegisterOpen(false);
-          setLoginOpen(true);
-        }}
-      />
+      {loginOpen ? (
+        <LoginModal
+          open={loginOpen}
+          onClose={() => setLoginOpen(false)}
+          onRegisterClick={() => {
+            setLoginOpen(false);
+            setRegisterOpen(true);
+          }}
+        />
+      ) : null}
+      {registerOpen ? (
+        <RegisterModal
+          open={registerOpen}
+          onClose={() => setRegisterOpen(false)}
+          onLoginClick={() => {
+            setRegisterOpen(false);
+            setLoginOpen(true);
+          }}
+        />
+      ) : null}
 
-      {!isAdmin && (
+      {!isAdmin && feedbackOpen ? (
         <FeedbackModal
           open={feedbackOpen}
           onClose={() => setFeedbackOpen(false)}
         />
-      )}
+      ) : null}
     </>
   );
 }

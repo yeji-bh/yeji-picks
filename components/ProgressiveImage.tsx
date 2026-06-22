@@ -3,12 +3,15 @@
 import Image, { type ImageProps } from "next/image";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { assetUrlForAttempt } from "@/lib/asset-url";
+import { gridImageSrc, markGridThumbMissing } from "@/lib/grid-image-url";
 import { cdnImageProps } from "@/lib/remote-image";
 
 type ProgressiveImageProps = ImageProps & {
   showSkeleton?: boolean;
   /** DB upload path for retry fallback (.webp ↔ .png). Omit for absolute URLs. */
   uploadPath?: string | null;
+  /** Load the pre-generated `_t.webp` thumb first; falls back to full image on error. */
+  cdnWidth?: number;
 };
 
 function srcKey(src: ImageProps["src"]): string {
@@ -35,6 +38,7 @@ export default function ProgressiveImage({
   onError,
   src,
   uploadPath,
+  cdnWidth,
   ...props
 }: ProgressiveImageProps) {
   const [attempt, setAttempt] = useState(0);
@@ -43,16 +47,26 @@ export default function ProgressiveImage({
   const loadedSrcRef = useRef<string | null>(null);
   const cdn = cdnImageProps();
   const baseKey = srcKey(src);
+  const maxAttempts = cdnWidth && uploadPath ? MAX_ATTEMPTS + 1 : MAX_ATTEMPTS;
 
   const resolvedSrc = useMemo(() => {
     if (!baseKey) return "";
+
+    if (cdnWidth && uploadPath) {
+      if (attempt === 0) return gridImageSrc(uploadPath, baseKey);
+      if (attempt === 1) return baseKey;
+      return assetUrlForAttempt(uploadPath, attempt - 1);
+    }
+
     if (uploadPath && attempt > 0) {
       return assetUrlForAttempt(uploadPath, attempt);
     }
-    if (attempt === 0) return baseKey;
-    const separator = baseKey.includes("?") ? "&" : "?";
-    return `${baseKey}${separator}r=${attempt}`;
-  }, [baseKey, uploadPath, attempt]);
+    if (attempt > 0) {
+      const separator = baseKey.includes("?") ? "&" : "?";
+      return `${baseKey}${separator}r=${attempt}`;
+    }
+    return baseKey;
+  }, [baseKey, uploadPath, attempt, cdnWidth]);
 
   useEffect(() => {
     setAttempt(0);
@@ -94,11 +108,14 @@ export default function ProgressiveImage({
           onLoad?.(event);
         }}
         onError={(event) => {
+          if (cdnWidth && uploadPath && attempt === 0) {
+            markGridThumbMissing(uploadPath);
+          }
           if (loadedSrcRef.current === baseKey) {
             onError?.(event);
             return;
           }
-          if (attempt + 1 < MAX_ATTEMPTS) {
+          if (attempt + 1 < maxAttempts) {
             setAttempt((value) => value + 1);
             return;
           }

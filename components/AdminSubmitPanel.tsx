@@ -7,7 +7,7 @@ import FileInputZone, { IMAGE_FILE_ACCEPT } from "./FileInputZone";
 import ProgressiveImage from "./ProgressiveImage";
 import SubmitForm from "./SubmitForm";
 import { useAssetUrl } from "@/lib/use-asset-url";
-import { compressImageForUpload } from "@/lib/compress-image-client";
+import { appendCompressedImagePair } from "@/lib/upload-form-images";
 import { prepareImageFile } from "@/lib/prepare-image-file";
 
 type SubmitTab = "outfit" | "nailArt" | "phoneCase" | "perfume";
@@ -205,8 +205,13 @@ export default function AdminSubmitPanel() {
 
         for (const item of chunk) {
           const { file: prepared } = await prepareImageFile(item.file);
-          const blob = await compressImageForUpload(prepared, "item");
-          formData.append("files", blob, item.file.name.replace(/\.\w+$/, ".webp"));
+          await appendCompressedImagePair(
+            formData,
+            prepared,
+            "item",
+            item.file.name,
+            { fileField: "files", thumbField: "thumbs" }
+          );
           compressed += 1;
           setUploadProgress({ done: compressed, total: pendingFiles.length });
         }
@@ -280,12 +285,12 @@ export default function AdminSubmitPanel() {
     setMessage(null);
     try {
       const { file: prepared } = await prepareImageFile(phoneImageFile);
-      const compressed = await compressImageForUpload(prepared, "item");
       const formData = new FormData();
-      formData.append(
-        "file",
-        compressed,
-        phoneImageFile.name.replace(/\.\w+$/, ".webp")
+      await appendCompressedImagePair(
+        formData,
+        prepared,
+        "item",
+        phoneImageFile.name
       );
       formData.append("brand", phoneBrand.trim());
       formData.append("model", phoneModel.trim());
@@ -353,12 +358,12 @@ export default function AdminSubmitPanel() {
     setMessage(null);
     try {
       const { file: prepared } = await prepareImageFile(perfumeImageFile);
-      const compressed = await compressImageForUpload(prepared, "item");
       const formData = new FormData();
-      formData.append(
-        "file",
-        compressed,
-        perfumeImageFile.name.replace(/\.\w+$/, ".webp")
+      await appendCompressedImagePair(
+        formData,
+        prepared,
+        "item",
+        perfumeImageFile.name
       );
       formData.append("name", perfumeName.trim());
       formData.append("brand", perfumeBrand.trim());

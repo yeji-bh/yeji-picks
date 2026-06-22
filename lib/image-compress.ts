@@ -3,9 +3,11 @@ import "server-only";
 const COVER_MAX = 1200;
 const ITEM_MAX = 800;
 const FEEDBACK_MAX = 640;
-const COVER_QUALITY = 82;
-const ITEM_QUALITY = 78;
-const FEEDBACK_QUALITY = 72;
+const THUMB_MAX = 400;
+const COVER_QUALITY = 75;
+const ITEM_QUALITY = 72;
+const FEEDBACK_QUALITY = 70;
+const THUMB_QUALITY = 72;
 
 export type ImageKind = "cover" | "item" | "feedback";
 
@@ -29,10 +31,10 @@ function isUnsupportedImageError(err: unknown): boolean {
 
 async function compressWithSharp(
   buffer: Buffer,
-  kind: ImageKind
+  maxEdge: number,
+  quality: number
 ): Promise<Buffer> {
   const { default: sharp } = await import("sharp");
-  const { maxEdge, quality } = compressOptions(kind);
 
   const image = sharp(buffer, { failOn: "error" }).rotate();
   const metadata = await image.metadata();
@@ -53,6 +55,29 @@ async function compressWithSharp(
     .toBuffer();
 }
 
+async function compressKindWithSharp(
+  buffer: Buffer,
+  kind: ImageKind
+): Promise<Buffer> {
+  const { maxEdge, quality } = compressOptions(kind);
+  return compressWithSharp(buffer, maxEdge, quality);
+}
+
+export async function compressThumbBuffer(buffer: Buffer): Promise<Buffer> {
+  if (isCloudflareWorker()) {
+    return buffer;
+  }
+
+  try {
+    return await compressWithSharp(buffer, THUMB_MAX, THUMB_QUALITY);
+  } catch (err) {
+    if (isUnsupportedImageError(err)) {
+      throw new Error("不支援的圖片格式，請改用 JPG 或 PNG");
+    }
+    throw err;
+  }
+}
+
 export async function compressImageBuffer(
   buffer: Buffer,
   kind: ImageKind = "item"
@@ -63,7 +88,7 @@ export async function compressImageBuffer(
   }
 
   try {
-    return await compressWithSharp(buffer, kind);
+    return await compressKindWithSharp(buffer, kind);
   } catch (err) {
     if (isUnsupportedImageError(err)) {
       throw new Error("不支援的圖片格式，請改用 JPG 或 PNG");
