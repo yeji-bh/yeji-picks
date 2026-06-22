@@ -162,7 +162,7 @@ export default function SelectMenu({
         className={
           variant === "icon"
             ? "flex h-9 w-9 cursor-pointer items-center justify-center rounded-sm border border-border bg-input text-foreground-secondary transition-colors hover:bg-subtle"
-            : `filter-select box-border flex h-10 w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-sm border border-border bg-input px-3 pr-2 text-left text-sm text-foreground outline-none focus:border-neutral-400 ${className}`
+            : `box-border flex h-10 w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-sm border border-border bg-input px-3 py-2 text-left text-sm text-foreground outline-none focus:border-neutral-400 ${className}`
         }
       >
         {variant === "icon" ? (

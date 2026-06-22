@@ -11,17 +11,16 @@ import LoginModal from "./LoginModal";
 import RegisterModal from "./RegisterModal";
 import ThemeToggle from "./ThemeToggle";
 import {
+  IconBook,
   IconClipboard,
   IconHeart,
-  IconBook,
+  IconInfo,
   IconRankings,
   IconMessage,
   IconSubmit,
   IconUser,
   NavItem,
 } from "./NavIcons";
-import { changeLanguage } from "@/lib/i18n/client";
-import { LOCALE_LABELS, LOCALES, type Locale } from "@/lib/i18n/settings";
 
 function IconMenu({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -39,16 +38,15 @@ function IconMenu({ className = "h-5 w-5" }: { className?: string }) {
 }
 
 export default function HeaderNav() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { user, loading, refresh } = useAuth();
   const router = useRouter();
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const isAdmin = user?.role === "admin";
-  const locale = (i18n.language as Locale) || "zh-CN";
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -112,27 +110,13 @@ export default function HeaderNav() {
               icon={<IconRankings />}
               label={t("nav.rankings")}
             />
-            <NavItem
-              href="/guide"
-              icon={<IconBook />}
-              label={t("nav.guide")}
-            />
             {isAdmin ? (
-              <>
-                <NavItem
-                  href="/feedback"
-                  icon={<IconMessage />}
-                  label={t("nav.feedback")}
-                />
-              </>
-            ) : (
               <NavItem
+                href="/feedback"
                 icon={<IconMessage />}
                 label={t("nav.feedback")}
-                onClick={() => setFeedbackOpen(true)}
               />
-            )}
-            <LanguageSwitcher />
+            ) : null}
             {!loading &&
               (user ? (
                 <div className="flex items-center gap-1">
@@ -161,10 +145,12 @@ export default function HeaderNav() {
                 </button>
               ))}
             <ThemeToggle />
+            <LanguageSwitcher />
           </nav>
 
           <div className="flex items-center gap-0.5 lg:hidden">
             <ThemeToggle />
+            <LanguageSwitcher />
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
@@ -232,21 +218,15 @@ export default function HeaderNav() {
                 <IconRankings />
                 <span>{t("nav.rankings")}</span>
               </Link>
-              <Link href="/guide" onClick={closeMenu} className={drawerLinkClass}>
-                <IconBook />
-                <span>{t("nav.guide")}</span>
-              </Link>
               {isAdmin ? (
-                <>
-                  <Link
-                    href="/feedback"
-                    onClick={closeMenu}
-                    className={drawerLinkClass}
-                  >
-                    <IconMessage />
-                    <span>{t("nav.feedback")}</span>
-                  </Link>
-                </>
+                <Link
+                  href="/feedback"
+                  onClick={closeMenu}
+                  className={drawerLinkClass}
+                >
+                  <IconMessage />
+                  <span>{t("nav.feedback")}</span>
+                </Link>
               ) : (
                 <button
                   type="button"
@@ -260,29 +240,14 @@ export default function HeaderNav() {
                   <span>{t("nav.feedback")}</span>
                 </button>
               )}
-
-              <div className="mt-2 border-t border-border pt-3">
-                <p className="mb-2 px-3 text-xs text-muted">{t("nav.language")}</p>
-                <div className="flex flex-col gap-1">
-                  {LOCALES.map((loc) => (
-                    <button
-                      key={loc}
-                      type="button"
-                      onClick={() => {
-                        changeLanguage(loc);
-                        closeMenu();
-                      }}
-                      className={`cursor-pointer rounded-lg px-3 py-2 text-left text-sm hover:bg-subtle ${
-                        locale === loc
-                          ? "font-medium text-foreground"
-                          : "text-foreground-secondary"
-                      }`}
-                    >
-                      {LOCALE_LABELS[loc]}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <Link href="/info" onClick={closeMenu} className={drawerLinkClass}>
+                <IconInfo />
+                <span>{t("nav.info")}</span>
+              </Link>
+              <Link href="/guide" onClick={closeMenu} className={drawerLinkClass}>
+                <IconBook />
+                <span>{t("nav.guide")}</span>
+              </Link>
             </nav>
 
             <div className="border-t border-border p-3">

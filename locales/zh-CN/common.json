@@ -17,7 +17,8 @@
     "language": "语言",
     "menu": "菜单",
     "openMenu": "打开菜单",
-    "closeMenu": "关闭菜单"
+    "closeMenu": "关闭菜单",
+    "info": "关于"
   },
   "theme": {
     "label": "主题",
@@ -569,5 +570,21 @@
         "tip2": "点击太阳／月亮图标可切换亮色与暗色模式，设定会记住你的偏好。"
       }
     }
+  },
+  "info": {
+    "title": "关于",
+    "aboutTitle": "关于",
+    "aboutBody1": "记录 YEJI 的穿搭与单品。",
+    "aboutBody2": "若找不到完全同款，会以相似款或平替补充。",
+    "reportIssueTitle": "回报问题",
+    "reportIssueBody": "若发现信息错误或链接失效，可通过站内回报功能告知，我会再更新修正。",
+    "creditsTitle": "制作与整理",
+    "credits": {
+      "designDevLabel": "网站设计与开发",
+      "xLabel": "X",
+      "xiaohongshuLabel": "小红书",
+      "matchingLabel": "同款信息提供"
+    },
+    "updatesTitle": "更新记录"
   }
 }

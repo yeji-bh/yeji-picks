@@ -17,7 +17,8 @@
     "language": "Language",
     "menu": "Menu",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "info": "Info"
   },
   "theme": {
     "label": "Theme",
@@ -568,5 +569,21 @@
         "tip2": "Toggle light/dark mode with the sun/moon icon; your choice is remembered."
       }
     }
+  },
+  "info": {
+    "title": "Info",
+    "aboutTitle": "About",
+    "aboutBody1": "Documenting YEJI's outfits and items.",
+    "aboutBody2": "If an exact match is unavailable, similar items or dupes may be added as references.",
+    "reportIssueTitle": "Report Issues",
+    "reportIssueBody": "If you find incorrect information or broken links, please use the in-site report feature and I will update it.",
+    "creditsTitle": "Made & Curated By",
+    "credits": {
+      "designDevLabel": "Site design and development",
+      "xLabel": "X",
+      "xiaohongshuLabel": "Xiaohongshu",
+      "matchingLabel": "Item information provided"
+    },
+    "updatesTitle": "Update Log"
   }
 }

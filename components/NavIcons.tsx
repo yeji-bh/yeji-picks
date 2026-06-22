@@ -92,6 +92,23 @@ export function IconBook({ className = "h-[18px] w-[18px]" }: IconProps) {
   );
 }
 
+export function IconInfo({ className = "h-[18px] w-[18px]" }: IconProps) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 10v6" strokeLinecap="round" />
+      <circle cx="12" cy="7.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export function IconGlobe({ className = "h-[18px] w-[18px]" }: IconProps) {
   return (
     <svg
