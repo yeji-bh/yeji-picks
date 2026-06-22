@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "./AuthProvider";
+import HomeGridSkeleton from "./HomeGridSkeleton";
 import OutfitCard from "./OutfitCard";
 import ItemCard from "./ItemCard";
 import NailArtCard from "./NailArtCard";
@@ -50,49 +51,20 @@ const FAVORITE_MODES: HomeViewMode[] = [
   "phoneCase",
 ];
 
-export default function FavoritesContent({
-  initialOutfits = [],
-  initialItems = [],
-  initialNailArts = [],
-  initialPhoneCases = [],
-}: {
-  initialOutfits?: OutfitSummary[];
-  initialItems?: FavoriteItem[];
-  initialNailArts?: FavoriteNailArt[];
-  initialPhoneCases?: FavoritePhoneCase[];
-}) {
+export default function FavoritesContent() {
   const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
   const [viewMode, setViewMode] = useState<HomeViewMode>("outfit");
-  const [outfits, setOutfits] = useState<OutfitSummary[]>(initialOutfits);
-  const [items, setItems] = useState<FavoriteItem[]>(initialItems);
-  const [nailArts, setNailArts] = useState<FavoriteNailArt[]>(initialNailArts);
-  const [phoneCases, setPhoneCases] =
-    useState<FavoritePhoneCase[]>(initialPhoneCases);
-  const [loading, setLoading] = useState(
-    initialOutfits.length === 0 &&
-      initialItems.length === 0 &&
-      initialNailArts.length === 0 &&
-      initialPhoneCases.length === 0
-  );
+  const [outfits, setOutfits] = useState<OutfitSummary[]>([]);
+  const [items, setItems] = useState<FavoriteItem[]>([]);
+  const [nailArts, setNailArts] = useState<FavoriteNailArt[]>([]);
+  const [phoneCases, setPhoneCases] = useState<FavoritePhoneCase[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (authLoading) return;
 
-    if (
-      user &&
-      (initialOutfits.length > 0 ||
-        initialItems.length > 0 ||
-        initialNailArts.length > 0 ||
-        initialPhoneCases.length > 0)
-    ) {
-      setOutfits(initialOutfits);
-      setItems(initialItems);
-      setNailArts(initialNailArts);
-      setPhoneCases(initialPhoneCases);
-      setLoading(false);
-      return;
-    }
+    let cancelled = false;
 
     async function load() {
       setLoading(true);
@@ -133,6 +105,8 @@ export default function FavoritesContent({
           phoneCaseUrl ? fetch(phoneCaseUrl) : null,
         ]);
 
+        if (cancelled) return;
+
         if (outfitRes?.ok) {
           const data = await outfitRes.json();
           setOutfits(data.outfits as OutfitSummary[]);
@@ -161,28 +135,26 @@ export default function FavoritesContent({
           setPhoneCases([]);
         }
       } catch {
+        if (cancelled) return;
         setOutfits([]);
         setItems([]);
         setNailArts([]);
         setPhoneCases([]);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
-    load();
-  }, [
-    user,
-    authLoading,
-    initialOutfits,
-    initialItems,
-    initialNailArts,
-    initialPhoneCases,
-  ]);
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, authLoading]);
 
+  const isLoading = loading || authLoading;
   const totalCount =
     outfits.length + items.length + nailArts.length + phoneCases.length;
-  const isEmpty = totalCount === 0;
+  const isEmpty = !isLoading && totalCount === 0;
   const tabEmpty =
     viewMode === "outfit"
       ? outfits.length === 0
@@ -207,7 +179,7 @@ export default function FavoritesContent({
         <h1 className="text-xl font-semibold text-foreground sm:text-2xl">
           {t("favorites.title")}
         </h1>
-        {!loading && !authLoading && totalCount > 0 && (
+        {!isLoading && totalCount > 0 && (
           <p className="mt-1 text-sm text-muted">
             {t("favorites.totalCount", { count: totalCount })}
           </p>
@@ -224,8 +196,8 @@ export default function FavoritesContent({
         </div>
       )}
 
-      {loading || authLoading ? (
-        <p className="text-sm text-muted">{t("loading")}</p>
+      {isLoading ? (
+        <HomeGridSkeleton />
       ) : isEmpty ? (
         <div className="rounded-xl border border-dashed border-border bg-empty p-8 text-center sm:p-12">
           <p className="text-sm text-muted">{t("favorites.empty")}</p>

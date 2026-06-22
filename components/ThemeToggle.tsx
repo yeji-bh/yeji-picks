@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "./ThemeProvider";
 
@@ -44,15 +45,23 @@ function IconMoon({ className = "h-[18px] w-[18px]" }: { className?: string }) {
 export default function ThemeToggle({ className = "" }: { className?: string }) {
   const { t } = useTranslation();
   const { theme, toggleTheme } = useTheme();
-  const isDark = theme === "dark";
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted && theme === "dark";
+  const label = isDark ? t("theme.switchLight") : t("theme.switchDark");
 
   return (
     <button
       type="button"
       onClick={toggleTheme}
       className={`flex cursor-pointer items-center justify-center rounded-md p-2 text-foreground-secondary transition-colors hover:bg-subtle ${className}`}
-      title={isDark ? t("theme.switchLight") : t("theme.switchDark")}
-      aria-label={isDark ? t("theme.switchLight") : t("theme.switchDark")}
+      title={label}
+      aria-label={label}
+      suppressHydrationWarning
     >
       {isDark ? <IconSun /> : <IconMoon />}
     </button>

@@ -32,10 +32,10 @@ export function localeFromAcceptLanguage(header: string | null): Locale {
 
 export function resolveInitialLocale(
   localeCookie: string | undefined,
-  localeManual: string | undefined,
+  _localeManual: string | undefined,
   acceptLanguage: string | null
 ): Locale {
-  if (isLocale(localeCookie) && localeManual === "1") {
+  if (isLocale(localeCookie)) {
     return localeCookie;
   }
   return localeFromAcceptLanguage(acceptLanguage);

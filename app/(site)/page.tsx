@@ -43,6 +43,7 @@ export default async function HomePage() {
 
   return (
     <HomeContent
+      initialLocale={locale}
       initialData={{
         outfits: {
           items: outfits.outfits,

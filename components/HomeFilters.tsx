@@ -23,7 +23,7 @@ type HomeFiltersProps = {
   typeFilter: string;
   query: string;
   sort: HomeSort;
-  resultCount: number;
+  resultCount?: number;
   onViewModeChange: (mode: HomeViewMode) => void;
   onTypeChange: (type: string) => void;
   onQueryChange: (query: string) => void;
@@ -260,9 +260,13 @@ export default function HomeFilters({
       </div>
 
       <div className="flex items-center justify-between gap-3">
-        <p className="shrink-0 text-sm text-neutral-600">
-          {t(resultCountKey, { count: resultCount })}
-        </p>
+        {resultCount != null ? (
+          <p className="shrink-0 text-sm text-neutral-600">
+            {t(resultCountKey, { count: resultCount })}
+          </p>
+        ) : (
+          <p className="h-5 w-28 shrink-0 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" aria-hidden />
+        )}
         <SelectMenu
           variant="icon"
           align="right"

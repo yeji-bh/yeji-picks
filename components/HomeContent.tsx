@@ -23,6 +23,7 @@ import { getSavedFilters, setSavedFilters } from "@/lib/home-filters";
 import { clearHomeScroll, getHomeScroll, restoreHomeScroll } from "@/lib/home-scroll";
 import { getSavedSort, setSavedSort, type HomeSort } from "@/lib/home-sort";
 import { DEFAULT_OUTFIT_SORT } from "@/lib/outfit-sort";
+import type { Locale } from "@/lib/i18n/settings";
 import { isGridLcpCandidate } from "@/lib/grid-image";
 import {
   buildHomeFeedKey,
@@ -52,13 +53,8 @@ function useSentinelLoadMore(
   resetKey: string
 ) {
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const wasVisibleRef = useRef(false);
   const loadMoreRef = useRef(loadMore);
   loadMoreRef.current = loadMore;
-
-  useEffect(() => {
-    wasVisibleRef.current = false;
-  }, [resetKey]);
 
   useEffect(() => {
     const el = sentinelRef.current;
@@ -66,11 +62,9 @@ function useSentinelLoadMore(
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const visible = entry?.isIntersecting ?? false;
-        if (visible && !wasVisibleRef.current) {
+        if (entry?.isIntersecting) {
           void loadMoreRef.current();
         }
-        wasVisibleRef.current = visible;
       },
       { rootMargin: "200px" }
     );
@@ -93,8 +87,10 @@ function feedTypeFilterForMode(mode: HomeViewMode, typeFilter: string): string {
 }
 
 export default function HomeContent({
+  initialLocale,
   initialData,
 }: {
+  initialLocale: Locale;
   initialData?: InitialData;
 }) {
   const { t, i18n } = useTranslation();
@@ -105,9 +101,10 @@ export default function HomeContent({
   const [sort, setSort] = useState<HomeSort>(DEFAULT_OUTFIT_SORT);
   const [typeFilter, setTypeFilter] = useState("");
   const [query, setQuery] = useState("");
+  const [prefsReady, setPrefsReady] = useState(false);
   const [pageReady] = useState(true);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (prefsRestoredRef.current) return;
     prefsRestoredRef.current = true;
     const savedMode = getSavedViewMode();
@@ -116,6 +113,7 @@ export default function HomeContent({
     const saved = getSavedFilters();
     setTypeFilter(saved.typeFilter);
     setQuery(saved.query);
+    setPrefsReady(true);
   }, []);
 
   const feedTypeFilter = feedTypeFilterForMode(viewMode, typeFilter);
@@ -126,8 +124,15 @@ export default function HomeContent({
     DEFAULT_OUTFIT_SORT,
     "",
     "",
-    i18n.language
+    initialLocale
   );
+
+  const canUseOutfitSeed =
+    prefsReady &&
+    viewMode === "outfit" &&
+    sort === DEFAULT_OUTFIT_SORT &&
+    !feedTypeFilter &&
+    !feedQuery.trim();
 
   const feed = useHomeFeed<
     OutfitSummary | ItemSummary | NailArtSummary | PhoneCaseSummary | PerfumeSummary
@@ -137,15 +142,20 @@ export default function HomeContent({
     typeFilter: feedTypeFilter,
     query: feedQuery,
     locale: i18n.language,
-    seed: initialData?.outfits ?? null,
+    seed: canUseOutfitSeed ? (initialData?.outfits ?? null) : null,
     seedKey: outfitSeedKey,
+    prefsReady,
   });
 
   const { items, total, hasMore, loading, loadingMore, loadMore, feedKey } =
     feed;
 
-  const sentinelEnabled = pageReady && hasMore && !loading;
-  const sentinelRef = useSentinelLoadMore(loadMore, sentinelEnabled, feedKey);
+  const sentinelEnabled = pageReady && hasMore && !loading && !loadingMore;
+  const sentinelRef = useSentinelLoadMore(
+    loadMore,
+    sentinelEnabled,
+    `${feedKey}:${items.length}`
+  );
 
   useEffect(() => {
     if (!pageReady) return;
@@ -172,6 +182,9 @@ export default function HomeContent({
     setViewMode(nextMode);
     setSavedViewMode(nextMode);
     setSort(getSavedSort(nextMode));
+    setTypeFilter("");
+    setQuery("");
+    setSavedFilters({ typeFilter: "", query: "" });
   }, [viewMode]);
 
   const handleSortChange = useCallback(
@@ -202,7 +215,12 @@ export default function HomeContent({
   const isFiltering =
     (viewMode === "outfit" || viewMode === "item") &&
     Boolean(typeFilter || query.trim());
-  const resultCount = total > 0 ? total : items.length;
+  const resultCount =
+    !prefsReady || loading
+      ? undefined
+      : total > 0
+        ? total
+        : items.length;
 
   const emptyMessageKey =
     isFiltering && items.length === 0
@@ -234,7 +252,7 @@ export default function HomeContent({
         onSortChange={handleSortChange}
       />
 
-      {loading ? (
+      {loading || !prefsReady ? (
         <HomeGridSkeleton />
       ) : items.length === 0 ? (
         <>

@@ -2,7 +2,6 @@
 
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import LanguageDetector from "i18next-browser-languagedetector";
 import { LOCALE_MANUAL_COOKIE } from "./resolve-locale";
 import {
   DEFAULT_LOCALE,
@@ -29,24 +28,18 @@ let initialized = false;
 export function initI18n(initialLocale: Locale) {
   if (initialized) return i18n;
 
-  i18n
-    .use(LanguageDetector)
-    .use(initReactI18next)
-    .init({
-      resources,
-      lng: initialLocale,
-      fallbackLng: DEFAULT_LOCALE,
-      supportedLngs: [...LOCALES],
-      ns: [I18N_NAMESPACE],
-      defaultNS: I18N_NAMESPACE,
-      interpolation: { escapeValue: false },
-      detection: {
-        order: ["cookie"],
-        lookupCookie: LOCALE_COOKIE,
-        caches: ["cookie"],
-        cookieMinutes: 525600,
-      },
-    });
+  i18n.use(initReactI18next).init({
+    resources,
+    lng: initialLocale,
+    fallbackLng: DEFAULT_LOCALE,
+    supportedLngs: [...LOCALES],
+    ns: [I18N_NAMESPACE],
+    defaultNS: I18N_NAMESPACE,
+    interpolation: { escapeValue: false },
+    // Locale comes from the server layout only — avoid client LanguageDetector
+    // overriding lng and causing SSR/hydration text mismatches.
+    initAsync: false,
+  });
 
   initialized = true;
   return i18n;

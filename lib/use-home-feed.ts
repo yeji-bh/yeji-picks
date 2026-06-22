@@ -89,6 +89,7 @@ type UseHomeFeedOptions<T extends { id: string }> = {
   locale: string;
   seed?: FeedPage<T> | null;
   seedKey?: string | null;
+  prefsReady?: boolean;
 };
 
 const feedCache = new Map<string, FeedSnapshot>();
@@ -101,6 +102,7 @@ export function useHomeFeed<T extends { id: string }>({
   locale,
   seed,
   seedKey,
+  prefsReady = true,
 }: UseHomeFeedOptions<T>) {
   const [debouncedQuery, setDebouncedQuery] = useState(query);
   useEffect(() => {
@@ -120,15 +122,10 @@ export function useHomeFeed<T extends { id: string }>({
   const fetchGenerationRef = useRef(0);
   const loadingMoreRef = useRef(false);
 
-  const canUseSeed = Boolean(seed && seedKey === feedKey);
-  const [items, setItems] = useState<T[]>(() =>
-    canUseSeed ? dedupeById(seed!.items) : []
-  );
-  const [total, setTotal] = useState(() => (canUseSeed ? seed!.total : 0));
-  const [hasMore, setHasMore] = useState(() =>
-    canUseSeed ? seed!.hasMore : false
-  );
-  const [loading, setLoading] = useState(() => !canUseSeed);
+  const [items, setItems] = useState<T[]>([]);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const itemsRef = useRef<T[]>([]);
   const totalRef = useRef(total);
@@ -189,6 +186,8 @@ export function useHomeFeed<T extends { id: string }>({
   );
 
   useEffect(() => {
+    if (!prefsReady) return;
+
     const cached = cacheRef.current.get(feedKey);
     if (cached) {
       setItems(dedupeById(cached.items as T[]));
@@ -212,9 +211,6 @@ export function useHomeFeed<T extends { id: string }>({
 
     setLoading(true);
     setLoadingMore(false);
-    setItems([]);
-    setTotal(0);
-    setHasMore(false);
 
     void fetchPage(0, false)
       .catch(() => {
@@ -223,7 +219,7 @@ export function useHomeFeed<T extends { id: string }>({
         setHasMore(false);
       })
       .finally(() => setLoading(false));
-  }, [feedKey, fetchPage, seed, seedKey, writeCache]);
+  }, [feedKey, fetchPage, seed, seedKey, writeCache, prefsReady]);
 
   const loadMore = useCallback(async () => {
     if (loadingMoreRef.current || !hasMore) return;
