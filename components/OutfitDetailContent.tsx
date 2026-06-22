@@ -12,6 +12,7 @@ import { cdnImageProps } from "@/lib/remote-image";
 import { syncMainBounds } from "@/lib/main-bounds";
 import { COVER_DETAIL_CLASS } from "@/lib/image";
 import { outfitHref } from "@/lib/entity-href";
+import type { OutfitReviewPage } from "@/lib/outfit-review-types";
 
 type Item = {
   id: string;
@@ -68,6 +69,7 @@ export default function OutfitDetailContent({
   items,
   newer,
   older,
+  initialReviews,
 }: {
   outfitId: string;
   outfitTitle: string;
@@ -76,6 +78,7 @@ export default function OutfitDetailContent({
   items: Item[];
   newer: { id: string; date: string; eventName: string } | null;
   older: { id: string; date: string; eventName: string } | null;
+  initialReviews?: OutfitReviewPage;
 }) {
   const { t } = useTranslation();
   const [zoomOpen, setZoomOpen] = useState(false);
@@ -138,7 +141,10 @@ export default function OutfitDetailContent({
       </div>
 
       <div className="w-full">
-        <OutfitReviewsSection outfitId={outfitId} />
+        <OutfitReviewsSection
+          outfitId={outfitId}
+          initialPage={initialReviews}
+        />
       </div>
 
       <ImageLightbox

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminUser } from "@/lib/auth";
 import { apiError } from "@/lib/api-error";
-import { getOutfitDisplayItems, syncOutfitCatalogItems } from "@/lib/catalog-item";
+import { syncOutfitCatalogItems } from "@/lib/catalog-item";
 import { PUBLIC_API_CACHE } from "@/lib/cache-config";
 import { prisma } from "@/lib/db";
-import { getOutfitNeighborsByCreatedAt } from "@/lib/outfit-nav";
+import { getOutfitDetail } from "@/lib/outfit-detail";
 import { revalidateOutfitCaches } from "@/lib/revalidate-outfits";
 import { validateSubmissionPayload } from "@/lib/submission";
 
@@ -15,39 +15,14 @@ export async function GET(
   try {
     const { id } = await params;
 
-    const outfit = await prisma.outfit.findUnique({ where: { id } });
-    if (!outfit) {
+    const detail = await getOutfitDetail(id);
+    if (!detail) {
       return apiError(request, "api.errors.notFoundOutfit", 404);
     }
 
-    const [items, neighbors] = await Promise.all([
-      getOutfitDisplayItems(id),
-      getOutfitNeighborsByCreatedAt(outfit.createdAt),
-    ]);
-
-    return NextResponse.json(
-      {
-        id: outfit.id,
-        eventName: outfit.eventName,
-        date: outfit.date,
-        mainImage: outfit.mainImage,
-        newer: neighbors.newer,
-        older: neighbors.older,
-        items: items.map((item) => ({
-          id: item.id,
-          type: item.type,
-          brand: item.brand,
-          productName: item.productName,
-          image: item.image,
-          images: item.images,
-          officialLink: item.officialLink,
-          notes: item.notes,
-          linkStatus: item.linkStatus,
-          useCount: item.useCount,
-        })),
-      },
-      { headers: { "Cache-Control": PUBLIC_API_CACHE } }
-    );
+    return NextResponse.json(detail, {
+      headers: { "Cache-Control": PUBLIC_API_CACHE },
+    });
   } catch (err) {
     console.error("[outfit GET]", err);
     return apiError(request, "api.errors.loadFailed", 500);

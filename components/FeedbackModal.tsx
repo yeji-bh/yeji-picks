@@ -182,7 +182,7 @@ export default function FeedbackModal({
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="ui-btn-secondary flex-1 px-4 py-2.5 text-sm"
+              className="ui-btn-secondary rounded-lg flex-1 px-4 py-2.5 text-sm"
             >
               {t("feedback.close")}
             </button>

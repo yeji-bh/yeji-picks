@@ -4,43 +4,44 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "./AuthProvider";
 import { useToast } from "./ToastProvider";
-import type { OutfitReviewSummary } from "@/lib/outfit-review-types";
+import type { OutfitReviewPage, OutfitReviewSummary } from "@/lib/outfit-review-types";
 import { dupeGuestHeaders } from "@/lib/dupe-guest-id";
 import { formatReviewTime } from "@/lib/review-time";
 
 const PAGE_SIZE = 3;
 const MAX_CONTENT = 100;
 
-type ReviewPageData = {
-  reviews: OutfitReviewSummary[];
-  total: number;
-  hasMore: boolean;
-  mine: OutfitReviewSummary | null;
-};
+type ReviewPageData = OutfitReviewPage;
 
 export default function OutfitReviewsSection({
   outfitId,
+  initialPage,
 }: {
   outfitId: string;
+  initialPage?: OutfitReviewPage;
 }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { showToast } = useToast();
-  const [reviews, setReviews] = useState<OutfitReviewSummary[]>([]);
-  const [mine, setMine] = useState<OutfitReviewSummary | null>(null);
-  const [total, setTotal] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState<OutfitReviewSummary[]>(
+    initialPage?.reviews ?? []
+  );
+  const [mine, setMine] = useState<OutfitReviewSummary | null>(
+    initialPage?.mine ?? null
+  );
+  const [total, setTotal] = useState(initialPage?.total ?? 0);
+  const [hasMore, setHasMore] = useState(initialPage?.hasMore ?? false);
+  const [loading, setLoading] = useState(!initialPage);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [nickname, setNickname] = useState("");
   const [content, setContent] = useState("");
-  const offsetRef = useRef(0);
+  const offsetRef = useRef(initialPage?.reviews.length ?? 0);
   const loadingMoreRef = useRef(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const canAutoLoadRef = useRef(false);
+  const canAutoLoadRef = useRef(!!initialPage);
 
   const applyPage = useCallback((data: ReviewPageData, append: boolean) => {
     if (append) {
@@ -61,41 +62,58 @@ export default function OutfitReviewsSection({
   }, []);
 
   const fetchPage = useCallback(
-    async (offset: number, append: boolean) => {
+    async (offset: number, append: boolean, signal?: AbortSignal) => {
       const res = await fetch(
         `/api/outfits/${outfitId}/reviews?offset=${offset}&limit=${PAGE_SIZE}`,
-        { headers: dupeGuestHeaders() }
+        { headers: dupeGuestHeaders(), signal }
       );
       const data = (await res.json()) as ReviewPageData & { error?: string };
-      if (!res.ok) throw new Error(data.error ?? t("review.loadFail"));
+      if (!res.ok) throw new Error(data.error ?? "review load failed");
       applyPage(data, append);
       return data;
     },
-    [applyPage, outfitId, t]
+    [applyPage, outfitId]
   );
 
-  const loadInitial = useCallback(async () => {
-    setLoading(true);
-    setLoadError(null);
-    offsetRef.current = 0;
-    canAutoLoadRef.current = false;
-    try {
-      await fetchPage(0, false);
-    } catch (err) {
-      setLoadError(
-        err instanceof Error ? err.message : t("review.loadFail")
-      );
-    } finally {
+  const loadInitial = useCallback(
+    async (signal?: AbortSignal) => {
+      setLoading(true);
+      setLoadError(null);
+      offsetRef.current = 0;
+      canAutoLoadRef.current = false;
+      try {
+        await fetchPage(0, false, signal);
+      } catch (err) {
+        if (signal?.aborted) return;
+        setLoadError(err instanceof Error ? err.message : "review load failed");
+      } finally {
+        if (signal?.aborted) return;
+        setLoading(false);
+        requestAnimationFrame(() => {
+          canAutoLoadRef.current = true;
+        });
+      }
+    },
+    [fetchPage]
+  );
+
+  useEffect(() => {
+    if (initialPage) {
+      applyPage(initialPage, false);
+      offsetRef.current = initialPage.reviews.length;
       setLoading(false);
+      setLoadError(null);
+      canAutoLoadRef.current = false;
       requestAnimationFrame(() => {
         canAutoLoadRef.current = true;
       });
+      return;
     }
-  }, [fetchPage, t]);
 
-  useEffect(() => {
-    loadInitial();
-  }, [loadInitial]);
+    const controller = new AbortController();
+    void loadInitial(controller.signal);
+    return () => controller.abort();
+  }, [outfitId, initialPage, applyPage, loadInitial]);
 
   const loadMore = useCallback(async () => {
     if (loadingMoreRef.current || !hasMore || loading) return;
@@ -285,7 +303,7 @@ export default function OutfitReviewsSection({
       {loading ? (
         <p className="mt-6 text-sm text-muted">{t("loading")}</p>
       ) : loadError ? (
-        <p className="mt-6 text-sm text-red-600">{loadError}</p>
+        <p className="mt-6 text-sm text-red-600">{t("review.loadFail")}</p>
       ) : total === 0 ? (
         <p className="mt-6 text-sm text-muted">{t("review.empty")}</p>
       ) : (

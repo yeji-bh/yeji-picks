@@ -14,15 +14,17 @@ import { dupeGuestHeaders } from "@/lib/dupe-guest-id";
 
 export default function ItemDupesSection({
   catalogItemId,
+  initialDupes,
 }: {
   catalogItemId: string;
+  initialDupes?: DupeSummary[];
 }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   const { showToast } = useToast();
-  const [dupes, setDupes] = useState<DupeSummary[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [dupes, setDupes] = useState<DupeSummary[]>(initialDupes ?? []);
+  const [loading, setLoading] = useState(initialDupes == null);
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -34,24 +36,35 @@ export default function ItemDupesSection({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState("");
 
-  const loadDupes = useCallback(async () => {
+  const loadDupes = useCallback(async (signal?: AbortSignal) => {
     try {
       const res = await fetch(`/api/catalog-items/${catalogItemId}/dupes`, {
         headers: dupeGuestHeaders(),
+        signal,
       });
       if (!res.ok) return;
       const data = (await res.json()) as { dupes?: DupeSummary[] };
       setDupes(data.dupes ?? []);
     } catch {
+      if (signal?.aborted) return;
       /* ignore */
     } finally {
+      if (signal?.aborted) return;
       setLoading(false);
     }
   }, [catalogItemId]);
 
   useEffect(() => {
-    loadDupes();
-  }, [loadDupes]);
+    if (initialDupes != null) {
+      setDupes(initialDupes);
+      setLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    void loadDupes(controller.signal);
+    return () => controller.abort();
+  }, [catalogItemId, initialDupes, loadDupes]);
 
   useEffect(() => {
     if (!formOpen) resetForm();

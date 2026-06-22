@@ -6,7 +6,7 @@ import { brandKeyForStore } from "@/lib/brand";
 import { resolveCanonicalBrand } from "@/lib/brand-db";
 import { PUBLIC_API_CACHE } from "@/lib/cache-config";
 import { prisma } from "@/lib/db";
-import { formatOutfitTitle } from "@/lib/outfit";
+import { getItemDetail, itemDetailToApiJson } from "@/lib/item-detail";
 import { normalizeItemType } from "@/lib/types";
 
 export async function GET(
@@ -16,45 +16,14 @@ export async function GET(
   try {
     const { id } = await params;
 
-    const item = await prisma.catalogItem.findUnique({
-      where: { id },
-      include: {
-        images: { orderBy: { sortOrder: "asc" } },
-        placements: {
-          include: {
-            outfit: {
-              select: {
-                id: true,
-                mainImage: true,
-                eventName: true,
-                date: true,
-              },
-            },
-          },
-          orderBy: { outfit: { date: "desc" } },
-        },
-      },
-    });
-
-    if (!item) {
+    const detail = await getItemDetail(id);
+    if (!detail) {
       return apiError(request, "api.errors.notFoundItem", 404);
     }
 
-    const display = toDisplayItem(item);
-
-    return NextResponse.json(
-      {
-        ...display,
-        outfits: item.placements.map((row) => ({
-          id: row.outfit.id,
-          mainImage: row.outfit.mainImage,
-          eventName: row.outfit.eventName,
-          title: formatOutfitTitle(row.outfit.date, row.outfit.eventName),
-          date: row.outfit.date,
-        })),
-      },
-      { headers: { "Cache-Control": PUBLIC_API_CACHE } }
-    );
+    return NextResponse.json(itemDetailToApiJson(detail), {
+      headers: { "Cache-Control": PUBLIC_API_CACHE },
+    });
   } catch (err) {
     console.error("[catalog-item GET]", err);
     return apiError(request, "api.errors.loadFailed", 500);

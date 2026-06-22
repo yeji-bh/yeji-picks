@@ -5,86 +5,38 @@ import Link from "next/link";
 import OutfitDetailContent from "./OutfitDetailContent";
 import OutfitDetailHeader from "./OutfitDetailHeader";
 import { formatOutfitTitle } from "@/lib/outfit";
+import type { OutfitDetailData } from "@/lib/outfit-detail";
+import type { OutfitReviewPage } from "@/lib/outfit-review-types";
 
-type OutfitDetailData = {
-  id: string;
-  eventName: string;
-  date: string;
-  mainImage: string;
-  items: {
-    id: string;
-    type: string;
-    brand: string | null;
-    productName: string | null;
-    image: string | null;
-    officialLink: string | null;
-    notes: string | null;
-    linkStatus: string | null;
-    useCount: number;
-  }[];
-  newer: { id: string; date: string; eventName: string } | null;
-  older: { id: string; date: string; eventName: string } | null;
-};
-
-function OutfitDetailSkeleton() {
-  return (
-    <div className="min-w-0 animate-pulse">
-      <div className="border-b border-border pb-3">
-        <div className="h-6 w-40 rounded bg-neutral-200" />
-      </div>
-      <div className="mt-4 grid gap-8 lg:mt-6 lg:grid-cols-[clamp(260px,24.74vw,475px)_minmax(0,1fr)] lg:gap-x-12">
-        <div className="aspect-[3/4] w-full rounded-xl bg-neutral-200 lg:max-w-[475px]" />
-        <div className="space-y-4">
-          <div className="h-5 w-12 rounded bg-neutral-200" />
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="flex gap-4">
-              <div className="h-24 w-24 shrink-0 rounded-lg bg-neutral-200" />
-              <div className="flex-1 space-y-2 py-2">
-                <div className="h-3 w-16 rounded bg-neutral-200" />
-                <div className="h-4 w-32 rounded bg-neutral-200" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function OutfitDetailLoader({ outfitId }: { outfitId: string }) {
-  const [data, setData] = useState<OutfitDetailData | null>(null);
+export default function OutfitDetailLoader({
+  outfitId,
+  initialData,
+  initialReviews,
+}: {
+  outfitId: string;
+  initialData: OutfitDetailData;
+  initialReviews?: OutfitReviewPage;
+}) {
+  const [data, setData] = useState(initialData);
   const [error, setError] = useState(false);
 
-  const load = useCallback(async () => {
+  useEffect(() => {
+    setData(initialData);
+    setError(false);
+  }, [initialData, outfitId]);
+
+  const retry = useCallback(async () => {
     setError(false);
     try {
       const res = await fetch(`/api/outfits/${outfitId}`);
       if (!res.ok) throw new Error("load failed");
       const json = (await res.json()) as OutfitDetailData & { error?: string };
-      setData({
-        ...json,
-        items: (json.items ?? []).map((item) => ({
-          id: item.id,
-          type: item.type,
-          brand: item.brand || null,
-          productName: item.productName || null,
-          image: item.image || null,
-          officialLink: item.officialLink || null,
-          notes: item.notes || null,
-          linkStatus: item.linkStatus ?? null,
-          useCount: item.useCount ?? 0,
-        })),
-      });
+      setData(json);
     } catch {
-      setData(null);
+      setData(initialData);
       setError(true);
     }
-  }, [outfitId]);
-
-  useEffect(() => {
-    setData(null);
-    void load();
-  }, [load]);
+  }, [initialData, outfitId]);
 
   if (error) {
     return (
@@ -94,7 +46,7 @@ export default function OutfitDetailLoader({ outfitId }: { outfitId: string }) {
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <button
             type="button"
-            onClick={() => void load()}
+            onClick={() => void retry()}
             className="cursor-pointer rounded-lg border border-border bg-white px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
           >
             重試
@@ -110,8 +62,6 @@ export default function OutfitDetailLoader({ outfitId }: { outfitId: string }) {
     );
   }
 
-  if (!data) return <OutfitDetailSkeleton />;
-
   const title = formatOutfitTitle(data.date, data.eventName);
 
   return (
@@ -125,6 +75,7 @@ export default function OutfitDetailLoader({ outfitId }: { outfitId: string }) {
         items={data.items}
         newer={data.newer}
         older={data.older}
+        initialReviews={initialReviews}
       />
     </div>
   );
