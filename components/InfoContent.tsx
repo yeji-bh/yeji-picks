@@ -37,16 +37,9 @@ export default function InfoContent({
         <div className="mt-3 space-y-4 text-sm leading-relaxed text-foreground-secondary sm:text-base">
           <div>
             <p className="font-medium text-foreground">{t("info.credits.designDevLabel")}</p>
-            <p>{t("info.credits.xLabel")}：
-              <Link href="https://x.com/pjdklwlnnx" target="_blank" className="text-accent underline-offset-2 hover:underline">
-                @pjdklwlnnx
-              </Link>
-            </p>
-            <p>{t("info.credits.xiaohongshuLabel")}：
-              <Link href="https://xhslink.com/m/ARTD8ztdqmq" target="_blank" className="text-accent underline-offset-2 hover:underline">
-                @夏日碎片
-              </Link>
-            </p>
+            <Link href="https://xhslink.com/m/ARTD8ztdqmq" target="_blank" className="text-accent underline-offset-2 hover:underline">
+              @夏日碎片
+            </Link>
           </div>
           <div>
             <p className="font-medium text-foreground">
