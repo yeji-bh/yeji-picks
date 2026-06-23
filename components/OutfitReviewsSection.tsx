@@ -235,51 +235,51 @@ export default function OutfitReviewsSection({
   const showForm = !mine || editingId != null;
 
   return (
-    <section className="mt-10 w-full">
+    <section className="mt-8 w-full sm:mt-10">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-bold text-foreground">
+        <h2 className="text-base font-bold text-foreground sm:text-lg">
           {t("review.sectionTitle")}
         </h2>
-        <span className="text-sm text-muted">
+        <span className="text-xs text-muted sm:text-sm">
           {t("review.count", { count: total })}
         </span>
       </div>
 
       {showForm ? (
-        <form onSubmit={handleSubmit} className="mt-5">
+        <form onSubmit={handleSubmit} className="mt-4 sm:mt-5">
           {!user ? (
             <input
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               placeholder={t("review.nicknamePlaceholder")}
               maxLength={32}
-              className="ui-field mb-3 px-3 py-2 text-sm"
+              className="ui-field mb-2.5 px-2.5 py-1.5 text-xs sm:mb-3 sm:px-3 sm:py-2 sm:text-sm"
             />
           ) : (
-            <p className="mb-3 text-sm text-muted">
+            <p className="mb-2.5 text-xs text-muted sm:mb-3 sm:text-sm">
               {t("review.loggedInAs", { name: user.account })}
             </p>
           )}
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            rows={5}
+            rows={4}
             maxLength={MAX_CONTENT}
             required
             placeholder={t("review.contentPlaceholder")}
-            className="ui-field w-full resize-none px-4 py-3 text-sm"
+            className="ui-field w-full resize-none px-3 py-2 text-xs sm:px-4 sm:py-3 sm:text-sm"
           />
-          <div className="mt-2 flex items-center justify-between gap-3">
-            <span className="text-sm text-muted">
+          <div className="mt-1.5 flex items-center justify-between gap-2 sm:mt-2 sm:gap-3">
+            <span className="text-xs text-muted sm:text-sm">
               {content.length}/{MAX_CONTENT}
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {editingId ? (
                 <button
                   type="button"
                   onClick={resetForm}
                   disabled={submitting}
-                  className="ui-btn-secondary cursor-pointer px-4 py-2 text-sm"
+                  className="ui-btn-secondary cursor-pointer px-2.5 py-1 text-xs sm:px-4 sm:py-2 sm:text-sm"
                 >
                   {t("review.cancelEdit")}
                 </button>
@@ -287,7 +287,7 @@ export default function OutfitReviewsSection({
               <button
                 type="submit"
                 disabled={submitting}
-                className="ui-btn-primary cursor-pointer px-5 py-2.5 text-sm"
+                className="ui-btn-primary cursor-pointer px-3 py-1.5 text-xs sm:px-5 sm:py-2.5 sm:text-sm"
               >
                 {submitting
                   ? t("review.submitting")
@@ -301,46 +301,46 @@ export default function OutfitReviewsSection({
       ) : null}
 
       {loading ? (
-        <p className="mt-6 text-sm text-muted">{t("loading")}</p>
+        <p className="mt-5 text-xs text-muted sm:mt-6 sm:text-sm">{t("loading")}</p>
       ) : loadError ? (
-        <p className="mt-6 text-sm text-red-600">{t("review.loadFail")}</p>
+        <p className="mt-5 text-xs text-red-600 sm:mt-6 sm:text-sm">{t("review.loadFail")}</p>
       ) : total === 0 ? (
-        <p className="mt-6 text-sm text-muted">{t("review.empty")}</p>
+        <p className="mt-5 text-xs text-muted sm:mt-6 sm:text-sm">{t("review.empty")}</p>
       ) : (
         <>
-          <ul className="mt-8 space-y-7">
+          <ul className="mt-6 space-y-5 sm:mt-8 sm:space-y-7">
             {displayReviews.map((review) => (
-              <li key={review.id} className="space-y-2">
-                <div className="flex items-start justify-between gap-3">
+              <li key={review.id} className="space-y-1.5 sm:space-y-2">
+                <div className="flex items-start justify-between gap-2 sm:gap-3">
                   <div className="min-w-0">
-                    <span className="text-sm font-semibold text-foreground">
+                    <span className="text-xs font-semibold text-foreground sm:text-sm">
                       {review.isAnonymous
                         ? t("review.anonymous")
                         : review.authorName}
                     </span>
                     {review.isMine ? (
-                      <span className="ml-2 text-sm text-muted">
+                      <span className="ml-1.5 text-xs text-muted sm:ml-2 sm:text-sm">
                         {t("review.mine")}
                       </span>
                     ) : null}
                   </div>
                   <time
                     dateTime={review.createdAt}
-                    className="shrink-0 text-sm text-muted"
+                    className="shrink-0 text-xs text-muted sm:text-sm"
                   >
                     {formatReviewTime(review.createdAt, t)}
                   </time>
                 </div>
-                <p className="break-words text-sm leading-relaxed text-foreground-secondary">
+                <p className="break-words text-xs leading-relaxed text-foreground-secondary sm:text-sm">
                   {review.content}
                 </p>
                 {review.canEdit || review.canDelete ? (
-                  <div className="flex items-center gap-3 pt-0.5">
+                  <div className="flex items-center gap-2 pt-0.5 sm:gap-3">
                     {review.canEdit ? (
                       <button
                         type="button"
                         onClick={() => startEdit(review)}
-                        className="cursor-pointer text-sm text-muted hover:text-foreground hover:underline"
+                        className="cursor-pointer text-xs text-muted hover:text-foreground hover:underline sm:text-sm"
                       >
                         {t("review.edit")}
                       </button>
@@ -349,7 +349,7 @@ export default function OutfitReviewsSection({
                       <button
                         type="button"
                         onClick={() => handleDelete(review.id)}
-                        className="cursor-pointer text-sm text-muted hover:text-red-600 hover:underline"
+                        className="cursor-pointer text-xs text-muted hover:text-red-600 hover:underline sm:text-sm"
                       >
                         {t("review.delete")}
                       </button>
@@ -362,15 +362,15 @@ export default function OutfitReviewsSection({
           {hasMore ? (
             <div
               ref={sentinelRef}
-              className="mt-6 flex flex-col items-center gap-2 py-2"
+              className="mt-5 flex flex-col items-center gap-2 py-2 sm:mt-6"
             >
               {loadingMore ? (
-                <p className="text-sm text-muted">{t("loading")}</p>
+                <p className="text-xs text-muted sm:text-sm">{t("loading")}</p>
               ) : (
                 <button
                   type="button"
                   onClick={() => void loadMore()}
-                  className="cursor-pointer text-sm text-muted underline-offset-2 hover:text-foreground hover:underline"
+                  className="cursor-pointer text-xs text-muted underline-offset-2 hover:text-foreground hover:underline sm:text-sm"
                 >
                   {t("review.loadMore")}
                 </button>

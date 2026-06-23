@@ -30,7 +30,6 @@ const LEGACY_TYPE_MAP = {
   bag_clutch: "bag",
   bag_other: "bag",
   top_tshirt: "top_shortsleeve",
-  top_vest: "top_sleeveless",
   top_blazer: "top_other",
   shoes_loafers: "shoes_other",
   jewelry: "jewelry_other",

@@ -1,6 +1,6 @@
-/** Normalized key for case-insensitive brand matching. */
+/** Normalized key for case-insensitive brand matching (spaces ignored). */
 export function brandKey(brand: string): string {
-  return brand.trim().toLowerCase();
+  return brand.trim().toLowerCase().replace(/\s+/g, "");
 }
 
 export function brandKeyForStore(brand: string | null | undefined): string | null {
