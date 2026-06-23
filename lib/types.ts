@@ -13,7 +13,7 @@ export const ITEM_TYPE_GROUPS = {
     "top_other",
   ],
   bottom: ["bottom_pants", "bottom_shorts", "bottom_skirt", "bottom_other"],
-  onepiece: ["onepiece_jumpsuit", "onepiece_dress"],
+  onepiece: ["onepiece_jumpsuit", "onepiece_dress", "onepiece_other"],
   shoes: [
     "shoes_sneakers",
     "shoes_boots",
