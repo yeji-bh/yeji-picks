@@ -4,6 +4,7 @@ import AuthProvider from "@/components/AuthProvider";
 import I18nProvider from "@/components/I18nProvider";
 import ThemeProvider from "@/components/ThemeProvider";
 import { getAssetBaseUrl } from "@/lib/asset-base";
+import { buildSiteMetadata } from "@/lib/site-metadata";
 import { localeFontBodyClass } from "@/lib/locale-font-class";
 import {
   LOCALE_MANUAL_COOKIE,
@@ -13,13 +14,18 @@ import { LOCALE_COOKIE } from "@/lib/i18n/settings";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
-const SITE_TITLE = "YEJI Picks";
 const IMAGE_CDN_ORIGIN = "https://img.yejipicks.top";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const cookieStore = await cookies();
+  const headerStore = await headers();
+  const locale = resolveInitialLocale(
+    cookieStore.get(LOCALE_COOKIE)?.value,
+    cookieStore.get(LOCALE_MANUAL_COOKIE)?.value,
+    headerStore.get("accept-language")
+  );
   return {
-    title: SITE_TITLE,
-    description: "YEJI Picks — outfits & favorites",
+    ...buildSiteMetadata(locale),
     icons: {
       icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
     },

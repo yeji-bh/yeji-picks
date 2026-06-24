@@ -23,7 +23,7 @@ export default function OutfitDetailHeader({
   return (
     <header>
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <h1 className="min-w-0 flex-1 break-words text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl lg:text-[28px]">
+        <h1 className="min-w-0 flex-1 break-words text-base font-semibold tracking-tight text-neutral-900 sm:text-lg lg:text-xl">
           {displayTitle}
         </h1>
         <div className="flex shrink-0 items-center gap-1">

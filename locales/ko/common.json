@@ -1,5 +1,9 @@
 {
   "siteTitle": "YEJI Picks",
+  "artistName": "황예지",
+  "siteMetaTitle": "YEJI Picks | 예지 동일 제품",
+  "siteMetaDescription": "ITZY 황예지의 코디, 아이템, 브랜드 및 대체 상품 아카이브 — YEJI Picks",
+  "siteMetaKeywords": "황예지,예지,YEJI,ITZY,코디,아이템,패션,대체상품",
   "common": {
     "backToTop": "맨 위로",
     "chooseFile": "파일 선택"
@@ -578,7 +582,7 @@
       "settings": {
         "title": "언어와 테마",
         "desc": "언어와 밝기/어두운 테마를 취향에 맞게 설정할 수 있습니다.",
-        "tip1": "언어 메뉴에서 繁體中文, 简体中文, English, 한국어를 선택할 수 있습니다.",
+        "tip1": "언어 메뉴에서 繁體中文, 简体中文, English, 한국어, 日本語를 선택할 수 있습니다.",
         "tip2": "해/달 아이콘으로 밝은/어두운 모드를 전환하며, 설정은 저장됩니다."
       }
     }

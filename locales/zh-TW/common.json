@@ -1,5 +1,9 @@
 {
   "siteTitle": "YEJI Picks",
+  "artistName": "黃禮志",
+  "siteMetaTitle": "YEJI Picks | 黃禮志同款",
+  "siteMetaDescription": "收錄 ITZY 黃禮志的穿搭、單品、品牌與平替資訊 — YEJI Picks",
+  "siteMetaKeywords": "黃禮志,YEJI,ITZY,禮志,穿搭,單品,同款,平替",
   "common": {
     "backToTop": "返回頂部",
     "chooseFile": "選擇檔案"
@@ -578,7 +582,7 @@
       "settings": {
         "title": "語言與主題",
         "desc": "網站支援多語系與深／淺色主題，可依個人喜好調整。",
-        "tip1": "導覽列的語言選單可切換繁體中文、简体中文、English、한국어。",
+        "tip1": "導覽列的語言選單可切換繁體中文、简体中文、English、한국어、日本語。",
         "tip2": "點擊太陽／月亮圖示可切換亮色與暗色模式，設定會記住你的偏好。"
       }
     }

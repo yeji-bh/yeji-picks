@@ -15,12 +15,14 @@ import zhCN from "@/locales/zh-CN/common.json";
 import zhTW from "@/locales/zh-TW/common.json";
 import en from "@/locales/en/common.json";
 import ko from "@/locales/ko/common.json";
+import ja from "@/locales/ja/common.json";
 
 const resources = {
   "zh-CN": { [I18N_NAMESPACE]: zhCN },
   "zh-TW": { [I18N_NAMESPACE]: zhTW },
   en: { [I18N_NAMESPACE]: en },
   ko: { [I18N_NAMESPACE]: ko },
+  ja: { [I18N_NAMESPACE]: ja },
 };
 
 let initialized = false;

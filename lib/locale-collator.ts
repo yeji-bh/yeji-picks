@@ -9,6 +9,8 @@ export function collatorLocale(locale: Locale): string {
       return "zh-Hant";
     case "ko":
       return "ko";
+    case "ja":
+      return "ja";
     case "en":
     default:
       return "en";

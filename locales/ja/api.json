@@ -1,0 +1,75 @@
+{
+  "api": {
+    "fields": {
+      "eventName": "イベント名",
+      "brand": "ブランド",
+      "productName": "アイテム名",
+      "notes": "メモ",
+      "nickname": "ニックネーム",
+      "reviewContent": "レビュー",
+      "feedback": "フィードバック",
+      "report": "報告",
+      "dupeBrand": "ブランド",
+      "dupeLink": "購入リンク",
+      "content": "内容"
+    },
+    "moderation": {
+      "empty": "{{field}}は必須です",
+      "tooLong": "{{field}}が長すぎます",
+      "blocked": "{{field}}に許可されていない内容が含まれています",
+      "invalid": "{{field}}の形式が正しくありません"
+    },
+    "account": {
+      "length": "アカウントの長さが無効です",
+      "blocked": "このアカウント名は使用できません",
+      "allDigits": "アカウントを数字のみにすることはできません",
+      "format": "アカウントは 2〜32 文字（英数字、_、.、-、または CJK）である必要があります",
+      "inUse": "このアカウントはすでに使用されています"
+    },
+    "errors": {
+      "unauthorized": "認証されていません",
+      "notLoggedIn": "ログインしていません",
+      "forbidden": "アクセスが拒否されました",
+      "notFoundOutfit": "コーデが見つかりません",
+      "notFoundItem": "アイテムが見つかりません",
+      "notFoundReview": "レビューが見つかりません",
+      "notFoundSubmission": "投稿が見つかりません",
+      "notFoundDupe": "類似品が見つかりません",
+      "loadFailed": "読み込みに失敗しました",
+      "updateFailed": "更新に失敗しました",
+      "deleteFailed": "削除に失敗しました",
+      "submitFailed": "投稿に失敗しました",
+      "invalidPayload": "データ形式が無効です",
+      "invalidParams": "パラメータが無効です",
+      "invalidAction": "無効な操作です",
+      "invalidVote": "無効な投票です",
+      "invalidRequest": "無効なリクエストです",
+      "voterUnidentified": "投票者を識別できませんでした",
+      "actorUnidentified": "ユーザーを識別できませんでした",
+      "voteFailed": "投票に失敗しました",
+      "operationFailed": "操作に失敗しました",
+      "storageNotConfigured": "画像ストレージが設定されていません。管理者にお問い合わせください。",
+      "selectImage": "画像を選択してください",
+      "enterFeedback": "フィードバックを入力してください",
+      "enterBrand": "ブランドを入力してください",
+      "enterLink": "購入リンクを入力してください",
+      "missingIds": "ids パラメータがありません",
+      "registerFailed": "登録に失敗しました",
+      "loginFailed": "ログインに失敗しました",
+      "loginCredentials": "アカウントまたはパスワードが正しくありません",
+      "loginRequired": "アカウントとパスワードを入力してください",
+      "passwordMin": "パスワードは 6 文字以上である必要があります",
+      "submissionProcessed": "この投稿はすでに処理されています",
+      "submissionApprovedEdit": "承認済みの投稿は管理者が編集する必要があります",
+      "submissionNotEditable": "この投稿はこれ以上編集できません",
+      "reviewAlreadyExists": "すでにこのコーデのレビューを投稿しています — 既存のレビューを編集してください",
+      "translationFailed": "翻訳に失敗しました",
+      "review": {
+        "contentRequired": "レビューを入力してください",
+        "contentMax": "レビューは最大 {{max}} 文字までです",
+        "nicknameInvalid": "ニックネームの形式が無効です",
+        "nicknameMax": "ニックネームは最大 {{max}} 文字までです"
+      }
+    }
+  }
+}

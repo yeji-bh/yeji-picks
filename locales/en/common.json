@@ -1,5 +1,9 @@
 {
   "siteTitle": "YEJI Picks",
+  "artistName": "Yeji",
+  "siteMetaTitle": "YEJI Picks",
+  "siteMetaDescription": "Archive of ITZY Yeji's outfits, items, brands and dupes — YEJI Picks",
+  "siteMetaKeywords": "Yeji,Hwang Yeji,YEJI,ITZY,outfits,fashion,items,dupes",
   "common": {
     "backToTop": "Back to top",
     "chooseFile": "Choose file"
@@ -578,7 +582,7 @@
       "settings": {
         "title": "Language & theme",
         "desc": "Customize language and light/dark appearance.",
-        "tip1": "Use the language menu for 繁體中文, 简体中文, English, or 한국어.",
+        "tip1": "Use the language menu for 繁體中文, 简体中文, English, 한국어, or 日本語.",
         "tip2": "Toggle light/dark mode with the sun/moon icon; your choice is remembered."
       }
     }
