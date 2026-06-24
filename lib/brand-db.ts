@@ -30,11 +30,27 @@ export async function resolveCanonicalBrand(
 }
 
 export async function getBrandPageData(key: string) {
-  const rows = await prisma.catalogItem.findMany({
+  let rows = await prisma.catalogItem.findMany({
     where: { brandKey: key },
     include: brandItemInclude,
     orderBy: [{ useCount: "desc" }, { createdAt: "desc" }],
   });
+
+  if (rows.length === 0) {
+    // Compatibility fallback for legacy rows where brand_key still keeps spaces.
+    const matchedIds = await prisma.$queryRaw<{ id: string }[]>`
+      SELECT id
+      FROM catalog_items
+      WHERE REPLACE(LOWER(TRIM(COALESCE(brand_key, brand, ''))), ' ', '') = ${key}
+    `;
+    if (matchedIds.length > 0) {
+      rows = await prisma.catalogItem.findMany({
+        where: { id: { in: matchedIds.map((row) => row.id) } },
+        include: brandItemInclude,
+        orderBy: [{ useCount: "desc" }, { createdAt: "desc" }],
+      });
+    }
+  }
 
   if (rows.length === 0) return null;
 
