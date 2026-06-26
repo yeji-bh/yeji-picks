@@ -18,15 +18,22 @@ export default function NailArtCard({
   image,
   priority = false,
 }: NailArtCardProps) {
-  const imageSrc = useAssetUrl(image);
+  const trimmedImage = image?.trim() ?? "";
+  const imageSrc = useAssetUrl(trimmedImage);
   const [attempt, setAttempt] = useState(0);
+  const [failed, setFailed] = useState(!trimmedImage);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const src = useMemo(() => {
-    if (attempt === 0) return gridImageSrc(image, imageSrc);
+    if (!trimmedImage) return "";
+    if (attempt === 0) return gridImageSrc(trimmedImage, imageSrc);
     if (attempt === 1) return imageSrc;
-    return assetUrlForAttempt(image, attempt - 1);
-  }, [attempt, image, imageSrc]);
+    return assetUrlForAttempt(trimmedImage, attempt - 1);
+  }, [attempt, trimmedImage, imageSrc]);
+
+  if (failed || !trimmedImage) {
+    return null;
+  }
 
   return (
     <>
@@ -44,8 +51,12 @@ export default function NailArtCard({
             loading={priority ? "eager" : "lazy"}
             decoding="async"
             onError={() => {
-              if (attempt === 0) markGridThumbMissing(image);
-              if (attempt + 1 < 4) setAttempt((value) => value + 1);
+              if (attempt === 0) markGridThumbMissing(trimmedImage);
+              if (attempt + 1 < 4) {
+                setAttempt((value) => value + 1);
+              } else {
+                setFailed(true);
+              }
             }}
           />
         </button>

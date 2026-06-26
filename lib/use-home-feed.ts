@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { HomeViewMode } from "@/lib/home-view-mode";
 import type { HomeSort } from "@/lib/home-sort";
 import { HOME_PAGE_SIZE } from "@/lib/home-pagination";
@@ -125,7 +125,7 @@ export function useHomeFeed<T extends { id: string }>({
   const [items, setItems] = useState<T[]>([]);
   const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [readyKey, setReadyKey] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const itemsRef = useRef<T[]>([]);
   const totalRef = useRef(total);
@@ -185,7 +185,7 @@ export function useHomeFeed<T extends { id: string }>({
     [mode, sort, typeFilter, debouncedQuery, locale, writeCache]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!prefsReady) return;
 
     const cached = cacheRef.current.get(feedKey);
@@ -193,7 +193,7 @@ export function useHomeFeed<T extends { id: string }>({
       setItems(dedupeById(cached.items as T[]));
       setTotal(cached.total);
       setHasMore(cached.hasMore);
-      setLoading(false);
+      setReadyKey(feedKey);
       setLoadingMore(false);
       return;
     }
@@ -204,12 +204,15 @@ export function useHomeFeed<T extends { id: string }>({
       setTotal(seed.total);
       setHasMore(seed.hasMore);
       writeCache(seededItems, seed.total, seed.hasMore);
-      setLoading(false);
+      setReadyKey(feedKey);
       setLoadingMore(false);
       return;
     }
 
-    setLoading(true);
+    setItems([]);
+    setTotal(0);
+    setHasMore(false);
+    setReadyKey(null);
     setLoadingMore(false);
 
     void fetchPage(0, false)
@@ -218,11 +221,11 @@ export function useHomeFeed<T extends { id: string }>({
         setTotal(0);
         setHasMore(false);
       })
-      .finally(() => setLoading(false));
+      .finally(() => setReadyKey(feedKey));
   }, [feedKey, fetchPage, seed, seedKey, writeCache, prefsReady]);
 
   const loadMore = useCallback(async () => {
-    if (loadingMoreRef.current || !hasMore) return;
+    if (loadingMoreRef.current || !hasMore || readyKey !== feedKey) return;
     loadingMoreRef.current = true;
     setLoadingMore(true);
     try {
@@ -233,13 +236,18 @@ export function useHomeFeed<T extends { id: string }>({
       loadingMoreRef.current = false;
       setLoadingMore(false);
     }
-  }, [fetchPage, hasMore]);
+  }, [fetchPage, feedKey, hasMore, readyKey]);
+
+  const isReady = prefsReady && readyKey === feedKey;
+  const safeItems = isReady ? items : [];
+  const safeTotal = isReady ? total : 0;
+  const safeHasMore = isReady ? hasMore : false;
 
   return {
-    items,
-    total,
-    hasMore,
-    loading,
+    items: safeItems,
+    total: safeTotal,
+    hasMore: safeHasMore,
+    loading: !isReady,
     loadingMore,
     loadMore,
     feedKey,

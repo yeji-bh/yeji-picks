@@ -4,41 +4,60 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import OutfitDetailContent from "./OutfitDetailContent";
 import OutfitDetailHeader from "./OutfitDetailHeader";
+import OutfitDetailSkeleton from "./OutfitDetailSkeleton";
 import { formatOutfitTitle } from "@/lib/outfit";
 import type { OutfitDetailData } from "@/lib/outfit-detail";
-import type { OutfitReviewPage } from "@/lib/outfit-review-types";
+import {
+  getOutfitDetailCache,
+  prefetchOutfitDetail,
+  setOutfitDetailCache,
+} from "@/lib/outfit-detail-cache";
 
-export default function OutfitDetailLoader({
-  outfitId,
-  initialData,
-  initialReviews,
-}: {
-  outfitId: string;
-  initialData: OutfitDetailData;
-  initialReviews?: OutfitReviewPage;
-}) {
-  const [data, setData] = useState(initialData);
+export default function OutfitDetailLoader({ outfitId }: { outfitId: string }) {
+  const cached = getOutfitDetailCache(outfitId);
+  const [data, setData] = useState<OutfitDetailData | null>(cached ?? null);
+  const [loading, setLoading] = useState(!cached);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
-    setData(initialData);
-    setError(false);
-  }, [initialData, outfitId]);
-
-  const retry = useCallback(async () => {
-    setError(false);
-    try {
-      const res = await fetch(`/api/outfits/${outfitId}`);
-      if (!res.ok) throw new Error("load failed");
-      const json = (await res.json()) as OutfitDetailData & { error?: string };
-      setData(json);
-    } catch {
-      setData(initialData);
-      setError(true);
+  const load = useCallback(async () => {
+    const hit = getOutfitDetailCache(outfitId);
+    if (hit) {
+      setData(hit);
+      setLoading(false);
+      setError(false);
+      return;
     }
-  }, [initialData, outfitId]);
 
-  if (error) {
+    setLoading(true);
+    setError(false);
+    const result = await prefetchOutfitDetail(outfitId);
+    if (result) {
+      setData(result);
+      setLoading(false);
+      return;
+    }
+
+    setData(null);
+    setLoading(false);
+    setError(true);
+  }, [outfitId]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  useEffect(() => {
+    if (!data) return;
+    setOutfitDetailCache(data.id, data);
+    if (data.newer) void prefetchOutfitDetail(data.newer.id);
+    if (data.older) void prefetchOutfitDetail(data.older.id);
+  }, [data]);
+
+  if (loading) {
+    return <OutfitDetailSkeleton />;
+  }
+
+  if (error || !data) {
     return (
       <div className="py-16 text-center">
         <h1 className="text-lg font-semibold text-neutral-900">載入失敗</h1>
@@ -46,7 +65,7 @@ export default function OutfitDetailLoader({
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <button
             type="button"
-            onClick={() => void retry()}
+            onClick={() => void load()}
             className="cursor-pointer rounded-lg border border-border bg-white px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
           >
             重試
@@ -75,7 +94,6 @@ export default function OutfitDetailLoader({
         items={data.items}
         newer={data.newer}
         older={data.older}
-        initialReviews={initialReviews}
       />
     </div>
   );

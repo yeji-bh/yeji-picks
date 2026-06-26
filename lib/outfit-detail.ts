@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { getOutfitDisplayItems } from "@/lib/catalog-item";
 import { prisma } from "@/lib/db";
 import { getOutfitNeighborsByCreatedAt } from "@/lib/outfit-nav";
@@ -25,9 +26,9 @@ export type OutfitDetailData = {
   older: { id: string; date: string; eventName: string } | null;
 };
 
-export async function getOutfitDetail(
+export const getOutfitDetail = cache(async (
   id: string
-): Promise<OutfitDetailData | null> {
+): Promise<OutfitDetailData | null> => {
   const outfit = await prisma.outfit.findUnique({ where: { id } });
   if (!outfit) return null;
 
@@ -56,4 +57,4 @@ export async function getOutfitDetail(
       useCount: item.useCount,
     })),
   };
-}
+});

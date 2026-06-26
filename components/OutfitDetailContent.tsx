@@ -12,7 +12,7 @@ import { cdnImageProps } from "@/lib/remote-image";
 import { syncMainBounds } from "@/lib/main-bounds";
 import { COVER_DETAIL_CLASS } from "@/lib/image";
 import { outfitHref } from "@/lib/entity-href";
-import type { OutfitReviewPage } from "@/lib/outfit-review-types";
+import { prefetchOutfitDetail } from "@/lib/outfit-detail-cache";
 
 type Item = {
   id: string;
@@ -30,17 +30,23 @@ function NavArrow({
   href,
   label,
   direction,
+  neighborId,
   className = "",
 }: {
   href: string;
   label: string;
   direction: "prev" | "next";
+  neighborId: string;
   className?: string;
 }) {
+  const prefetchNeighbor = () => void prefetchOutfitDetail(neighborId);
+
   return (
     <Link
       href={href}
       aria-label={label}
+      onMouseEnter={prefetchNeighbor}
+      onFocus={prefetchNeighbor}
       className={`fixed top-1/2 z-40 hidden -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-border bg-white p-2.5 text-neutral-600 shadow-md transition-colors hover:border-neutral-300 hover:bg-neutral-50 hover:text-neutral-900 lg:flex ${className}`}
     >
       <svg
@@ -69,7 +75,6 @@ export default function OutfitDetailContent({
   items,
   newer,
   older,
-  initialReviews,
 }: {
   outfitId: string;
   outfitTitle: string;
@@ -78,7 +83,6 @@ export default function OutfitDetailContent({
   items: Item[];
   newer: { id: string; date: string; eventName: string } | null;
   older: { id: string; date: string; eventName: string } | null;
-  initialReviews?: OutfitReviewPage;
 }) {
   const { t } = useTranslation();
   const [zoomOpen, setZoomOpen] = useState(false);
@@ -97,6 +101,7 @@ export default function OutfitDetailContent({
           href={outfitHref(newer)}
           label={t("outfit.newer")}
           direction="prev"
+          neighborId={newer.id}
           className="left-3 xl:left-6"
         />
       )}
@@ -105,6 +110,7 @@ export default function OutfitDetailContent({
           href={outfitHref(older)}
           label={t("outfit.older")}
           direction="next"
+          neighborId={older.id}
           className="right-3 xl:right-6"
         />
       )}
@@ -141,10 +147,7 @@ export default function OutfitDetailContent({
       </div>
 
       <div className="w-full">
-        <OutfitReviewsSection
-          outfitId={outfitId}
-          initialPage={initialReviews}
-        />
+        <OutfitReviewsSection outfitId={outfitId} />
       </div>
 
       <ImageLightbox

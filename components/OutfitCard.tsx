@@ -11,6 +11,7 @@ import FavoriteButton from "./FavoriteButton";
 import ItemTypeBadges from "./ItemTypeBadges";
 import ProgressiveImage from "./ProgressiveImage";
 import { saveHomeScrollIfHome } from "@/lib/home-scroll";
+import { prefetchOutfitDetail } from "@/lib/outfit-detail-cache";
 
 type OutfitCardProps = {
   id: string;
@@ -36,12 +37,16 @@ export default function OutfitCard({
   const displayTitle = title === "outfit" ? t("outfit.unnamed") : title;
   const mainImageSrc = useAssetUrl(mainImage);
 
+  const detailHref = outfitHref({ id, date, eventName });
+  const prefetchDetail = () => void prefetchOutfitDetail(id);
+
   return (
     <article className="group min-w-0">
       <Link
-        href={outfitHref({ id, date, eventName })}
-        prefetch={false}
+        href={detailHref}
         onClick={() => saveHomeScrollIfHome()}
+        onMouseEnter={prefetchDetail}
+        onFocus={prefetchDetail}
         className="block"
       >
         <div className={`relative w-full overflow-hidden bg-cover ${COVER_ASPECT_CLASS}`}>
@@ -61,9 +66,10 @@ export default function OutfitCard({
       <div className="mt-2.5 space-y-1.5">
         <div className="flex items-start justify-between gap-2">
           <Link
-            href={outfitHref({ id, date, eventName })}
-            prefetch={false}
+            href={detailHref}
             onClick={() => saveHomeScrollIfHome()}
+            onMouseEnter={prefetchDetail}
+            onFocus={prefetchDetail}
             className="min-w-0 flex-1 break-words text-base font-semibold leading-snug text-neutral-900 line-clamp-2 hover:underline sm:text-[17px]"
           >
             {displayTitle}

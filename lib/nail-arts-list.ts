@@ -18,6 +18,33 @@ export type NailArtListResult = {
   hasMore: boolean;
 };
 
+type NailArtRow = {
+  id: string;
+  image: string;
+  createdAt: Date;
+};
+
+/** Keep one row per image URL (newest wins) to avoid inflated counts from duplicate uploads. */
+function dedupeNailArtsByImage(
+  rows: NailArtRow[],
+  sort: GallerySort
+): NailArtRow[] {
+  const ordered =
+    sort === "oldest"
+      ? [...rows].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+      : [...rows].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+  const seen = new Set<string>();
+  const unique: NailArtRow[] = [];
+  for (const row of ordered) {
+    const key = row.image.trim();
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    unique.push(row);
+  }
+  return unique;
+}
+
 export async function getNailArtList(
   limit: number,
   offset: number,
@@ -25,31 +52,28 @@ export async function getNailArtList(
   withTotal: boolean
 ): Promise<NailArtListResult> {
   const parsedSort = parseGallerySort(sort);
-  const orderBy =
-    parsedSort === "oldest" ? { createdAt: "asc" as const } : { createdAt: "desc" as const };
 
-  const [rows, total] = await Promise.all([
-    prisma.nailArt.findMany({
-      select: { id: true, image: true },
-      orderBy,
-      take: limit,
-      skip: offset,
-    }),
-    withTotal ? prisma.nailArt.count() : Promise.resolve(0),
-  ]);
+  const rows = await prisma.nailArt.findMany({
+    select: { id: true, image: true, createdAt: true },
+  });
+
+  const unique = dedupeNailArtsByImage(rows, parsedSort);
+  const page = unique.slice(offset, offset + limit);
+  const nailArts = page.map(({ id, image }) => ({ id, image }));
 
   if (!withTotal) {
     return {
-      nailArts: rows,
-      total: offset + rows.length + (rows.length === limit ? 1 : 0),
-      hasMore: rows.length === limit,
+      nailArts,
+      total: offset + nailArts.length + (nailArts.length === limit ? 1 : 0),
+      hasMore: nailArts.length === limit,
     };
   }
 
+  const total = unique.length;
   return {
-    nailArts: rows,
+    nailArts,
     total,
-    hasMore: offset + rows.length < total,
+    hasMore: offset + nailArts.length < total,
   };
 }
 

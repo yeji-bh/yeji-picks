@@ -1,10 +1,27 @@
-import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import OutfitDetailLoader from "@/components/OutfitDetailLoader";
-import { getCurrentUser } from "@/lib/auth";
-import { voterKeyForUser } from "@/lib/dupe-actor";
-import { getOutfitDetail } from "@/lib/outfit-detail";
-import { getOutfitReviewPage, REVIEW_PAGE_SIZE } from "@/lib/outfit-review";
+import { prisma } from "@/lib/db";
+import { formatOutfitTitle } from "@/lib/outfit";
 import { extractIdFromSlugParam } from "@/lib/slug";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const resolvedId = extractIdFromSlugParam(id);
+  const outfit = await prisma.outfit.findUnique({
+    where: { id: resolvedId },
+    select: { eventName: true, date: true },
+  });
+
+  if (!outfit) {
+    return { title: "Outfit" };
+  }
+
+  return { title: formatOutfitTitle(outfit.date, outfit.eventName) };
+}
 
 export default async function OutfitDetailPage({
   params,
@@ -14,28 +31,5 @@ export default async function OutfitDetailPage({
   const { id } = await params;
   const resolvedId = extractIdFromSlugParam(id);
 
-  const [detail, user] = await Promise.all([
-    getOutfitDetail(resolvedId),
-    getCurrentUser(),
-  ]);
-
-  if (!detail) notFound();
-
-  const initialReviews = user
-    ? await getOutfitReviewPage(
-        resolvedId,
-        voterKeyForUser(user.id),
-        user.role === "admin",
-        0,
-        REVIEW_PAGE_SIZE
-      )
-    : undefined;
-
-  return (
-    <OutfitDetailLoader
-      outfitId={resolvedId}
-      initialData={detail}
-      initialReviews={initialReviews}
-    />
-  );
+  return <OutfitDetailLoader outfitId={resolvedId} />;
 }
