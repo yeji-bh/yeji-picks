@@ -270,7 +270,7 @@
     "bag": "包包",
     "jewelry": "飾品",
     "eyewear": "眼鏡",
-    "other": "其他"
+    "accessory": "配件"
   },
   "itemTypes": {
     "hat_cap": "棒球帽／鴨舌帽",
@@ -292,11 +292,13 @@
     "bottom_other": "其他下身",
     "onepiece_jumpsuit": "連身褲",
     "onepiece_dress": "連身裙",
+    "onepiece_swimsuit": "連身泳衣",
     "onepiece_other": "其他連身",
     "shoes_sneakers": "球鞋／運動鞋",
     "shoes_boots": "靴子",
     "shoes_heels": "高跟鞋",
     "shoes_sandals": "涼鞋／拖鞋",
+    "shoes_flats": "平底鞋",
     "shoes_other": "其他鞋子",
     "bag": "包包",
     "jewelry_necklace": "項鍊",
@@ -306,8 +308,11 @@
     "jewelry_other": "其他飾品",
     "eyewear_glasses": "眼鏡",
     "eyewear_sunglasses": "太陽眼鏡",
-    "other": "其他",
-    "accessory": "配件"
+    "accessory_belt": "腰帶",
+    "accessory_hair": "髮飾",
+    "accessory_socks": "襪子",
+    "accessory_earphones": "耳機",
+    "accessory_other": "其他配件"
   },
   "report": {
     "button": "問題回報",

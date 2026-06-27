@@ -270,7 +270,7 @@
     "bag": "Bag",
     "jewelry": "Jewelry",
     "eyewear": "Eyewear",
-    "other": "Other"
+    "accessory": "Accessories"
   },
   "itemTypes": {
     "hat_cap": "Cap",
@@ -292,11 +292,13 @@
     "bottom_other": "Other bottom",
     "onepiece_jumpsuit": "Jumpsuit",
     "onepiece_dress": "Dress",
+    "onepiece_swimsuit": "Swimsuit",
     "onepiece_other": "Other one-piece",
     "shoes_sneakers": "Sneakers",
     "shoes_boots": "Boots",
     "shoes_heels": "Heels",
     "shoes_sandals": "Sandals/flip-flops",
+    "shoes_flats": "Flats",
     "shoes_other": "Other shoes",
     "bag": "Bag",
     "jewelry_necklace": "Necklace",
@@ -306,8 +308,11 @@
     "jewelry_other": "Other jewelry",
     "eyewear_glasses": "Glasses",
     "eyewear_sunglasses": "Sunglasses",
-    "other": "Other",
-    "accessory": "Accessory"
+    "accessory_belt": "Belt",
+    "accessory_hair": "Hair accessory",
+    "accessory_socks": "Socks",
+    "accessory_earphones": "Earphones",
+    "accessory_other": "Other accessories"
   },
   "report": {
     "button": "Problem Report",

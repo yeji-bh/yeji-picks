@@ -63,7 +63,7 @@ async function replaceOutfitItems(outfitId, items) {
   await prisma.item.createMany({
     data: items.map((item) => ({
       outfitId,
-      type: item.type || "other",
+      type: item.type || "accessory_other",
       brand: item.brand || null,
       productName: item.productName || null,
       image: item.image || null,

@@ -13,12 +13,13 @@ export const ITEM_TYPE_GROUPS = {
     "top_other",
   ],
   bottom: ["bottom_pants", "bottom_shorts", "bottom_skirt", "bottom_other"],
-  onepiece: ["onepiece_jumpsuit", "onepiece_dress", "onepiece_other"],
+  onepiece: ["onepiece_jumpsuit", "onepiece_dress", "onepiece_swimsuit", "onepiece_other"],
   shoes: [
     "shoes_sneakers",
     "shoes_boots",
     "shoes_heels",
     "shoes_sandals",
+    "shoes_flats",
     "shoes_other",
   ],
   bag: ["bag"],
@@ -30,7 +31,13 @@ export const ITEM_TYPE_GROUPS = {
     "jewelry_other",
   ],
   eyewear: ["eyewear_glasses", "eyewear_sunglasses"],
-  other: ["other"],
+  accessory: [
+    "accessory_belt",
+    "accessory_hair",
+    "accessory_socks",
+    "accessory_earphones",
+    "accessory_other",
+  ],
 } as const;
 
 export type ItemTypeGroup = keyof typeof ITEM_TYPE_GROUPS;
@@ -62,10 +69,11 @@ const LEGACY_TYPE_MAP: Record<string, ItemType> = {
   shoes_loafers: "shoes_other",
   jewelry: "jewelry_other",
   eyewear: "eyewear_glasses",
-  belt: "other",
-  socks: "other",
-  scarf: "other",
-  accessory: "other",
+  belt: "accessory_belt",
+  socks: "accessory_socks",
+  scarf: "accessory_other",
+  accessory: "accessory_other",
+  other: "accessory_other",
 };
 
 export function normalizeItemType(type: string): ItemType {
@@ -77,7 +85,7 @@ export function normalizeItemType(type: string): ItemType {
   if ((ITEM_TYPES as readonly string[]).includes(lower)) {
     return lower as ItemType;
   }
-  return LEGACY_TYPE_MAP[trimmed] ?? LEGACY_TYPE_MAP[lower] ?? "other";
+  return LEGACY_TYPE_MAP[trimmed] ?? LEGACY_TYPE_MAP[lower] ?? "accessory_other";
 }
 
 export function isItemTypeGroup(filter: string): filter is ItemTypeGroup {
@@ -102,7 +110,6 @@ export function matchesTypeFilter(itemType: string, filter: string): boolean {
   if ((ITEM_TYPES as readonly string[]).includes(filter)) {
     return normalized === filter;
   }
-  if (filter === "other") return normalized === "other";
   return normalized.startsWith(`${filter}_`);
 }
 

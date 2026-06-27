@@ -18,7 +18,7 @@ export function validateSubmissionPayload(
     .map((item) => {
       const i = item as Record<string, unknown>;
       const type = normalizeItemType(
-        typeof i.type === "string" ? i.type : "other"
+        typeof i.type === "string" ? i.type : "accessory_other"
       );
 
       const images = Array.isArray(i.images)

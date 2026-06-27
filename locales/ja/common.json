@@ -270,7 +270,7 @@
     "bag": "バッグ",
     "jewelry": "ジュエリー",
     "eyewear": "アイウェア",
-    "other": "その他"
+    "accessory": "小物"
   },
   "itemTypes": {
     "hat_cap": "キャップ",
@@ -292,11 +292,13 @@
     "bottom_other": "その他のボトムス",
     "onepiece_jumpsuit": "ジャンプスーツ",
     "onepiece_dress": "ドレス",
+    "onepiece_swimsuit": "ワンピース水着",
     "onepiece_other": "その他のワンピース",
     "shoes_sneakers": "スニーカー",
     "shoes_boots": "ブーツ",
     "shoes_heels": "ヒール",
     "shoes_sandals": "サンダル／ビーチサンダル",
+    "shoes_flats": "フラットシューズ",
     "shoes_other": "その他のシューズ",
     "bag": "バッグ",
     "jewelry_necklace": "ネックレス",
@@ -306,8 +308,11 @@
     "jewelry_other": "その他のジュエリー",
     "eyewear_glasses": "メガネ",
     "eyewear_sunglasses": "サングラス",
-    "other": "その他",
-    "accessory": "アクセサリー"
+    "accessory_belt": "ベルト",
+    "accessory_hair": "ヘアアクセ",
+    "accessory_socks": "ソックス",
+    "accessory_earphones": "イヤホン",
+    "accessory_other": "その他小物"
   },
   "report": {
     "button": "問題報告",

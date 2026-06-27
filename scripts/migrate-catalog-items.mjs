@@ -34,14 +34,15 @@ const LEGACY_TYPE_MAP = {
   shoes_loafers: "shoes_other",
   jewelry: "jewelry_other",
   eyewear: "eyewear_glasses",
-  belt: "other",
-  socks: "other",
-  scarf: "other",
-  accessory: "other",
+  belt: "accessory_belt",
+  socks: "accessory_socks",
+  scarf: "accessory_other",
+  accessory: "accessory_other",
+  other: "accessory_other",
 };
 
 function normalizeItemType(type) {
-  if (!type || typeof type !== "string") return "other";
+  if (!type || typeof type !== "string") return "accessory_other";
   return LEGACY_TYPE_MAP[type] ?? type;
 }
 
