@@ -1,5 +1,4 @@
 const SPAM_PATTERNS = [
-  /(?:https?:\/\/|www\.)/i,
   /(?:點擊|点击|加微信|加vx|telegram|t\.me|賭博|赌博|色情|约炮|約炮)/i,
   /(?:viagra|casino|porn|xxx|nude|naked)/i,
 ];
@@ -49,9 +48,6 @@ export function moderateText(
   }
   if (SPAM_PATTERNS.some((pattern) => pattern.test(trimmed))) {
     return { ok: false, code: "blocked", field };
-  }
-  if (/(.)\1{12,}/.test(trimmed)) {
-    return { ok: false, code: "invalid", field };
   }
   return { ok: true };
 }

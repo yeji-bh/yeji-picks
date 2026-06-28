@@ -340,7 +340,6 @@
     "editTitle": "編輯評價",
     "nicknamePlaceholder": "暱稱（選填，未填顯示匿名）",
     "loggedInAs": "以 {{name}} 身分評價",
-    "ratingLabel": "評分",
     "contentPlaceholder": "撰寫評價",
     "timeJustNow": "剛剛",
     "timeMinutes": "{{count}} 分鐘前",
@@ -563,7 +562,7 @@
       "reviews": {
         "title": "穿搭評價",
         "desc": "在穿搭詳情頁底部，你可以閱讀或撰寫對該套穿搭的評價。",
-        "tip1": "可給予評分並撰寫文字評價；未登入也可使用（可選填暱稱）。",
+        "tip1": "可撰寫文字評價；未登入也可使用（可選填暱稱）。",
         "tip2": "登入後可編輯或刪除自己送出的評價。"
       },
       "dupes": {
@@ -597,6 +596,7 @@
     "aboutTitle": "關於",
     "aboutBody1": "記錄 YEJI 的穿搭與單品。",
     "aboutBody2": "若找不到完全同款，會以相似款或平替補充。",
+    "aboutBody3": "一般不扒舞台裝，因為基本都是訂製的（除了彩排）。",
     "reportIssueTitle": "回報問題",
     "reportIssueBody": "若發現資訊錯誤或連結失效，可透過網站內的回報功能告知，我會再更新修正。",
     "creditsTitle": "製作與整理",

@@ -340,7 +340,6 @@
     "editTitle": "Edit your review",
     "nicknamePlaceholder": "Nickname (optional, shown as Anonymous if empty)",
     "loggedInAs": "Reviewing as {{name}}",
-    "ratingLabel": "Rating",
     "contentPlaceholder": "Write a review",
     "timeJustNow": "Just now",
     "timeMinutes": "{{count}}m ago",
@@ -563,7 +562,7 @@
       "reviews": {
         "title": "Outfit reviews",
         "desc": "At the bottom of an outfit page you can read and write reviews.",
-        "tip1": "Rate and write a review; no account required (nickname optional).",
+        "tip1": "Write a text review; no account required (nickname optional).",
         "tip2": "When signed in, you can edit or delete your own review."
       },
       "dupes": {
@@ -597,6 +596,7 @@
     "aboutTitle": "About",
     "aboutBody1": "Documenting YEJI's outfits and items.",
     "aboutBody2": "If an exact match is unavailable, similar items or dupes may be added as references.",
+    "aboutBody3": "Stage outfits are generally not tracked, as they are mostly custom-made (rehearsal wear excepted).",
     "reportIssueTitle": "Report Issues",
     "reportIssueBody": "If you find incorrect information or broken links, please use the in-site report feature and I will update it.",
     "creditsTitle": "Made & Curated By",

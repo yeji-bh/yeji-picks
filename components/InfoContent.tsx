@@ -21,6 +21,9 @@ export default function InfoContent({
         <p className="mt-2 text-sm leading-relaxed text-foreground-secondary sm:text-base">
           {t("info.aboutBody2")}
         </p>
+        <p className="mt-2 text-sm leading-relaxed text-foreground-secondary sm:text-base">
+          {t("info.aboutBody3")}
+        </p>
       </section>
 
       <section>

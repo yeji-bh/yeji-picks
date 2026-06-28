@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { resolveVoterKey } from "@/lib/dupe-actor";
-import { apiError, moderationError } from "@/lib/api-error";
-import { moderateText } from "@/lib/content-moderation";
+import { apiError } from "@/lib/api-error";
 import {
   getOutfitReviewPage,
   updateOutfitReview,
@@ -53,16 +52,6 @@ export async function PATCH(
     }
 
     const nickname = user ? null : parsed.nickname;
-    for (const [field, text] of [
-      ["nickname", nickname],
-      ["reviewContent", parsed.content],
-    ] as const) {
-      if (!text) continue;
-      const check = moderateText(text, field);
-      if (!check.ok) {
-        return moderationError(request, check.field, check.code);
-      }
-    }
 
     await updateOutfitReview(reviewId, user?.id ?? null, {
       nickname,
