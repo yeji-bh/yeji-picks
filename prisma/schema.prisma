@@ -219,3 +219,25 @@ model Perfume {
 
   @@map("perfumes")
 }
+
+model LovedItem {
+  id           String   @id @default(cuid())
+  image        String
+  name         String   @default("")
+  brand        String   @default("")
+  officialLink String   @default("") @map("official_link")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("loved_items")
+}
+
+model Cosmetic {
+  id           String   @id @default(cuid())
+  image        String
+  name         String   @default("")
+  brand        String   @default("")
+  officialLink String   @default("") @map("official_link")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("cosmetics")
+}

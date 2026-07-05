@@ -161,13 +161,19 @@ export default function HomeFilters({
           ? "home.nailArtResultCount"
           : viewMode === "phoneCase"
             ? "home.phoneCaseResultCount"
-            : "home.perfumeResultCount";
+            : viewMode === "perfume"
+              ? "home.perfumeResultCount"
+              : viewMode === "lovedItem"
+                ? "home.lovedItemResultCount"
+                : "home.cosmeticResultCount";
 
   const searchPlaceholder =
     viewMode === "phoneCase"
       ? t("home.searchPhoneCasePlaceholder")
-      : viewMode === "perfume"
-        ? t("home.searchPerfumePlaceholder")
+      : viewMode === "perfume" ||
+          viewMode === "lovedItem" ||
+          viewMode === "cosmetic"
+        ? t("home.searchGalleryProductPlaceholder")
         : t("home.searchPlaceholder");
 
   return (

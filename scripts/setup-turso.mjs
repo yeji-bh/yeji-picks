@@ -197,6 +197,22 @@ const statements = [
     "official_link" TEXT NOT NULL DEFAULT '',
     "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
   )`, "perfumes"],
+  [`CREATE TABLE IF NOT EXISTS "loved_items" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "image" TEXT NOT NULL,
+    "name" TEXT NOT NULL DEFAULT '',
+    "brand" TEXT NOT NULL DEFAULT '',
+    "official_link" TEXT NOT NULL DEFAULT '',
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`, "loved_items"],
+  [`CREATE TABLE IF NOT EXISTS "cosmetics" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "image" TEXT NOT NULL,
+    "name" TEXT NOT NULL DEFAULT '',
+    "brand" TEXT NOT NULL DEFAULT '',
+    "official_link" TEXT NOT NULL DEFAULT '',
+    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  )`, "cosmetics"],
 ];
 
 for (const [sql, label] of statements) {

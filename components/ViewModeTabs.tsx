@@ -39,6 +39,8 @@ const VIEW_MODES: HomeViewMode[] = [
   "nailArt",
   "phoneCase",
   "perfume",
+  "lovedItem",
+  "cosmetic",
 ];
 
 const MODE_LABEL_KEYS: Record<HomeViewMode, string> = {
@@ -47,6 +49,8 @@ const MODE_LABEL_KEYS: Record<HomeViewMode, string> = {
   nailArt: "home.modeNailArt",
   phoneCase: "home.modePhoneCase",
   perfume: "home.modePerfume",
+  lovedItem: "home.modeLovedItem",
+  cosmetic: "home.modeCosmetic",
 };
 
 export default function ViewModeTabs({

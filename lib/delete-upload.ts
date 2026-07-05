@@ -67,7 +67,7 @@ function imagesInRawJson(rawJson: string): string[] {
 
 /** Live DB references only — submission snapshots must not block R2 cleanup. */
 export async function isUploadReferencedInDb(url: string): Promise<boolean> {
-  const [outfitCount, imageCount, feedbackCount, dupeCount, nailArtCount, phoneCaseCount] =
+  const [outfitCount, imageCount, feedbackCount, dupeCount, nailArtCount, phoneCaseCount, perfumeCount, lovedItemCount, cosmeticCount] =
     await Promise.all([
       prisma.outfit.count({ where: { mainImage: url } }),
       prisma.catalogItemImage.count({ where: { url } }),
@@ -75,10 +75,13 @@ export async function isUploadReferencedInDb(url: string): Promise<boolean> {
       prisma.catalogDupe.count({ where: { image: url } }),
       prisma.nailArt.count({ where: { image: url } }),
       prisma.phoneCase.count({ where: { image: url } }),
+      prisma.perfume.count({ where: { image: url } }),
+      prisma.lovedItem.count({ where: { image: url } }),
+      prisma.cosmetic.count({ where: { image: url } }),
     ]);
 
   return (
-    outfitCount + imageCount + feedbackCount + dupeCount + nailArtCount + phoneCaseCount >
+    outfitCount + imageCount + feedbackCount + dupeCount + nailArtCount + phoneCaseCount + perfumeCount + lovedItemCount + cosmeticCount >
     0
   );
 }

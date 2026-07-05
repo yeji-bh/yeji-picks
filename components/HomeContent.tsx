@@ -9,11 +9,13 @@ import NailArtMasonry from "./NailArtMasonry";
 import OutfitCard from "./OutfitCard";
 import PhoneCaseCard from "./PhoneCaseCard";
 import PerfumeListItem from "./PerfumeListItem";
+import GalleryProductCard from "./GalleryProductCard";
 import HomeFilters from "./HomeFilters";
 import type { ItemSummary } from "@/lib/item-summary";
 import type { NailArtSummary } from "@/lib/nail-arts-list";
 import type { PhoneCaseSummary } from "@/lib/phone-cases-list";
 import type { PerfumeSummary } from "@/lib/perfumes-list";
+import type { GalleryProductSummary } from "@/lib/gallery-product-list";
 import {
   getSavedViewMode,
   setSavedViewMode,
@@ -135,7 +137,12 @@ export default function HomeContent({
     !feedQuery.trim();
 
   const feed = useHomeFeed<
-    OutfitSummary | ItemSummary | NailArtSummary | PhoneCaseSummary | PerfumeSummary
+    | OutfitSummary
+    | ItemSummary
+    | NailArtSummary
+    | PhoneCaseSummary
+    | PerfumeSummary
+    | GalleryProductSummary
   >({
     mode: viewMode,
     sort,
@@ -233,7 +240,11 @@ export default function HomeContent({
             ? "home.noNailArts"
             : viewMode === "phoneCase"
               ? "home.noPhoneCases"
-              : "home.noPerfumes";
+              : viewMode === "perfume"
+                ? "home.noPerfumes"
+                : viewMode === "lovedItem"
+                  ? "home.noLovedItems"
+                  : "home.noCosmetics";
 
   const gridClass =
     "grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4";
@@ -285,6 +296,20 @@ export default function HomeContent({
                   brand={perfume.brand}
                   description={perfume.description}
                   officialLink={perfume.officialLink}
+                  priority={isGridLcpCandidate(index)}
+                  imageQuality={72}
+                />
+              ))}
+            </div>
+          ) : viewMode === "lovedItem" || viewMode === "cosmetic" ? (
+            <div className={gridClass}>
+              {(items as GalleryProductSummary[]).map((product, index) => (
+                <GalleryProductCard
+                  key={product.id}
+                  image={product.image}
+                  name={product.name}
+                  brand={product.brand}
+                  officialLink={product.officialLink}
                   priority={isGridLcpCandidate(index)}
                   imageQuality={72}
                 />

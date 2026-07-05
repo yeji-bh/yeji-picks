@@ -4,13 +4,19 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import FileInputZone, { IMAGE_FILE_ACCEPT } from "./FileInputZone";
-import ProgressiveImage from "./ProgressiveImage";
 import SubmitForm from "./SubmitForm";
-import { useAssetUrl } from "@/lib/use-asset-url";
+import GalleryProductAdminSection from "./GalleryProductAdminSection";
+import AdminGalleryThumb from "./AdminGalleryThumb";
 import { appendCompressedImagePair } from "@/lib/upload-form-images";
 import { prepareImageFile } from "@/lib/prepare-image-file";
 
-type SubmitTab = "outfit" | "nailArt" | "phoneCase" | "perfume";
+type SubmitTab =
+  | "outfit"
+  | "nailArt"
+  | "phoneCase"
+  | "perfume"
+  | "lovedItem"
+  | "cosmetic";
 
 type NailArtRow = {
   id: string;
@@ -45,26 +51,6 @@ type PendingFile = {
 
 const MAX_BATCH_SIZE = 50;
 const UPLOAD_CHUNK_SIZE = 15;
-
-function AdminGalleryThumb({
-  image,
-  alt,
-}: {
-  image: string;
-  alt: string;
-}) {
-  const src = useAssetUrl(image);
-  return (
-    <ProgressiveImage
-      src={src}
-      uploadPath={image}
-      alt={alt}
-      fill
-      className="object-cover"
-      sizes="120px"
-    />
-  );
-}
 
 export default function AdminSubmitPanel() {
   const { t } = useTranslation();
@@ -463,6 +449,20 @@ export default function AdminSubmitPanel() {
         >
           {t("home.modePerfume")}
         </button>
+        <button
+          type="button"
+          onClick={() => setTab("lovedItem")}
+          className={tabClass(tab === "lovedItem")}
+        >
+          {t("home.modeLovedItem")}
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("cosmetic")}
+          className={tabClass(tab === "cosmetic")}
+        >
+          {t("home.modeCosmetic")}
+        </button>
       </div>
 
       {message && (
@@ -743,7 +743,7 @@ export default function AdminSubmitPanel() {
             )}
           </div>
         </section>
-      ) : (
+      ) : tab === "perfume" ? (
         <section className="mt-6 space-y-6">
           <form
             onSubmit={(e) => void handlePerfumeSubmit(e)}
@@ -913,6 +913,32 @@ export default function AdminSubmitPanel() {
             )}
           </div>
         </section>
+      ) : tab === "lovedItem" ? (
+        <GalleryProductAdminSection
+          uploadTitleKey="admin.gallery.lovedItemUploadTitle"
+          uploadDescKey="admin.gallery.lovedItemUploadDesc"
+          uploadBtnKey="admin.gallery.uploadLovedItem"
+          uploadSuccessKey="admin.gallery.lovedItemUploadSuccess"
+          existingTitleKey="admin.gallery.existingLovedItems"
+          emptyKey="home.noLovedItems"
+          listApiPath="/api/admin/loved-items"
+          uploadApiPath="/api/admin/loved-items/upload"
+          deleteApiPath="/api/admin/loved-items"
+          listKey="lovedItems"
+        />
+      ) : (
+        <GalleryProductAdminSection
+          uploadTitleKey="admin.gallery.cosmeticUploadTitle"
+          uploadDescKey="admin.gallery.cosmeticUploadDesc"
+          uploadBtnKey="admin.gallery.uploadCosmetic"
+          uploadSuccessKey="admin.gallery.cosmeticUploadSuccess"
+          existingTitleKey="admin.gallery.existingCosmetics"
+          emptyKey="home.noCosmetics"
+          listApiPath="/api/admin/cosmetics"
+          uploadApiPath="/api/admin/cosmetics/upload"
+          deleteApiPath="/api/admin/cosmetics"
+          listKey="cosmetics"
+        />
       )}
     </div>
   );

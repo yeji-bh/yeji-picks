@@ -19,13 +19,21 @@ type FeedSnapshot = {
 
 const RESPONSE_KEYS: Record<
   HomeViewMode,
-  "outfits" | "items" | "nailArts" | "phoneCases" | "perfumes"
+  | "outfits"
+  | "items"
+  | "nailArts"
+  | "phoneCases"
+  | "perfumes"
+  | "lovedItems"
+  | "cosmetics"
 > = {
   outfit: "outfits",
   item: "items",
   nailArt: "nailArts",
   phoneCase: "phoneCases",
   perfume: "perfumes",
+  lovedItem: "lovedItems",
+  cosmetic: "cosmetics",
 };
 
 const API_PATHS: Record<HomeViewMode, string> = {
@@ -34,6 +42,8 @@ const API_PATHS: Record<HomeViewMode, string> = {
   nailArt: "/api/nail-arts/list",
   phoneCase: "/api/phone-cases/list",
   perfume: "/api/perfumes/list",
+  lovedItem: "/api/loved-items/list",
+  cosmetic: "/api/cosmetics/list",
 };
 
 export function buildHomeFeedKey(

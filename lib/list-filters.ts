@@ -50,3 +50,10 @@ export function matchesPerfumeQuery(
 ): boolean {
   return matchesListQuery(perfume.searchText, query);
 }
+
+export function matchesGalleryProductQuery(
+  item: { searchText: string },
+  query: string
+): boolean {
+  return matchesListQuery(item.searchText, query);
+}
