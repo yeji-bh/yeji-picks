@@ -257,7 +257,7 @@ export const getOutfitDisplayItems = cache(
   }
 );
 
-export async function searchCatalogItems(query: string, limit = 12) {
+export async function searchCatalogItems(query: string, limit = 100) {
   const q = query.trim();
   if (!q) return [];
 

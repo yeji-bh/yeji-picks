@@ -111,7 +111,7 @@ export default function CatalogItemPicker({
       />
       {loading && <p className="text-xs text-muted">{t("loading")}</p>}
       {results.length > 0 && (
-        <ul className="ui-dropdown max-h-48 space-y-1 overflow-y-auto p-1">
+        <ul className="ui-dropdown max-h-72 space-y-1 overflow-y-auto p-1">
           {results.map((item) => (
             <li key={item.id}>
               <button
